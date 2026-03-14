@@ -1436,9 +1436,13 @@ function saveLocal() {
 }
 
 // ── Map app state → DB rows ───────────────────────────────────
+function expRowId(term, section, item) {
+  return `exp_${term}_${section}_${item}`.replace(/\s+/g,"_").replace(/[^a-zA-Z0-9_]/g,"").toLowerCase().slice(0,80);
+}
+
 function duesDataToRows(arr) {
   return arr.map(d => ({
-    id:                d.id || "br_" + d.name.replace(/\s+/g,"_").toLowerCase(),
+    id:                d.id || "br_" + d.name.replace(/\s+/g,"_").replace(/[^a-zA-Z0-9_]/g,"").toLowerCase(),
     name:              d.name,
     cls:               d.cls,
     due:               d.due,
@@ -1469,8 +1473,8 @@ function rowsToDuesData(rows) {
   }));
 }
 function expToRows(arr, term) {
-  return arr.map((e,i) => ({
-    id:       `exp_${term}_${i}_${e.item.replace(/\s+/g,"_").toLowerCase()}`,
+  return arr.map(e => ({
+    id:       e.id || expRowId(term, e.section, e.item),
     term,
     section:  e.section,
     item:     e.item,
@@ -1582,24 +1586,32 @@ async function pullAll() {
     }
     // Dues
     const duesRows = await sbGet("dues", "order=name.asc");
-    if (duesRows.length) {
-      duesData = rowsToDuesData(duesRows);
-      localStorage.setItem("fiji_dues_spring", JSON.stringify(duesData));
+    const expRows  = await sbGet("expenditures", "order=term.asc,section.asc");
+    const txRows   = await sbGet("transactions", "order=date.desc");
+
+    // Check if DB is truly empty (first time setup)
+    const dbEmpty = duesRows.length === 0 && txRows.length === 0;
+    if (dbEmpty) {
+      // Seed the DB from built-in data
+      duesData  = DUES_DATA_SPRING.map(d=>({...d, payStatus:"Paid in Full", payMethod:"Bank Account", extraFees:[], installments:1, installmentsPaid:0}));
+      springExp = SPRING_EXP.map(e=>({...e}));
+      fallExp   = FALL_EXP.map(e=>({...e}));
+      txList    = [...TX_OUT_SEED, ...TX_IN_SEED];
+      recomputeExpSpent();
+      syncRosterCounts();
+      await pushAll();
+    } else {
+      // Load from DB
+      if (duesRows.length) duesData = rowsToDuesData(duesRows);
+      if (expRows.length) {
+        const sp = rowsToExp(expRows.filter(r=>r.term==="Spring 2026"));
+        const fa = rowsToExp(expRows.filter(r=>r.term==="Fall 2026"));
+        if (sp.length) springExp = sp;
+        if (fa.length) fallExp   = fa;
+      }
+      if (txRows.length) txList = txRows.map(rowToTx);
     }
-    // Expenditures
-    const expRows = await sbGet("expenditures", "order=term.asc,section.asc");
-    if (expRows.length) {
-      springExp = rowsToExp(expRows.filter(r=>r.term==="Spring 2026"));
-      fallExp   = rowsToExp(expRows.filter(r=>r.term==="Fall 2026"));
-      if (!springExp.length) springExp = SPRING_EXP.map(e=>({...e}));
-      if (!fallExp.length)   fallExp   = FALL_EXP.map(e=>({...e}));
-    }
-    // Transactions
-    const txRows = await sbGet("transactions", "order=date.desc");
-    if (txRows.length) {
-      txList = txRows.map(rowToTx);
-      localStorage.setItem("fiji_tx", JSON.stringify(txList));
-    }
+
     sbOnline = true;
     setSyncStatus("ok");
     saveLocal();
@@ -3545,33 +3557,18 @@ function renderRecommendations() {
 
 // ═════════════════════════ INIT ═════════════════════════
 async function init() {
-  // 1. Render immediately from local cache so UI is instant
+  // 1. Render immediately from local cache so UI feels instant
   recomputeExpSpent();
   syncRosterCounts();
   renderDashboard();
   if (!localStorage.getItem("fiji_skip_welcome")) openWelcome();
 
-  // 2. Pull latest data from Supabase in background
+  // 2. Pull latest from Supabase — handles seeding if DB empty
   const pulled = await pullAll();
-
   if (pulled) {
-    // Check if DB is empty (first time setup) — push seed data up
-    const isEmpty = txList.length === 0 && duesData.length === 0;
-    if (isEmpty) {
-      // Re-initialize from seeds then push everything up
-      duesData  = DUES_DATA_SPRING.map(d=>({...d, payStatus:"Paid in Full", payMethod:"Bank Account", extraFees:[], installments:1, installmentsPaid:0}));
-      springExp = SPRING_EXP.map(e=>({...e}));
-      fallExp   = FALL_EXP.map(e=>({...e}));
-      txList    = [...TX_OUT_SEED, ...TX_IN_SEED];
-      recomputeExpSpent();
-      syncRosterCounts();
-      await pushAll();
-    } else {
-      // Got live data — re-render with it
-      recomputeExpSpent();
-      syncRosterCounts();
-      refreshAll();
-    }
+    recomputeExpSpent();
+    syncRosterCounts();
+    refreshAll();
   }
 }
 
