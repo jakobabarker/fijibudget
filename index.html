@@ -259,7 +259,44 @@
 </style>
 </head>
 <body>
-<div id="app">
+
+<!-- ═══════════════ LOGIN SCREEN ═══════════════ -->
+<div id="login-screen" style="
+  position:fixed;inset:0;z-index:9999;
+  background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+">
+  <div style="width:380px;text-align:center">
+    <!-- Crest -->
+    <div style="width:64px;height:64px;border:2px solid var(--gold);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;background:var(--gold-glow)">
+      <span style="font-family:var(--font-display);font-size:24px;color:var(--gold);font-weight:700">ΦΓΔ</span>
+    </div>
+    <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;margin-bottom:8px">Chi Eta · Spring 2026</div>
+    <h2 style="font-family:var(--font-display);font-size:26px;font-weight:900;margin-bottom:4px">Treasury Access</h2>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:28px">Enter the chapter password to continue</p>
+
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px">
+      <div style="margin-bottom:14px;text-align:left">
+        <label style="font-family:var(--font-mono);font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px">Password</label>
+        <input type="password" id="login-input" placeholder="Enter password…"
+          style="width:100%;padding:10px 14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:var(--text);font-size:14px;outline:none;box-sizing:border-box;font-family:var(--font-body)"
+          onkeydown="if(event.key==='Enter') tryLogin()">
+      </div>
+      <div id="login-error" style="display:none;color:var(--red);font-size:12px;margin-bottom:12px;text-align:left">
+        ✕ Incorrect password. Try again.
+      </div>
+      <button onclick="tryLogin()" style="width:100%;padding:11px;background:var(--gold);border:none;border-radius:8px;color:#1a1a1a;font-family:var(--font-body);font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.3px">
+        Unlock Treasury →
+      </button>
+    </div>
+
+    <p style="font-size:11px;color:var(--dim);margin-top:16px">
+      Chi Eta Phi Gamma Delta · For authorized use only
+    </p>
+  </div>
+</div>
+
+<div id="app" style="display:none">
   <header>
     <div class="header-left">
       <div class="logo-mark">ΦΓΔ</div>
@@ -272,6 +309,8 @@
       <span id="sync-status" style="font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:.3px">⟳ Loading…</span>
       <div id="termToggle" class="term-badge" onclick="toggleTerm()">Spring 2026 ▾</div>
       <button class="btn btn-ghost btn-sm" onclick="window.print()">⎙ Print</button>
+      <button class="btn btn-ghost btn-sm" onclick="changePassword()" title="Change password" style="font-size:11px">🔑</button>
+      <button class="btn btn-ghost btn-sm" onclick="logout()" title="Lock app" style="font-size:11px">🔒</button>
     </div>
   </header>
   <nav>
@@ -3536,8 +3575,104 @@ async function init() {
   }
 }
 
+// ── Auth gate — check login state on page load ────────────────
+(async function authCheck() {
+  // Check if already authed this session
+  if (localStorage.getItem("fiji_authed") === "1") {
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("app").style.display = "flex";
+    init();
+  } else {
+    // Show login, focus input
+    document.getElementById("login-screen").style.display = "flex";
+    document.getElementById("app").style.display = "none";
+    setTimeout(()=>document.getElementById("login-input")?.focus(), 100);
+  }
+})();
+
+// ═══════════════════════════════════════════════════════════════
+// LOGIN / PASSWORD
+// ═══════════════════════════════════════════════════════════════
+const DEFAULT_PASSWORD = "fijixheta2026"; // change this via the app settings
+
+async function tryLogin() {
+  const input = document.getElementById("login-input").value.trim();
+  const error = document.getElementById("login-error");
+  error.style.display = "none";
+
+  if (!input) return;
+
+  // Fetch the stored password hash from Supabase config (or localStorage)
+  let storedHash = null;
+  try {
+    const rows = await sbGet("config", "id=eq.1");
+    storedHash = rows[0]?.data?.passwordHash || null;
+  } catch(e) {
+    // offline — fall back to localStorage
+    const local = JSON.parse(localStorage.getItem("fiji_config") || "{}");
+    storedHash = local?.passwordHash || null;
+  }
+
+  // If no password set yet, use default and store it
+  if (!storedHash) {
+    storedHash = await hashStr(DEFAULT_PASSWORD);
+    // Save default hash
+    config.passwordHash = storedHash;
+    pushConfig().catch(()=>{});
+    saveLocal();
+  }
+
+  const inputHash = await hashStr(input);
+  if (inputHash === storedHash) {
+    // Correct — unlock
+    localStorage.setItem("fiji_authed", "1");
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("app").style.display = "flex";
+    init();
+  } else {
+    error.style.display = "block";
+    document.getElementById("login-input").value = "";
+    document.getElementById("login-input").focus();
+    // Shake animation
+    const box = document.getElementById("login-input").parentElement.parentElement;
+    box.style.animation = "shake .3s ease";
+    setTimeout(()=>box.style.animation="", 400);
+  }
+}
+
+async function hashStr(str) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+
+async function changePassword() {
+  const current = prompt("Enter current password:");
+  if (!current) return;
+  const currentHash = await hashStr(current);
+  const stored = config.passwordHash || await hashStr(DEFAULT_PASSWORD);
+  if (currentHash !== stored) { alert("Incorrect current password."); return; }
+  const newPw = prompt("Enter new password (min 6 characters):");
+  if (!newPw || newPw.length < 6) { alert("Password too short."); return; }
+  const confirm2 = prompt("Confirm new password:");
+  if (newPw !== confirm2) { alert("Passwords don't match."); return; }
+  config.passwordHash = await hashStr(newPw);
+  pushConfig().catch(()=>{});
+  saveLocal();
+  alert("✓ Password changed successfully.");
+}
+
+function logout() {
+  localStorage.removeItem("fiji_authed");
+  location.reload();
+}
+
 init();
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+@keyframes shake {
+  0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)}
+}
+</style>
 </body>
 </html>
