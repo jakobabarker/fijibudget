@@ -1419,6 +1419,14 @@ async function sbUpsert(table, rows) {
   });
   if (!r.ok) { const t = await r.text(); throw new Error(`UPSERT ${table}: ${t}`); }
 }
+async function sbDeleteAll(table) {
+  // Delete all rows by matching id >= '' (always true for text PKs)
+  const r = await fetch(`${SB_URL}/rest/v1/${table}?id=gte.`, {
+    method: "DELETE", headers: SB_HDR
+  });
+  // 204 = success, 404 = nothing to delete — both are fine
+  if (!r.ok && r.status !== 404) throw new Error(`DELETE ALL ${table} ${r.status}`);
+}
 async function sbDelete(table, id) {
   const r = await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${encodeURIComponent(id)}`, {
     method: "DELETE", headers: SB_HDR
@@ -1526,24 +1534,23 @@ function rowToTx(r) {
 async function pushAll() {
   setSyncStatus("syncing");
   try {
-    // Config
     await sbUpsert("config", { id: 1, data: config });
-    // Dues
+    // Full replace for dues, exp, tx
+    await sbDeleteAll("dues");
     const duesRows = duesDataToRows(duesData);
     if (duesRows.length) await sbUpsert("dues", duesRows);
-    // Expenditures
-    const expRows = [
-      ...expToRows(springExp, "Spring 2026"),
-      ...expToRows(fallExp,   "Fall 2026"),
-    ];
+
+    await sbDeleteAll("expenditures");
+    const expRows = [...expToRows(springExp,"Spring 2026"), ...expToRows(fallExp,"Fall 2026")];
     if (expRows.length) await sbUpsert("expenditures", expRows);
-    // Transactions
+
+    await sbDeleteAll("transactions");
     const txRows = txList.map(txToRow);
     if (txRows.length) await sbUpsert("transactions", txRows);
 
     sbOnline = true;
     setSyncStatus("ok");
-    saveLocal(); // keep cache in sync
+    saveLocal();
   } catch(e) {
     console.error("pushAll failed:", e);
     setSyncStatus("error");
@@ -1551,28 +1558,41 @@ async function pushAll() {
   }
 }
 
-// ── Partial push helpers — called on targeted mutations ───────
-async function pushConfig()  {
+// ── Partial push helpers ──────────────────────────────────────
+async function pushConfig() {
   try { await sbUpsert("config", { id:1, data:config }); setSyncStatus("ok"); }
-  catch(e) { setSyncStatus("offline"); } saveLocal();
+  catch(e) { setSyncStatus("offline"); }
+  saveLocal();
 }
 async function pushDues() {
-  try { await sbUpsert("dues", duesDataToRows(duesData)); setSyncStatus("ok"); }
-  catch(e) { setSyncStatus("offline"); } saveLocal();
+  // Full replace — ensures deletions and additions both persist correctly
+  try {
+    await sbDeleteAll("dues");
+    const rows = duesDataToRows(duesData);
+    if (rows.length) await sbUpsert("dues", rows);
+    setSyncStatus("ok");
+  } catch(e) { console.error("pushDues failed:", e); setSyncStatus("error"); }
+  saveLocal();
 }
 async function pushExp() {
+  // Full replace — ensures budget edits persist correctly
   try {
-    const rows = [...expToRows(springExp,"Spring 2026"),...expToRows(fallExp,"Fall 2026")];
-    await sbUpsert("expenditures", rows); setSyncStatus("ok");
-  } catch(e) { setSyncStatus("offline"); } saveLocal();
+    await sbDeleteAll("expenditures");
+    const rows = [...expToRows(springExp,"Spring 2026"), ...expToRows(fallExp,"Fall 2026")];
+    if (rows.length) await sbUpsert("expenditures", rows);
+    setSyncStatus("ok");
+  } catch(e) { console.error("pushExp failed:", e); setSyncStatus("error"); }
+  saveLocal();
 }
 async function pushTx(tx) {
   try { await sbUpsert("transactions", txToRow(tx)); setSyncStatus("ok"); }
-  catch(e) { setSyncStatus("offline"); } saveLocal();
+  catch(e) { setSyncStatus("offline"); }
+  saveLocal();
 }
 async function deleteTxRemote(id) {
   try { await sbDelete("transactions", id); setSyncStatus("ok"); }
-  catch(e) { setSyncStatus("offline"); } saveLocal();
+  catch(e) { setSyncStatus("offline"); }
+  saveLocal();
 }
 
 // ── Full pull — load everything from Supabase on startup ──────
