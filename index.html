@@ -1257,12 +1257,14 @@ const SPRING_EXP = [
   {section:"Housing Corp",item:"Parlor Fees",budgeted:2050,spent:2075},
 ];
 const FALL_EXP = [
+  // Officers
   {section:"Officers",item:"President",budgeted:20,spent:0},
   {section:"Officers",item:"Treasurer",budgeted:20,spent:0},
   {section:"Officers",item:"Recording Secretary",budgeted:20,spent:0},
   {section:"Officers",item:"Corresponding Secretary",budgeted:20,spent:0},
   {section:"Officers",item:"Historian",budgeted:20,spent:0},
   {section:"Officers",item:"Executive Discretionary",budgeted:300,spent:0},
+  // Committees
   {section:"Committees",item:"Recruitment",budgeted:2000,spent:0},
   {section:"Committees",item:"Foundations of Courage",budgeted:0,spent:0},
   {section:"Committees",item:"Housing",budgeted:1500,spent:0},
@@ -1286,15 +1288,17 @@ const FALL_EXP = [
   {section:"Committees",item:"Brotherhood",budgeted:500,spent:0},
   {section:"Committees",item:"Mental Health",budgeted:300,spent:0},
   {section:"Committees",item:"Parent Relations",budgeted:1500,spent:0},
-  {section:"IHQ",item:"Member Fees",budgeted:6187.5,spent:0},
+  // IHQ
+  {section:"IHQ",item:"Member Fees",budgeted:6187.50,spent:0},
   {section:"IHQ",item:"Insurance Fees",budgeted:12375,spent:0},
   {section:"IHQ",item:"IFC Fees",budgeted:1188,spent:0},
   {section:"IHQ",item:"LegFi Fees",budgeted:684,spent:0},
   {section:"IHQ",item:"Graduate Gifts",budgeted:200,spent:0},
+  // Other
   {section:"Other",item:"Cabinet Retreat",budgeted:50,spent:0},
   {section:"Other",item:"Spring Sing",budgeted:0,spent:0},
   {section:"Other",item:"Shenanigans",budgeted:2000,spent:0},
-  {section:"Other",item:"Other Org Philanthropy",budgeted:500,spent:0},
+  {section:"Other",item:"Other Organization Philanthropy Events",budgeted:500,spent:0},
   {section:"Other",item:"Lawncare",budgeted:2000,spent:0},
   {section:"Other",item:"Strategic Planning Retreat",budgeted:50,spent:0},
   {section:"Other",item:"Tent",budgeted:0,spent:0},
@@ -1306,6 +1310,7 @@ const FALL_EXP = [
   {section:"Other",item:"Ritual Room",budgeted:0,spent:0},
   {section:"Other",item:"Services",budgeted:80,spent:0},
   {section:"Other",item:"Savings",budgeted:1000,spent:0},
+  // Housing Corp
   {section:"Housing Corp",item:"House Rent",budgeted:36000,spent:0},
   {section:"Housing Corp",item:"Parlor Fees",budgeted:2075,spent:0},
 ];
@@ -1501,6 +1506,32 @@ function effectiveDue(d) {
   return duesNet + rent;
 }
 function brotherTotalRevenue(d) { return effectiveDue(d); }
+
+// Compute expected total revenue for a given term.
+// Spring: sum actual effectiveDue from duesData roster (real numbers).
+// Fall: derive from config rates × brother counts (roster is Spring-based).
+function termRevenue(term) {
+  if (term === "Spring 2026") {
+    return duesData.reduce(function(s,d){ return s + brotherTotalRevenue(d); }, 0);
+  }
+  // Fall — use config rates × brother counts
+  var t   = "fall";
+  var r   = config.duesRates[t];
+  var bc  = config.brotherCounts[t];
+  var hr  = config.housingRates[t];
+  var ccRate = config.ccRateFall;
+  // Dues revenue (no CC adjustment at the aggregate level — assume bank payments)
+  var duesRev = bc.newMember * r.newMember
+              + bc.member    * r.member
+              + bc.houseMember * r.houseMember;
+  // Rent revenue from house members
+  var rentRev = bc.houseMember * (hr.rentPerBrother || 0);
+  // IHQ costs
+  var ihq = config.ihqFees || DEFAULT_CONFIG.ihqFees;
+  var totalBros = bc.newMember + bc.member + bc.houseMember;
+  var ihqCost = ihq.reduce(function(s,f){ return s + f.perBrother * totalBros; }, 0);
+  return duesRev + rentRev - ihqCost;
+}
 
 // ═══════════════════════════════════════════════════════════════
 // SUPABASE
@@ -2490,12 +2521,14 @@ function renderCalculations() {
   var ihqFallTotal   = ihq.reduce(function(s,f){return s+f.perBrother*brothers.fall.total;},0);
   var ihqPerBroTotal = ihq.reduce(function(s,f){return s+f.perBrother;},0);
 
-  var springDuesRev = bc.spring.newMember*dr.spring.newMember + bc.spring.member*dr.spring.member + bc.spring.houseMember*dr.spring.houseMember;
-  var fallDuesRev   = bc.fall.newMember*dr.fall.newMember     + bc.fall.member*dr.fall.member     + bc.fall.houseMember*dr.fall.houseMember;
+  // Use termRevenue() so Fall uses Fall roster/rates and Spring uses actual dues data
+  var springChapter    = termRevenue("Spring 2026");
+  var fallChapter      = termRevenue("Fall 2026");
+  // Keep these for the revenue breakdown table
+  var springDuesRev    = bc.spring.newMember*dr.spring.newMember + bc.spring.member*dr.spring.member + bc.spring.houseMember*dr.spring.houseMember;
+  var fallDuesRev      = bc.fall.newMember*dr.fall.newMember + bc.fall.member*dr.fall.member + bc.fall.houseMember*dr.fall.houseMember;
   var springHousingRev = hr.spring.rent + hr.spring.parlor;
   var fallHousingRev   = hr.fall.rent   + hr.fall.parlor;
-  var springChapter = springDuesRev - ihqSpringTotal;
-  var fallChapter   = fallDuesRev   - ihqFallTotal;
 
   var springBudgeted = springExp.reduce(function(s,i){return s+i.budgeted;},0);
   var springSpent    = springExp.reduce(function(s,i){return s+i.spent;},0);
@@ -3570,7 +3603,7 @@ function renderCommEditForm() {
 function updateCommEditTotals() {
   var term = getCommTerm();
   var exp  = term === "Spring 2026" ? springExp : fallExp;
-  var duesRev = duesData.reduce(function(s,d){return s+brotherTotalRevenue(d);},0);
+  var duesRev = termRevenue(term);
   var origTotal = exp.reduce(function(s,i){return s+i.budgeted;},0);
 
   // Sum all current input values
@@ -3662,7 +3695,7 @@ function renderCommitteeBudget() {
   var totalS = exp.reduce(function(s,i){return s+i.spent;},0);
   var overCt = exp.filter(function(i){return i.budgeted>0&&i.spent>i.budgeted;}).length;
   var nearCt = exp.filter(function(i){var b=i.budgeted; return b>0&&i.spent/b>=0.85&&i.spent<=b;}).length;
-  var duesRev = duesData.reduce(function(s,d){return s+brotherTotalRevenue(d);},0);
+  var duesRev = termRevenue(term);
   var surplus = duesRev - totalB;
 
   var kpisEl = document.getElementById("bud-comm-kpis");
