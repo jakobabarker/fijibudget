@@ -2513,10 +2513,21 @@ function dmRefreshTotal() {
   var rentOwed = rentNet;
 
   var totalOwed   = netDues + rentOwed;
-  // Paid so far = what's actually been received by chapter (net of CC)
-  // For Paid in Full: full net amount. For Payment Plan: installments paid × (rate/installs) × (1-CC)
-  var totalPaid   = duesPaid + (hasRentTracked ? rentPaid : 0);
-  var totalRemain = totalOwed - totalPaid;
+  // When Paid in Full, totalPaid = totalOwed by definition (no remaining balance)
+  // When Payment Plan, calculate from installments paid
+  var totalPaid;
+  if (status === "Paid in Full") {
+    totalPaid = totalOwed;
+  } else if (status === "Payment Plan") {
+    var installs  = parseInt((document.getElementById("dm-installments")||{}).value) || 1;
+    var instPaid  = parseInt((document.getElementById("dm-inst-paid")   ||{}).value) || 0;
+    var duesPaidFromPlan = installs > 0 ? (netDues / installs) * instPaid : 0;
+    var rentPaidAmt = hasRentTracked ? rentPaid : 0;
+    totalPaid = duesPaidFromPlan + rentPaidAmt;
+  } else {
+    totalPaid = 0;
+  }
+  var totalRemain = Math.max(0, totalOwed - totalPaid);
   // Discount is shown separately — it reduces what brother owes, not chapter revenue
   var duesDiscNote = discountAmt > 0 ? " (−"+fmt(discountAmt)+" disc)" : "";
   var rentDiscNote = rentDiscAmt  > 0 ? " (−"+fmt(rentDiscAmt)+" disc)" : "";
@@ -2574,9 +2585,12 @@ function dmRefreshTotal() {
   var paidEl  = document.getElementById("dm-total-paid-preview");
   var remEl   = document.getElementById("dm-total-remaining");
   if (owedEl) owedEl.textContent  = fmt(totalOwed);
-  if (paidEl) paidEl.textContent  = fmt(totalPaid);
+  if (paidEl) {
+    paidEl.textContent = status === "Paid in Full" ? "Paid in Full" : fmt(totalPaid);
+    paidEl.style.fontSize = status === "Paid in Full" ? "14px" : "18px";
+  }
   if (remEl) {
-    remEl.textContent = fmt(Math.max(0, totalRemain));
+    remEl.textContent = fmt(totalRemain);
     remEl.style.color = totalRemain <= 0.01 ? "var(--green)" : "var(--amber)";
   }
 
