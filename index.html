@@ -220,6 +220,7 @@
   .edit-budget-input:focus { border-color:var(--gold); }
   .edit-budget-input.changed { border-color:var(--amber);background:rgba(212,128,58,0.1); }
   .comm-term-btn.active { background:rgba(78,158,110,0.2) !important; color:var(--green) !important; font-weight:600 !important; }
+  .early-pay-row td:first-child::after { content:" ✓"; font-size:10px; color:var(--green); }
 
   /* ── CALC INLINE EDIT INPUTS ── */
   .calc-inline-input {
@@ -382,12 +383,12 @@
           </div>
         </div>
         <table class="data-table">
-          <thead><tr><th>Brother</th><th>Class</th><th>Base Dues</th><th>Payment Status</th><th>Method</th><th>Total Revenue</th><th></th></tr></thead>
+          <thead><tr><th>Brother</th><th>Class</th><th>Base Dues</th><th>Early Discount</th><th>Rent</th><th>Dues Status</th><th>Rent Status</th><th>Method</th><th style="color:var(--gold)">Net to Chapter</th><th></th></tr></thead>
           <tbody id="dues-tbody"></tbody>
           <tfoot><tr class="total-row">
             <td colspan="2">Totals (<span id="dues-count">0</span> brothers)</td>
             <td class="mono" id="dues-total-due"></td>
-            <td></td>
+            <td></td><td></td><td></td><td></td>
             <td></td>
             <td class="mono" style="color:var(--gold)" id="dues-total-revenue"></td>
             <td></td>
@@ -507,10 +508,10 @@
         </div>
       </div>
       <!-- Housing rates card — only shown in edit mode -->
-      <div id="calc-housing-section" style="display:none;margin-bottom:18px">
+      <div id="calc-housing-section" style="margin-bottom:18px">
         <div class="card">
-          <div class="card-header">Housing Rates</div>
-          <div style="padding:18px 20px" id="calc-housing"></div>
+          <div class="card-header">Rent Rates</div>
+          <div style="padding:16px" id="calc-housing"></div>
         </div>
       </div>
       <div class="two-col">
@@ -992,19 +993,18 @@
       </div>
     </div>
 
-    <!-- Dues Payment Plan detail -->
-    <div id="dm-plan-section" style="display:none;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:12px">
-      <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin-bottom:10px">Dues Payment Plan</div>
-      <div class="form-row cols2" style="margin-bottom:0">
-        <div><label>Number of Installments</label><input type="number" id="dm-installments" min="1" value="2" step="1" oninput="dmRefreshTotal()"></div>
-        <div><label>Installments Paid</label><input type="number" id="dm-inst-paid" min="0" value="0" step="1" oninput="dmSyncInstallmentToPaid()"></div>
-      </div>
-      <div id="dm-plan-summary" style="margin-top:10px;font-size:12px;color:var(--muted)"></div>
-    </div>
-
     <!-- CC warning -->
     <div id="dm-cc-warning" style="display:none;padding:8px 12px;background:rgba(212,128,58,0.1);border-left:3px solid var(--amber);border-radius:4px;font-size:11.5px;color:var(--amber);margin-bottom:12px">
       Credit card processing fee applied — chapter nets less than face value.
+    </div>
+
+    <!-- Early pay discount -->
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:rgba(78,158,110,0.06);border:1px solid rgba(78,158,110,0.2);border-radius:8px;margin-bottom:12px">
+      <input type="checkbox" id="dm-early-discount" onchange="dmRefreshTotal()" style="width:16px;height:16px;cursor:pointer;accent-color:var(--green)">
+      <div>
+        <label for="dm-early-discount" style="font-size:13px;font-weight:600;color:var(--green);cursor:pointer;margin:0">Early Payment Discount</label>
+        <div style="font-size:11px;color:var(--muted);margin-top:1px">Apply <span id="dm-discount-amount"></span> discount for early payment</div>
+      </div>
     </div>
 
     <!-- Extra Fees -->
@@ -1041,6 +1041,15 @@
           <div><label>Installments Paid</label><input type="number" id="dm-rent-inst-paid" min="0" value="0" step="1" oninput="dmSyncRentInstallmentToPaid()"></div>
         </div>
         <div id="dm-rent-plan-summary" style="margin-top:8px;font-size:12px;color:var(--muted)"></div>
+      </div>
+
+      <!-- Rent early pay discount — only for Paid in Full -->
+      <div id="dm-rent-early-disc-row" style="display:none;display:flex;align-items:center;gap:12px;padding:8px 12px;background:rgba(78,158,110,0.06);border:1px solid rgba(78,158,110,0.2);border-radius:7px;margin-bottom:8px">
+        <input type="checkbox" id="dm-rent-early-discount" onchange="dmRefreshTotal()" style="width:15px;height:15px;cursor:pointer;accent-color:var(--green)">
+        <div>
+          <label for="dm-rent-early-discount" style="font-size:12.5px;font-weight:600;color:var(--green);cursor:pointer;margin:0">Early Rent Discount</label>
+          <div style="font-size:11px;color:var(--muted);margin-top:1px">Apply <span id="dm-rent-disc-amount"></span> discount for paying rent in full early</div>
+        </div>
       </div>
 
       <div id="dm-rent-summary" style="font-size:11.5px;color:var(--muted)"></div>
@@ -1510,6 +1519,8 @@ let currentTerm = "Spring 2026";
 
 const DEFAULT_CONFIG = {
   ccRateSpring: 3.15, ccRateFall: 3.15,
+  earlyPayDiscount: 50,
+  rentEarlyDiscount: 50,
   housingRates: {
     spring: { rent: 36000, parlor: 2050, rentPerBrother: 2250 },
     fall:   { rent: 36000, parlor: 2075, rentPerBrother: 2250 }
@@ -1550,8 +1561,10 @@ let config    = JSON.parse(localStorage.getItem("fiji_config")      || "null") |
     if (!config.brotherCounts[t]) config.brotherCounts[t] = JSON.parse(JSON.stringify(d.brotherCounts[t]));
   });
   if (!config.ihqFees) config.ihqFees = JSON.parse(JSON.stringify(d.ihqFees));
-  if (config.ccRateSpring === undefined) config.ccRateSpring = d.ccRateSpring;
-  if (config.ccRateFall   === undefined) config.ccRateFall   = d.ccRateFall;
+  if (config.ccRateSpring === undefined)   config.ccRateSpring   = d.ccRateSpring;
+  if (config.ccRateFall   === undefined)   config.ccRateFall     = d.ccRateFall;
+  if (config.earlyPayDiscount  === undefined) config.earlyPayDiscount  = d.earlyPayDiscount;
+  if (config.rentEarlyDiscount === undefined) config.rentEarlyDiscount = d.rentEarlyDiscount || 50;
 })();
 
 let duesData  = JSON.parse(localStorage.getItem("fiji_dues_spring") || "null") || DUES_DATA_SPRING.map(d => ({...d, payStatus:"Paid in Full", payMethod:"Bank Account", extraFees:[], installments:1, installmentsPaid:0, rentStatus:"N/A", rentPaid:0, rentInstallments:1, rentInstallmentsPaid:0}));
@@ -1579,19 +1592,26 @@ duesData = duesData.map(d => ({
   payStatus:"Paid in Full", payMethod:"Bank Account",
   extraFees:[], installments:1, installmentsPaid:0,
   rentStatus:"N/A", rentPaid:0, rentInstallments:1, rentInstallmentsPaid:0,
+  earlyDiscount:false,
+  rentEarlyDiscount:false,
   ...d
 }));
 
 function effectiveDue(d) {
-  var term   = currentTerm === "Spring 2026" ? "spring" : "fall";
-  var ccRate = currentTerm === "Spring 2026" ? config.ccRateSpring : config.ccRateFall;
-  var extra  = (d.extraFees || []).reduce(function(s,f){ return s+f.amount; }, 0);
-  var gross  = d.due + extra;
-  var ccDed  = d.payMethod === "Credit Card" ? gross*(ccRate/100) : 0;
-  var duesNet = gross - ccDed;
+  var term      = currentTerm === "Spring 2026" ? "spring" : "fall";
+  var ccRate    = currentTerm === "Spring 2026" ? config.ccRateSpring : config.ccRateFall;
+  var extra     = (d.extraFees || []).reduce(function(s,f){ return s+f.amount; }, 0);
+  var discount  = d.earlyDiscount ? (config.earlyPayDiscount || 50) : 0;
+  var gross     = d.due + extra - discount;
+  var ccDed     = d.payMethod === "Credit Card" ? gross*(ccRate/100) : 0;
+  var duesNet   = gross - ccDed;
   // Only include rent if house member AND rent status is actively tracked (not N/A)
+  var hr         = config.housingRates[term] || {};
+  var rentBase   = hr.rentPerBrother || DEFAULT_CONFIG.housingRates[term].rentPerBrother || 2250;
+  var rentDisc   = (d.rentEarlyDiscount && d.rentStatus === "Paid in Full")
+    ? (config.rentEarlyDiscount || 50) : 0;
   var rent = (d.cls === "House Member" && d.rentStatus && d.rentStatus !== "N/A")
-    ? (config.housingRates[term].rentPerBrother || 0) : 0;
+    ? (rentBase - rentDisc) : 0;
   return duesNet + rent;
 }
 function brotherTotalRevenue(d) { return effectiveDue(d); }
@@ -1693,7 +1713,9 @@ function duesDataToRows(arr) {
       rent_status: d.rentStatus || "N/A",
       rent_paid: d.rentPaid || 0,
       rent_installments: d.rentInstallments || 1,
-      rent_installments_paid: d.rentInstallmentsPaid || 0
+      rent_installments_paid: d.rentInstallmentsPaid || 0,
+      early_discount: d.earlyDiscount || false,
+      rent_early_discount: d.rentEarlyDiscount || false
     };
   });
 }
@@ -1711,7 +1733,9 @@ function rowsToDuesData(rows) {
       rentStatus: r.rent_status || "N/A",
       rentPaid: parseFloat(r.rent_paid) || 0,
       rentInstallments: r.rent_installments || 1,
-      rentInstallmentsPaid: r.rent_installments_paid || 0
+      rentInstallmentsPaid: r.rent_installments_paid || 0,
+      earlyDiscount: r.early_discount || false,
+      rentEarlyDiscount: r.rent_early_discount || false
     };
   });
 }
@@ -1821,7 +1845,7 @@ async function pullAll() {
     var txRows   = await sbGet("transactions", "order=date.desc");
     var dbEmpty  = duesRows.length === 0 && txRows.length === 0;
     if (dbEmpty) {
-      duesData  = DUES_DATA_SPRING.map(function(d) { return Object.assign({}, d, {payStatus:"Paid in Full",payMethod:"Bank Account",extraFees:[],installments:1,installmentsPaid:0,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0}); });
+      duesData  = DUES_DATA_SPRING.map(function(d) { return Object.assign({}, d, {payStatus:"Paid in Full",payMethod:"Bank Account",extraFees:[],installments:1,installmentsPaid:0,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,earlyDiscount:false,rentEarlyDiscount:false}); });
       springExp = SPRING_EXP.map(function(e) { return Object.assign({},e); });
       fallExp   = FALL_EXP.map(function(e)   { return Object.assign({},e); });
       txList    = TX_OUT_SEED.concat(TX_IN_SEED);
@@ -2074,72 +2098,103 @@ function renderRevenues() {
     +'<div class="mono" style="font-size:9px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin-bottom:4px">Total Inflows</div>'
     +'<div class="mono" style="font-size:20px;font-weight:700;color:var(--gold)">'+fmt(totalIn)+'</div></div>';
 }
-
 function filterDues() {
-  var q    = (document.getElementById("dues-search")       ||{}).value || "";
-  var cls  = (document.getElementById("dues-filter-class") ||{}).value || "";
-  var stat = (document.getElementById("dues-filter-status")||{}).value || "";
-  q = q.toLowerCase();
+  var q    = ((document.getElementById("dues-search")       || {}).value || "").toLowerCase();
+  var cls  = ((document.getElementById("dues-filter-class") || {}).value || "");
+  var stat = ((document.getElementById("dues-filter-status")|| {}).value || "");
   var rows = duesData.filter(function(d) {
-    if (q   && !d.name.toLowerCase().includes(q)) return false;
-    if (cls && d.cls !== cls) return false;
-    if (stat) {
-      if (stat === "Problem!"     && d.payStatus !== "Problem!")     return false;
-      if (stat === "Payment Plan" && d.payStatus !== "Payment Plan") return false;
-      if (stat === "Paid in Full" && d.payStatus !== "Paid in Full") return false;
-    }
+    if (q    && !d.name.toLowerCase().includes(q)) return false;
+    if (cls  && d.cls !== cls) return false;
+    if (stat === "Problem!"     && d.payStatus !== "Problem!")     return false;
+    if (stat === "Payment Plan" && d.payStatus !== "Payment Plan") return false;
+    if (stat === "Paid in Full" && d.payStatus !== "Paid in Full") return false;
     return true;
   });
+
   var tbody = document.getElementById("dues-tbody");
   if (!tbody) return;
-  if (document.getElementById("dues-count")) document.getElementById("dues-count").textContent = rows.length;
 
-  var totalDue = rows.reduce(function(s,d){return s+d.due;},0);
-  var totalRev = rows.reduce(function(s,d){return s+brotherTotalRevenue(d);},0);
-  var totalPaid = rows.reduce(function(s,d){return s+d.paid;},0);
-  if (document.getElementById("dues-total-due"))     document.getElementById("dues-total-due").textContent     = fmt(totalDue);
-  if (document.getElementById("dues-total-revenue")) document.getElementById("dues-total-revenue").textContent = fmt(totalRev);
-  if (document.getElementById("dues-total-paid"))    document.getElementById("dues-total-paid").textContent    = fmt(totalPaid);
+  var countEl = document.getElementById("dues-count");
+  if (countEl) countEl.textContent = rows.length;
 
-  var term = currentTerm === "Spring 2026" ? "spring" : "fall";
+  var term   = currentTerm === "Spring 2026" ? "spring" : "fall";
   var ccRate = currentTerm === "Spring 2026" ? config.ccRateSpring : config.ccRateFall;
 
+  var totalDue  = rows.reduce(function(s,d){ return s + d.due; }, 0);
+  var totalPaid = rows.reduce(function(s,d){ return s + d.paid; }, 0);
+  var totalRev  = rows.reduce(function(s,d){ return s + brotherTotalRevenue(d); }, 0);
+  if (document.getElementById("dues-total-due"))     document.getElementById("dues-total-due").textContent     = fmt(totalDue);
+  if (document.getElementById("dues-total-paid"))    document.getElementById("dues-total-paid").textContent    = fmt(totalPaid);
+  if (document.getElementById("dues-total-revenue")) document.getElementById("dues-total-revenue").textContent = fmt(totalRev);
+
   tbody.innerHTML = rows.map(function(d) {
-    var realIdx = duesData.indexOf(d);
-    var extra = (d.extraFees||[]).reduce(function(s,f){return s+f.amount;},0);
-    var totalRev = brotherTotalRevenue(d);
-    var ccDed = d.payMethod==="Credit Card" ? (d.due+extra)*(ccRate/100) : 0;
-    var isProb = d.payStatus==="Problem!";
-    var isPlan = d.payStatus==="Payment Plan";
-    var isHouse = d.cls==="House Member";
-    var isRentProb = isHouse && d.rentStatus==="Problem!";
-    var isRentPlan = isHouse && d.rentStatus==="Payment Plan";
+    var realIdx  = duesData.indexOf(d);
+    var extra    = (d.extraFees||[]).reduce(function(s,f){return s+f.amount;},0);
+    var discount = d.earlyDiscount ? (config.earlyPayDiscount || 50) : 0;
+    var hr       = config.housingRates[term] || {};
+    var rentRate = hr.rentPerBrother || DEFAULT_CONFIG.housingRates[term].rentPerBrother || 2250;
+    var isHouse  = d.cls === "House Member";
+    var hasRent  = isHouse && d.rentStatus && d.rentStatus !== "N/A";
+    var rentDiscAmt = (d.rentEarlyDiscount && d.rentStatus === "Paid in Full")
+      ? (config.rentEarlyDiscount || 50) : 0;
+    var rentAmt  = hasRent ? Math.max(0, rentRate - rentDiscAmt) : 0;
+    var gross    = d.due + extra - discount;
+    var ccDed    = d.payMethod === "Credit Card" ? gross*(ccRate/100) : 0;
+    var netDues  = gross - ccDed;
+    var netRev   = netDues + rentAmt;
+
+    var isProb     = d.payStatus === "Problem!";
+    var isPlan     = d.payStatus === "Payment Plan";
+    var isRentProb = isHouse && d.rentStatus === "Problem!";
+    var isRentPlan = isHouse && d.rentStatus === "Payment Plan";
     var anyProblem = isProb || isRentProb;
 
     var installInfo = isPlan ? (' <span style="font-size:10px;color:var(--muted)">'+(d.installmentsPaid||0)+"/"+(d.installments||1)+" paid</span>") : "";
-    var payBadge = isProb
-      ? '<span class="badge badge-red">Problem!</span>'
-      : isPlan
-        ? '<span class="badge badge-amber">Payment Plan</span>'+installInfo
-        : '<span class="badge badge-green">Paid in Full</span>';
+    var payBadge    = isProb  ? '<span class="badge badge-red">Problem!</span>'
+      : isPlan ? '<span class="badge badge-amber">Plan</span>'+installInfo
+      : '<span class="badge badge-green">Paid</span>';
+
     var rentInstInfo = isRentPlan ? (' <span style="font-size:10px;color:var(--muted)">'+(d.rentInstallmentsPaid||0)+"/"+(d.rentInstallments||1)+'</span>') : "";
-    var rentBadge = (!isHouse || !d.rentStatus || d.rentStatus==="N/A") ? ""
-      : isRentProb ? '<br><span class="badge badge-red" style="font-size:9px;margin-top:3px">🏠 Rent Problem!</span>'
-      : isRentPlan ? '<br><span class="badge badge-amber" style="font-size:9px;margin-top:3px">🏠 Rent Plan</span>'+rentInstInfo
-      : '<br><span class="badge badge-green" style="font-size:9px;margin-top:3px">🏠 Rent Paid</span>';
-    var methodBadge = d.payMethod==="Credit Card"
+    var rentBadge = !hasRent ? '<span style="font-size:10px;color:var(--dim)">—</span>'
+      : isRentProb ? '<span class="badge badge-red" style="font-size:9px">Problem!</span>'
+      : isRentPlan ? '<span class="badge badge-amber" style="font-size:9px">Plan</span>'+rentInstInfo
+      : '<span class="badge badge-green" style="font-size:9px">Paid</span>';
+
+    var methodBadge = d.payMethod === "Credit Card"
       ? '<span class="badge badge-amber" style="font-size:9px">CC -'+fmt(ccDed)+'</span>'
       : '<span style="font-size:10px;color:var(--dim)">'+(d.payMethod||"Bank")+'</span>';
-    var extraStr = extra>0 ? '<span style="font-size:10px;color:var(--amber);margin-left:4px">+'+fmt(extra)+'</span>' : "";
+
+    var extraStr    = extra    > 0 ? ' <span style="font-size:10px;color:var(--amber)">+'+fmt(extra)+'</span>' : "";
+    var discountStr = discount > 0
+      ? '<span class="mono" style="font-size:12px;color:var(--green)">-'+fmt(discount)+'</span>'
+        +' <span style="font-size:9px;color:var(--dim)">early</span>'
+      : '<span style="font-size:10px;color:var(--dim)">—</span>';
+    var rentStr = hasRent
+      ? '<span class="mono" style="font-size:12px;color:var(--blue)">'+fmt(rentAmt)+'</span>'
+        +(rentDiscAmt > 0 ? ' <span style="font-size:9px;color:var(--green)">−'+fmt(rentDiscAmt)+'</span>' : '')
+        +(isRentPlan ? ' <span style="font-size:9px;color:var(--amber)">plan</span>' : '')
+      : '<span style="font-size:10px;color:var(--dim)">—</span>';
     var clsColor = d.cls==="House Member"?"badge-gold":d.cls==="New Member"?"badge-amber":"badge-blue";
 
-    return '<tr class="'+(anyProblem?"unpaid-row":"")+'" style="'+(anyProblem?"border-left:3px solid var(--red)":"")+'">'
+    // Tooltip breakdown
+    var tip = "Dues: "+fmt(d.due);
+    if (extra > 0)    tip += " + Extras: "+fmt(extra);
+    if (discount > 0) tip += " - Early Discount: "+fmt(discount);
+    if (ccDed > 0)    tip += " - CC Fee: "+fmt(ccDed);
+    if (hasRent)      tip += " + Rent: "+fmt(rentAmt);
+    tip += " = "+fmt(netRev);
+
+    return '<tr class="'+(anyProblem?"unpaid-row":"")+(d.earlyDiscount?" early-pay-row":"")+'" '
+      +'style="'+(anyProblem?"border-left:3px solid var(--red)":d.earlyDiscount?"border-left:3px solid var(--green)":"")+'">'
       +'<td style="font-weight:'+(anyProblem?"700":"500")+';color:'+(anyProblem?"var(--red)":"var(--text)")+'">'+d.name+'</td>'
       +'<td><span class="badge '+clsColor+'" style="font-size:10px">'+d.cls+'</span></td>'
       +'<td class="mono" style="font-size:12px">'+fmt(d.due)+extraStr+'</td>'
-      +'<td>'+payBadge+rentBadge+'</td>'
+      +'<td>'+discountStr+'</td>'
+      +'<td>'+rentStr+'</td>'
+      +'<td>'+payBadge+'</td>'
+      +'<td>'+rentBadge+'</td>'
       +'<td>'+methodBadge+'</td>'
-      +'<td class="mono" style="font-size:12px;font-weight:600;color:var(--gold)">'+fmt(totalRev)+'</td>'
+      +'<td class="mono" style="font-size:13px;font-weight:700;color:var(--gold)" title="'+tip+'">'+fmt(netRev)+'</td>'
       +'<td style="display:flex;gap:4px;padding:6px 14px">'
       +'<button class="btn btn-ghost btn-sm" onclick="openDuesModal('+realIdx+')">Edit</button>'
       +'</td></tr>';
@@ -2359,8 +2414,16 @@ function dmTogglePlan() {
 function dmToggleRentPlan() {
   var rentStatusEl = document.getElementById("dm-rentstatus");
   var status = rentStatusEl ? rentStatusEl.value : "N/A";
-  var el = document.getElementById("dm-rent-plan-section");
-  if (el) el.style.display = status === "Payment Plan" ? "block" : "none";
+  var planEl = document.getElementById("dm-rent-plan-section");
+  if (planEl) planEl.style.display = status === "Payment Plan" ? "block" : "none";
+  // Only show early discount for Paid in Full (payment plan excludes it)
+  var earlyDiscRow = document.getElementById("dm-rent-early-disc-row");
+  if (earlyDiscRow) earlyDiscRow.style.display = status === "Paid in Full" ? "flex" : "none";
+  // Clear the checkbox if switching away from Paid in Full
+  if (status !== "Paid in Full") {
+    var cb = document.getElementById("dm-rent-early-discount");
+    if (cb) cb.checked = false;
+  }
   dmRefreshTotal();
 }
 
@@ -2399,7 +2462,12 @@ function dmRefreshTotal() {
   var instPaid   = parseInt((document.getElementById("dm-inst-paid")    ||{}).value) || 0;
   var ccRate     = currentTerm === "Spring 2026" ? config.ccRateSpring : config.ccRateFall;
   var extraTotal = dmFees.reduce(function(s,f){return s+f.amount;},0);
-  var gross      = baseDue + extraTotal;
+  var earlyDiscEl = document.getElementById("dm-early-discount");
+  var hasDiscount = earlyDiscEl ? earlyDiscEl.checked : false;
+  var discountAmt = hasDiscount ? (config.earlyPayDiscount || 50) : 0;
+  var dmDiscAmtEl = document.getElementById("dm-discount-amount");
+  if (dmDiscAmtEl) dmDiscAmtEl.textContent = fmt(config.earlyPayDiscount || 50);
+  var gross      = baseDue + extraTotal - discountAmt;
   var ccDed      = method === "Credit Card" ? gross*(ccRate/100) : 0;
   var netDues    = gross - ccDed;
 
@@ -2408,14 +2476,19 @@ function dmRefreshTotal() {
   var termKey      = currentTerm === "Spring 2026" ? "spring" : "fall";
   var hr           = config.housingRates[termKey] || {};
   var rentRate     = hr.rentPerBrother || DEFAULT_CONFIG.housingRates[termKey].rentPerBrother || 2250;
-  var rentStatusEl = document.getElementById("dm-rentstatus");
-  var rentStatus   = rentStatusEl ? rentStatusEl.value : "N/A";
-  var rentPaid     = parseFloat((document.getElementById("dm-rentpaid")          ||{}).value) || 0;
-  var rentInstalls = parseInt((document.getElementById("dm-rent-installments")   ||{}).value) || 1;
-  var rentInstPaid = parseInt((document.getElementById("dm-rent-inst-paid")      ||{}).value) || 0;
+  var rentStatusEl    = document.getElementById("dm-rentstatus");
+  var rentStatus      = rentStatusEl ? rentStatusEl.value : "N/A";
+  var rentPaid        = parseFloat((document.getElementById("dm-rentpaid")         ||{}).value) || 0;
+  var rentInstalls    = parseInt((document.getElementById("dm-rent-installments")  ||{}).value) || 1;
+  var rentInstPaid    = parseInt((document.getElementById("dm-rent-inst-paid")     ||{}).value) || 0;
+  var rentEarlyDiscCb = document.getElementById("dm-rent-early-discount");
+  var hasRentEarlyDisc = (rentEarlyDiscCb && rentEarlyDiscCb.checked && rentStatus === "Paid in Full");
+  var rentDiscAmt     = hasRentEarlyDisc ? (config.rentEarlyDiscount || 50) : 0;
+  var rentDiscAmtEl   = document.getElementById("dm-rent-disc-amount");
+  if (rentDiscAmtEl) rentDiscAmtEl.textContent = fmt(config.rentEarlyDiscount || 50);
 
   // Rent only counts toward "owed" if status is tracked (not N/A)
-  var rentOwed = (isHouse && rentStatus !== "N/A") ? rentRate : 0;
+  var rentOwed = (isHouse && rentStatus !== "N/A") ? (rentRate - rentDiscAmt) : 0;
 
   var totalOwed   = netDues + rentOwed;
   var totalPaid   = duesPaid + (isHouse && rentStatus !== "N/A" ? rentPaid : 0);
@@ -2453,14 +2526,17 @@ function dmRefreshTotal() {
 
   // Rent summary bar (always shown for house members if status !== N/A)
   if (isHouse && rentStatus !== "N/A") {
-    var remColor = rentPaid >= rentRate ? "var(--green)" : "var(--amber)";
+    var rentNet  = rentOwed; // already has discount applied
+    var remColor = rentPaid >= rentNet ? "var(--green)" : "var(--amber)";
     var rentSum  = document.getElementById("dm-rent-summary");
     if (rentSum) rentSum.innerHTML =
         "Semester rent: <b style='color:var(--blue)'>"+fmt(rentRate)+"</b>"
-      +" &nbsp;&middot;&nbsp; "
-      +"Paid: <b style='color:var(--green)'>"+fmt(rentPaid)+"</b>"
-      +" &nbsp;&middot;&nbsp; "
-      +"<span style='color:"+remColor+"'>"+fmt(rentRate - rentPaid)+" remaining</span>";
+      +(rentDiscAmt > 0
+        ? " &minus; <b style='color:var(--green)'>early disc: "+fmt(rentDiscAmt)+"</b>"
+          +" = <b style='color:var(--blue)'>"+fmt(rentNet)+"</b>"
+        : "")
+      +" &nbsp;&middot;&nbsp; Paid: <b style='color:var(--green)'>"+fmt(rentPaid)+"</b>"
+      +" &nbsp;&middot;&nbsp; <span style='color:"+remColor+"'>"+fmt(Math.max(0,rentNet-rentPaid))+" remaining</span>";
   } else if (isHouse) {
     var rentSum = document.getElementById("dm-rent-summary");
     if (rentSum) rentSum.innerHTML = "<span style='color:var(--dim)'>Rent not tracked for this brother.</span>";
@@ -2479,8 +2555,9 @@ function dmRefreshTotal() {
 
   // Breakdown
   var bd = "Dues: "+fmt(baseDue);
-  if (extraTotal > 0) bd += " + Fees: "+fmt(extraTotal);
-  if (ccDed > 0)      bd += " &minus; CC "+ccRate+"%: "+fmt(ccDed);
+  if (extraTotal > 0)  bd += " + Fees: "+fmt(extraTotal);
+  if (discountAmt > 0) bd += " &minus; Early Discount: "+fmt(discountAmt);
+  if (ccDed > 0)       bd += " &minus; CC "+ccRate+"%: "+fmt(ccDed);
   if (isHouse && rentStatus !== "N/A") bd += " &nbsp;&middot;&nbsp; Rent: "+fmt(rentRate);
   var breakdown = document.getElementById("dm-breakdown");
   if (breakdown) breakdown.innerHTML = bd;
@@ -2560,6 +2637,14 @@ function openDuesModal(idx) {
   document.getElementById("dm-paystatus").value = payStatus;
   document.getElementById("dm-paymethod").value = d.payMethod || "Bank Account";
   document.getElementById("dm-notes").value     = d.notes || "";
+  var dmDisc = document.getElementById("dm-early-discount");
+  if (dmDisc) dmDisc.checked = d.earlyDiscount || false;
+  var dmRentDisc = document.getElementById("dm-rent-early-discount");
+  if (dmRentDisc) dmRentDisc.checked = d.rentEarlyDiscount || false;
+  var dmDiscAmt = document.getElementById("dm-discount-amount");
+  if (dmDiscAmt) dmDiscAmt.textContent = fmt(config.earlyPayDiscount || 50);
+  var dmRentDiscAmt = document.getElementById("dm-rent-disc-amount");
+  if (dmRentDiscAmt) dmRentDiscAmt.textContent = fmt(config.rentEarlyDiscount || 50);
 
   var dmInst = document.getElementById("dm-installments");
   if (dmInst) dmInst.value = installs;
@@ -2586,6 +2671,8 @@ function openDuesModal(idx) {
 
   var rentPlanSection = document.getElementById("dm-rent-plan-section");
   if (rentPlanSection) rentPlanSection.style.display = rentStatus === "Payment Plan" ? "block" : "none";
+  var rentEarlyRow = document.getElementById("dm-rent-early-disc-row");
+  if (rentEarlyRow) rentEarlyRow.style.display = rentStatus === "Paid in Full" ? "flex" : "none";
 
   dmRenderFees();
   dmRefreshTotal();
@@ -2637,7 +2724,11 @@ function saveDues() {
   duesData[idx].paid       = paid;
   duesData[idx].payStatus  = status;
   duesData[idx].payMethod  = method;
-  duesData[idx].notes      = document.getElementById("dm-notes").value;
+  duesData[idx].notes        = document.getElementById("dm-notes").value;
+  var dmDiscSave = document.getElementById("dm-early-discount");
+  duesData[idx].earlyDiscount     = dmDiscSave ? dmDiscSave.checked : false;
+  var dmRentDiscSave = document.getElementById("dm-rent-early-discount");
+  duesData[idx].rentEarlyDiscount = dmRentDiscSave ? dmRentDiscSave.checked : false;
   duesData[idx].extraFees  = dmFees.map(function(f){return {label:f.label,amount:f.amount};});
   duesData[idx].rentStatus = rentStatus;
   duesData[idx].rentPaid   = rentPaid;
@@ -2809,10 +2900,30 @@ function renderCalculations() {
     ratesRows += '<tr style="background:rgba(201,168,76,0.05)"><td style="font-size:11px;color:var(--muted)">CC Rate</td>'
       +'<td style="text-align:right">'+inpField(config.ccRateSpring,"config.ccRateSpring=parseFloat(this.value)||3.15",55)+'%</td>'
       +'<td style="text-align:right">'+inpField(config.ccRateFall,"config.ccRateFall=parseFloat(this.value)||3.15",55)+'%</td></tr>';
+    var spRPB = hr.spring.rentPerBrother || DEFAULT_CONFIG.housingRates.spring.rentPerBrother || 2250;
+    var faRPB = hr.fall.rentPerBrother   || DEFAULT_CONFIG.housingRates.fall.rentPerBrother   || 2250;
+    var earlyDisc = config.earlyPayDiscount || 50;
+    ratesRows += '<tr style="background:rgba(74,127,193,0.05)"><td style="font-size:11px;color:var(--muted)">Rent / House Member</td>'
+      +'<td style="text-align:right">'+inpField(spRPB,"config.housingRates.spring.rentPerBrother=parseFloat(this.value)||0",80)+'</td>'
+      +'<td style="text-align:right">'+inpField(faRPB,"config.housingRates.fall.rentPerBrother=parseFloat(this.value)||0",80)+'</td></tr>';
+    ratesRows += '<tr style="background:rgba(78,158,110,0.05)"><td style="font-size:11px;color:var(--muted)">Early Pay Discount</td>'
+      +'<td colspan="2" style="text-align:right">−'+inpField(earlyDisc,"config.earlyPayDiscount=parseFloat(this.value)||0",80)+'</td></tr>';
+    ratesRows += '<tr style="background:rgba(78,158,110,0.04)"><td style="font-size:11px;color:var(--muted)">Early Rent Discount</td>'
+      +'<td colspan="2" style="text-align:right">−'+inpField(config.rentEarlyDiscount||50,"config.rentEarlyDiscount=parseFloat(this.value)||0",80)+'</td></tr>';
   } else {
+    var spRPB = hr.spring.rentPerBrother || DEFAULT_CONFIG.housingRates.spring.rentPerBrother || 2250;
+    var faRPB = hr.fall.rentPerBrother   || DEFAULT_CONFIG.housingRates.fall.rentPerBrother   || 2250;
+    var earlyDisc = config.earlyPayDiscount || 50;
     ratesRows += '<tr style="background:rgba(255,255,255,0.02)"><td style="font-size:11px;color:var(--muted)">CC Rate</td>'
       +'<td class="mono" style="text-align:right;color:var(--amber)">'+config.ccRateSpring+'%</td>'
       +'<td class="mono" style="text-align:right;color:var(--amber)">'+config.ccRateFall+'%</td></tr>';
+    ratesRows += '<tr style="background:rgba(74,127,193,0.04)"><td style="font-size:11px;color:var(--muted)">Rent / House Member</td>'
+      +'<td class="mono" style="text-align:right;color:var(--blue)">'+fmt(spRPB)+'</td>'
+      +'<td class="mono" style="text-align:right;color:var(--blue)">'+fmt(faRPB)+'</td></tr>';
+    ratesRows += '<tr style="background:rgba(78,158,110,0.04)"><td style="font-size:11px;color:var(--muted)">Early Pay Discount</td>'
+      +'<td class="mono" style="text-align:right;color:var(--green)" colspan="2">−'+fmt(earlyDisc)+'</td></tr>';
+    ratesRows += '<tr style="background:rgba(78,158,110,0.03)"><td style="font-size:11px;color:var(--muted)">Early Rent Discount</td>'
+      +'<td class="mono" style="text-align:right;color:var(--green)" colspan="2">−'+fmt(config.rentEarlyDiscount||50)+'</td></tr>';
   }
   document.getElementById("calc-rates").innerHTML = '<table class="data-table" style="font-size:12px">'
     +'<thead><tr><th>Class</th><th style="text-align:right">Spring</th><th style="text-align:right">Fall</th></tr></thead>'
@@ -2834,29 +2945,85 @@ function renderCalculations() {
     +'<tbody>'+feeRows+'</tbody></table>';
 
   // Housing (edit mode only section)
-  var housingSection = document.getElementById("calc-housing-section");
-  if (housingSection) {
-    housingSection.style.display = editMode ? "block" : "none";
+  // Housing/Rent section — always visible, editable in edit mode
+  var housingEl = document.getElementById("calc-housing");
+  if (housingEl) {
+    var spRPB    = hr.spring.rentPerBrother || DEFAULT_CONFIG.housingRates.spring.rentPerBrother || 2250;
+    var faRPB    = hr.fall.rentPerBrother   || DEFAULT_CONFIG.housingRates.fall.rentPerBrother   || 2250;
+    var earlyDisc = config.earlyPayDiscount || 50;
+
     if (editMode) {
-      document.getElementById("calc-housing").innerHTML =
-        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">'
-        +'<div><div style="font-family:var(--font-mono);font-size:9px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin-bottom:10px">Spring 2026</div>'
-        +'<div style="margin-bottom:8px"><label style="font-size:11px;color:var(--muted)">Total Rent to Housing Corp ($)</label>'
-        +'<input type="number" step="0.01" value="'+hr.spring.rent+'" class="calc-inline-input" style="width:100%;margin-top:4px" onchange="config.housingRates.spring.rent=parseFloat(this.value)||0;renderCalculations()"></div>'
-        +'<div style="margin-bottom:8px"><label style="font-size:11px;color:var(--muted)">Parlor Fee ($)</label>'
-        +'<input type="number" step="0.01" value="'+hr.spring.parlor+'" class="calc-inline-input" style="width:100%;margin-top:4px" onchange="config.housingRates.spring.parlor=parseFloat(this.value)||0;renderCalculations()"></div>'
-        +'<div><label style="font-size:11px;color:var(--muted)">Rent Per House Member ($)</label>'
-        +'<input type="number" step="0.01" value="'+(hr.spring.rentPerBrother||2250)+'" class="calc-inline-input" style="width:100%;margin-top:4px" onchange="config.housingRates.spring.rentPerBrother=parseFloat(this.value)||0;renderCalculations()"></div></div>'
-        +'<div><div style="font-family:var(--font-mono);font-size:9px;letter-spacing:1px;color:var(--blue);text-transform:uppercase;margin-bottom:10px">Fall 2026</div>'
-        +'<div style="margin-bottom:8px"><label style="font-size:11px;color:var(--muted)">Total Rent to Housing Corp ($)</label>'
-        +'<input type="number" step="0.01" value="'+hr.fall.rent+'" class="calc-inline-input" style="width:100%;margin-top:4px" onchange="config.housingRates.fall.rent=parseFloat(this.value)||0;renderCalculations()"></div>'
-        +'<div style="margin-bottom:8px"><label style="font-size:11px;color:var(--muted)">Parlor Fee ($)</label>'
-        +'<input type="number" step="0.01" value="'+hr.fall.parlor+'" class="calc-inline-input" style="width:100%;margin-top:4px" onchange="config.housingRates.fall.parlor=parseFloat(this.value)||0;renderCalculations()"></div>'
-        +'<div><label style="font-size:11px;color:var(--muted)">Rent Per House Member ($)</label>'
-        +'<input type="number" step="0.01" value="'+(hr.fall.rentPerBrother||2250)+'" class="calc-inline-input" style="width:100%;margin-top:4px" onchange="config.housingRates.fall.rentPerBrother=parseFloat(this.value)||0;renderCalculations()"></div></div>'
+      housingEl.innerHTML =
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px">'
+        +'<div>'
+          +'<div class="mono" style="font-size:9px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin-bottom:10px">Spring Housing</div>'
+          +'<div style="margin-bottom:8px"><label style="font-size:11px;color:var(--muted)">Total Rent to Corp ($)</label>'
+          +'<input type="number" step="0.01" value="'+hr.spring.rent+'" class="calc-inline-input" style="width:100%;margin-top:4px" onchange="config.housingRates.spring.rent=parseFloat(this.value)||0;renderCalculations()"></div>'
+          +'<div style="margin-bottom:8px"><label style="font-size:11px;color:var(--muted)">Parlor Fee ($)</label>'
+          +'<input type="number" step="0.01" value="'+hr.spring.parlor+'" class="calc-inline-input" style="width:100%;margin-top:4px" onchange="config.housingRates.spring.parlor=parseFloat(this.value)||0;renderCalculations()"></div>'
+          +'<div><label style="font-size:11px;color:var(--muted)">Rent Per House Member ($)</label>'
+          +'<input type="number" step="0.01" value="'+spRPB+'" class="calc-inline-input" style="width:100%;margin-top:4px" onchange="config.housingRates.spring.rentPerBrother=parseFloat(this.value)||0;renderCalculations()"></div>'
+        +'</div>'
+        +'<div>'
+          +'<div class="mono" style="font-size:9px;letter-spacing:1px;color:var(--blue);text-transform:uppercase;margin-bottom:10px">Fall Housing</div>'
+          +'<div style="margin-bottom:8px"><label style="font-size:11px;color:var(--muted)">Total Rent to Corp ($)</label>'
+          +'<input type="number" step="0.01" value="'+hr.fall.rent+'" class="calc-inline-input" style="width:100%;margin-top:4px" onchange="config.housingRates.fall.rent=parseFloat(this.value)||0;renderCalculations()"></div>'
+          +'<div style="margin-bottom:8px"><label style="font-size:11px;color:var(--muted)">Parlor Fee ($)</label>'
+          +'<input type="number" step="0.01" value="'+hr.fall.parlor+'" class="calc-inline-input" style="width:100%;margin-top:4px" onchange="config.housingRates.fall.parlor=parseFloat(this.value)||0;renderCalculations()"></div>'
+          +'<div><label style="font-size:11px;color:var(--muted)">Rent Per House Member ($)</label>'
+          +'<input type="number" step="0.01" value="'+faRPB+'" class="calc-inline-input" style="width:100%;margin-top:4px" onchange="config.housingRates.fall.rentPerBrother=parseFloat(this.value)||0;renderCalculations()"></div>'
+        +'</div>'
+        +'<div>'
+          +'<div class="mono" style="font-size:9px;letter-spacing:1px;color:var(--green);text-transform:uppercase;margin-bottom:10px">Early Pay Discount</div>'
+          +'<div><label style="font-size:11px;color:var(--muted)">Discount Amount ($)</label>'
+          +'<input type="number" step="0.01" value="'+earlyDisc+'" class="calc-inline-input" style="width:100%;margin-top:4px" onchange="config.earlyPayDiscount=parseFloat(this.value)||50;renderCalculations()"></div>'
+          +'<div style="margin-top:10px;font-size:11px;color:var(--dim)">Applied per brother who paid before the semester deadline.</div>'
+        +'</div>'
+        +'</div>';
+    } else {
+      // Read-only view — always shown
+      var earlyCount = duesData.filter(function(d){ return d.earlyDiscount; }).length;
+      var totalEarlyDisc = earlyCount * earlyDisc;
+      housingEl.innerHTML =
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px">'
+        +'<div>'
+          +'<div class="mono" style="font-size:9px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin-bottom:10px">Spring 2026</div>'
+          +[["Total Rent to Corp", fmt(hr.spring.rent)],
+            ["Parlor Fee",         fmt(hr.spring.parlor)],
+            ["Rent / House Member",fmt(spRPB),"var(--blue)"]
+          ].map(function(r){
+            return '<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)">'
+              +'<span style="font-size:12px;color:var(--muted)">'+r[0]+'</span>'
+              +'<span class="mono" style="font-size:13px;font-weight:600;color:'+(r[2]||"var(--text)")+'">'+r[1]+'</span></div>';
+          }).join("")
+        +'</div>'
+        +'<div>'
+          +'<div class="mono" style="font-size:9px;letter-spacing:1px;color:var(--blue);text-transform:uppercase;margin-bottom:10px">Fall 2026</div>'
+          +[["Total Rent to Corp", fmt(hr.fall.rent)],
+            ["Parlor Fee",         fmt(hr.fall.parlor)],
+            ["Rent / House Member",fmt(faRPB),"var(--blue)"]
+          ].map(function(r){
+            return '<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)">'
+              +'<span style="font-size:12px;color:var(--muted)">'+r[0]+'</span>'
+              +'<span class="mono" style="font-size:13px;font-weight:600;color:'+(r[2]||"var(--text)")+'">'+r[1]+'</span></div>';
+          }).join("")
+        +'</div>'
+        +'<div>'
+          +'<div class="mono" style="font-size:9px;letter-spacing:1px;color:var(--green);text-transform:uppercase;margin-bottom:10px">Early Pay Discount</div>'
+          +'<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)">'
+            +'<span style="font-size:12px;color:var(--muted)">Discount Amount</span>'
+            +'<span class="mono" style="font-size:13px;font-weight:600;color:var(--green)">-'+fmt(earlyDisc)+'</span></div>'
+          +'<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)">'
+            +'<span style="font-size:12px;color:var(--muted)">Brothers w/ Discount</span>'
+            +'<span class="mono" style="font-size:13px;font-weight:600">'+earlyCount+'</span></div>'
+          +'<div style="display:flex;justify-content:space-between;padding:7px 0">'
+            +'<span style="font-size:12px;color:var(--muted)">Total Discounted</span>'
+            +'<span class="mono" style="font-size:13px;font-weight:600;color:var(--amber)">-'+fmt(totalEarlyDisc)+'</span></div>'
+        +'</div>'
         +'</div>';
     }
   }
+
 
   // Revenue breakdown
   document.getElementById("calc-revenue").innerHTML = '<table class="data-table" style="font-size:12px">'
