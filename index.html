@@ -397,6 +397,8 @@
         <div style="padding:10px 14px;font-size:11px;color:var(--muted);border-top:1px solid var(--border)">
           <span>Grand Total Revenue to Chapter: </span>
           <strong style="color:var(--gold);font-family:var(--font-mono)" id="dues-grand-total-rev">—</strong>
+          <span style="margin-left:18px;color:var(--muted)">Total CC Fees Lost: </span>
+          <strong style="color:var(--red);font-family:var(--font-mono)" id="dues-grand-cc-fees">—</strong>
         </div>
       </div>
       <div class="card">
@@ -973,23 +975,48 @@
       </div>
     </div>
 
-    <!-- Row 2: Base Due + Paid -->
+    <!-- Row 2: Base Due + Status + Method -->
     <div class="form-row cols2">
       <div><label>Base Dues ($)</label><input type="number" id="dm-due" step="0.01" oninput="dmRefreshTotal()"></div>
-      <div><label>Dues Paid So Far ($)</label><input type="number" id="dm-paid" step="0.01" oninput="dmRefreshTotal()"></div>
-    </div>
-
-    <!-- Row 3: Payment Status + Method -->
-    <div class="form-row cols2">
-      <div><label>Dues Status</label>
-        <select id="dm-paystatus" onchange="dmTogglePlan()">
-          <option>Paid in Full</option><option>Payment Plan</option><option>Problem!</option>
-        </select>
-      </div>
       <div><label>Payment Method</label>
         <select id="dm-paymethod" onchange="dmRefreshTotal()">
           <option>Bank Account</option><option>Credit Card</option><option>Other</option>
         </select>
+      </div>
+    </div>
+
+    <!-- Dues paid status — simple checkbox or payment plan -->
+    <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:12px">
+      <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin-bottom:10px">Dues Payment</div>
+
+      <!-- Status selector -->
+      <div class="form-row cols2" style="margin-bottom:10px">
+        <div><label>Status</label>
+          <select id="dm-paystatus" onchange="dmTogglePlan()">
+            <option>Paid in Full</option><option>Payment Plan</option><option>Problem!</option>
+          </select>
+        </div>
+        <!-- Paid in Full checkbox — shown when Paid in Full -->
+        <div id="dm-paid-full-row" style="display:flex;align-items:center;gap:10px;padding-top:20px">
+          <input type="checkbox" id="dm-paid-full-check" checked onchange="dmTogglePaidFull()" style="width:16px;height:16px;accent-color:var(--green);cursor:pointer">
+          <label for="dm-paid-full-check" style="font-size:13px;color:var(--green);font-weight:600;cursor:pointer;margin:0">Dues Paid ✓</label>
+        </div>
+      </div>
+
+      <!-- Payment plan detail — shown when Payment Plan -->
+      <div id="dm-plan-section" style="display:none">
+        <div class="form-row cols2" style="margin-bottom:6px">
+          <div><label>Number of Installments</label><input type="number" id="dm-installments" min="1" value="2" step="1" oninput="dmRefreshTotal()"></div>
+          <div><label>Installments Paid</label><input type="number" id="dm-inst-paid" min="0" value="0" step="1" oninput="dmSyncInstallmentToPaid()"></div>
+        </div>
+        <!-- Hidden paid field — still needed for data storage -->
+        <input type="hidden" id="dm-paid" value="0">
+        <div id="dm-plan-summary" style="font-size:12px;color:var(--muted);margin-top:4px"></div>
+      </div>
+
+      <!-- Problem notes — shown when Problem! -->
+      <div id="dm-problem-row" style="display:none;font-size:12px;color:var(--red);padding:6px 0">
+        ⚠ Flag this brother for follow-up. Add details in Notes below.
       </div>
     </div>
 
@@ -1044,7 +1071,7 @@
       </div>
 
       <!-- Rent early pay discount — only for Paid in Full -->
-      <div id="dm-rent-early-disc-row" style="display:none;display:flex;align-items:center;gap:12px;padding:8px 12px;background:rgba(78,158,110,0.06);border:1px solid rgba(78,158,110,0.2);border-radius:7px;margin-bottom:8px">
+      <div id="dm-rent-early-disc-row" style="display:none;align-items:center;gap:12px;padding:8px 12px;background:rgba(78,158,110,0.06);border:1px solid rgba(78,158,110,0.2);border-radius:7px;margin-bottom:8px">
         <input type="checkbox" id="dm-rent-early-discount" onchange="dmRefreshTotal()" style="width:15px;height:15px;cursor:pointer;accent-color:var(--green)">
         <div>
           <label for="dm-rent-early-discount" style="font-size:12.5px;font-weight:600;color:var(--green);cursor:pointer;margin:0">Early Rent Discount</label>
@@ -1072,65 +1099,6 @@
         </div>
       </div>
       <div style="margin-top:10px;font-size:11px;color:var(--muted);border-top:1px solid var(--border);padding-top:8px" id="dm-breakdown"></div>
-    </div>
-
-    <!-- Notes -->
-    <div class="form-row">
-      <div><label>Notes</label><input type="text" id="dm-notes" placeholder="Payment plan details, special circumstances..."></div>
-    </div>
-
-    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:8px">
-      <button class="btn btn-ghost" onclick="closeDuesModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="saveDues()">Save Changes</button>
-    </div>
-  </div>
-</div>
-    <div style="margin-bottom:12px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <label style="margin:0">Additional Charges</label>
-        <button class="btn btn-ghost btn-sm" onclick="dmAddFee()" style="font-size:10px">+ Add Fee</button>
-      </div>
-      <div id="dm-fees-list"></div>
-    </div>
-
-    <!-- Total preview -->
-    <div style="background:rgba(201,168,76,0.07);border:1px solid rgba(201,168,76,0.2);border-radius:8px;padding:12px 16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center">
-      <div>
-        <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin-bottom:3px">Total Revenue to Chapter</div>
-        <div style="font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--gold)" id="dm-total-preview">—</div>
-      </div>
-      <div style="text-align:right;font-size:11px;color:var(--muted)" id="dm-breakdown"></div>
-    </div>
-
-    <!-- House Rent section — only shown for House Members -->
-    <div id="dm-rent-section" style="display:none;background:rgba(74,127,193,0.06);border:1px solid rgba(74,127,193,0.25);border-radius:8px;padding:14px;margin-bottom:12px">
-      <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:1px;color:var(--blue);text-transform:uppercase;margin-bottom:12px">🏠 House Rent</div>
-
-      <!-- Rent status + amount -->
-      <div class="form-row cols2" style="margin-bottom:10px">
-        <div><label>Rent Payment Status</label>
-          <select id="dm-rentstatus" onchange="dmToggleRentPlan()">
-            <option value="N/A">N/A (Not Applicable)</option>
-            <option value="Paid in Full">Paid in Full</option>
-            <option value="Payment Plan">Payment Plan</option>
-            <option value="Problem!">Problem!</option>
-          </select>
-        </div>
-        <div><label>Rent Paid So Far ($)</label>
-          <input type="number" id="dm-rentpaid" step="0.01" value="0" oninput="dmRefreshTotal()">
-        </div>
-      </div>
-
-      <!-- Rent payment plan details -->
-      <div id="dm-rent-plan-section" style="display:none;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:8px">
-        <div class="form-row cols2" style="margin-bottom:0">
-          <div><label>Total Installments</label><input type="number" id="dm-rent-installments" min="1" value="2" step="1" oninput="dmRefreshTotal()"></div>
-          <div><label>Installments Paid</label><input type="number" id="dm-rent-inst-paid" min="0" value="0" step="1" oninput="dmRefreshTotal()"></div>
-        </div>
-        <div id="dm-rent-plan-summary" style="margin-top:8px;font-size:12px;color:var(--muted)"></div>
-      </div>
-
-      <div id="dm-rent-summary" style="font-size:11.5px;color:var(--muted)"></div>
     </div>
 
     <!-- Notes -->
@@ -1598,44 +1566,47 @@ duesData = duesData.map(d => ({
 }));
 
 function effectiveDue(d) {
-  var term      = currentTerm === "Spring 2026" ? "spring" : "fall";
-  var ccRate    = currentTerm === "Spring 2026" ? config.ccRateSpring : config.ccRateFall;
-  var extra     = (d.extraFees || []).reduce(function(s,f){ return s+f.amount; }, 0);
-  var discount  = d.earlyDiscount ? (config.earlyPayDiscount || 50) : 0;
-  var gross     = d.due + extra - discount;
-  var ccDed     = d.payMethod === "Credit Card" ? gross*(ccRate/100) : 0;
-  var duesNet   = gross - ccDed;
-  // Only include rent if house member AND rent status is actively tracked (not N/A)
-  var hr         = config.housingRates[term] || {};
-  var rentBase   = hr.rentPerBrother || DEFAULT_CONFIG.housingRates[term].rentPerBrother || 2250;
-  var rentDisc   = (d.rentEarlyDiscount && d.rentStatus === "Paid in Full")
-    ? (config.rentEarlyDiscount || 50) : 0;
-  var rent = (d.cls === "House Member" && d.rentStatus && d.rentStatus !== "N/A")
-    ? (rentBase - rentDisc) : 0;
-  return duesNet + rent;
+  // Revenue to chapter = what was paid minus CC processing fees.
+  // Early discounts are honored separately (tracked as discounts given),
+  // but the brother still pays the full dues amount via CC.
+  // So CC is assessed on the full gross; discounts do NOT reduce this figure.
+  var term     = currentTerm === "Spring 2026" ? "spring" : "fall";
+  var ccRate   = currentTerm === "Spring 2026" ? config.ccRateSpring : config.ccRateFall;
+  var extra    = (d.extraFees || []).reduce(function(s,f){ return s+f.amount; }, 0);
+  var hr       = config.housingRates[term] || {};
+  var rentBase = hr.rentPerBrother || DEFAULT_CONFIG.housingRates[term].rentPerBrother || 2250;
+  var hasRent  = (d.cls === "House Member" && d.rentStatus && d.rentStatus !== "N/A");
+  var grossDues  = d.due + extra;
+  var grossRent  = hasRent ? rentBase : 0;
+  var grossTotal = grossDues + grossRent;
+  var ccDed      = d.payMethod === "Credit Card" ? grossTotal * (ccRate / 100) : 0;
+  return grossTotal - ccDed;
 }
 function brotherTotalRevenue(d) { return effectiveDue(d); }
 
 // Compute expected total revenue for a given term.
 // Spring: sum actual effectiveDue from duesData roster (real numbers).
 // Fall: derive from config rates × brother counts (roster is Spring-based).
+// termRevenue: total expected revenue for budgeting.
+// Assumes ALL payment plans will be paid in full (for budget surplus calculations).
+// CC fees are included so the surplus reflects real spendable money.
 function termRevenue(term) {
   if (term === "Spring 2026") {
+    // Sum effectiveDue for each brother — this applies CC fees on full gross,
+    // discounts, and rent. Payment plan status doesn't affect this (we budget
+    // assuming full collection).
     return duesData.reduce(function(s,d){ return s + brotherTotalRevenue(d); }, 0);
   }
-  // Fall — use config rates × brother counts
-  var t   = "fall";
-  var r   = config.duesRates[t];
-  var bc  = config.brotherCounts[t];
-  var hr  = config.housingRates[t];
+  // Fall — derive from config rates × brother counts
+  var t      = "fall";
+  var r      = config.duesRates[t];
+  var bc     = config.brotherCounts[t];
+  var hr     = config.housingRates[t];
   var ccRate = config.ccRateFall;
-  // Dues revenue (no CC adjustment at the aggregate level — assume bank payments)
-  var duesRev = bc.newMember * r.newMember
-              + bc.member    * r.member
+  var duesRev = bc.newMember   * r.newMember
+              + bc.member      * r.member
               + bc.houseMember * r.houseMember;
-  // Rent revenue from house members
-  var rentRev = bc.houseMember * (hr.rentPerBrother || 0);
-  // IHQ costs
+  var rentRev = bc.houseMember * (hr.rentPerBrother || DEFAULT_CONFIG.housingRates.fall.rentPerBrother || 2250);
   var ihq = config.ihqFees || DEFAULT_CONFIG.ihqFees;
   var totalBros = bc.newMember + bc.member + bc.houseMember;
   var ihqCost = ihq.reduce(function(s,f){ return s + f.perBrother * totalBros; }, 0);
@@ -2137,11 +2108,17 @@ function filterDues() {
     var hasRent  = isHouse && d.rentStatus && d.rentStatus !== "N/A";
     var rentDiscAmt = (d.rentEarlyDiscount && d.rentStatus === "Paid in Full")
       ? (config.rentEarlyDiscount || 50) : 0;
-    var rentAmt  = hasRent ? Math.max(0, rentRate - rentDiscAmt) : 0;
-    var gross    = d.due + extra - discount;
-    var ccDed    = d.payMethod === "Credit Card" ? gross*(ccRate/100) : 0;
-    var netDues  = gross - ccDed;
-    var netRev   = netDues + rentAmt;
+    // CC on FULL gross — discounts are separate ledger entries, not CC reductions
+    var grossDues  = d.due + extra;
+    var grossRent  = hasRent ? rentRate : 0;
+    var grossTotal = grossDues + grossRent;
+    var ccDed      = d.payMethod === "Credit Card" ? grossTotal*(ccRate/100) : 0;
+    var duesCcDed  = d.payMethod === "Credit Card" && grossTotal > 0 ? ccDed*(grossDues/grossTotal) : 0;
+    var rentCcDed  = d.payMethod === "Credit Card" && grossTotal > 0 ? ccDed*(grossRent/grossTotal) : 0;
+    var discount   = d.earlyDiscount ? (config.earlyPayDiscount || 50) : 0;
+    var netDues    = grossDues - duesCcDed;    // chapter nets this from dues payment
+    var rentAmt    = hasRent ? (grossRent - rentCcDed) : 0; // chapter nets this from rent payment
+    var netRev     = netDues + rentAmt;        // total chapter revenue from this brother
 
     var isProb     = d.payStatus === "Problem!";
     var isPlan     = d.payStatus === "Payment Plan";
@@ -2161,7 +2138,7 @@ function filterDues() {
       : '<span class="badge badge-green" style="font-size:9px">Paid</span>';
 
     var methodBadge = d.payMethod === "Credit Card"
-      ? '<span class="badge badge-amber" style="font-size:9px">CC -'+fmt(ccDed)+'</span>'
+      ? '<span class="badge badge-amber" style="font-size:9px">CC −'+fmt(ccDed)+'</span>'
       : '<span style="font-size:10px;color:var(--dim)">'+(d.payMethod||"Bank")+'</span>';
 
     var extraStr    = extra    > 0 ? ' <span style="font-size:10px;color:var(--amber)">+'+fmt(extra)+'</span>' : "";
@@ -2178,10 +2155,12 @@ function filterDues() {
 
     // Tooltip breakdown
     var tip = "Dues: "+fmt(d.due);
-    if (extra > 0)    tip += " + Extras: "+fmt(extra);
-    if (discount > 0) tip += " - Early Discount: "+fmt(discount);
-    if (ccDed > 0)    tip += " - CC Fee: "+fmt(ccDed);
-    if (hasRent)      tip += " + Rent: "+fmt(rentAmt);
+    if (extra > 0)      tip += " + Extras: "+fmt(extra);
+    if (discount > 0)   tip += " − Early Disc: "+fmt(discount);
+    if (duesCcDed > 0)  tip += " − CC on dues: "+fmt(duesCcDed);
+    if (hasRent)        tip += " | Rent: "+fmt(grossRent);
+    if (rentDiscAmt>0)  tip += " − Rent Disc: "+fmt(rentDiscAmt);
+    if (rentCcDed > 0)  tip += " − CC on rent: "+fmt(rentCcDed);
     tip += " = "+fmt(netRev);
 
     return '<tr class="'+(anyProblem?"unpaid-row":"")+(d.earlyDiscount?" early-pay-row":"")+'" '
@@ -2200,8 +2179,19 @@ function filterDues() {
       +'</td></tr>';
   }).join("");
 
-  var grandRev = duesData.reduce(function(s,d){return s+brotherTotalRevenue(d);},0);
+  var grandRev    = duesData.reduce(function(s,d){return s+brotherTotalRevenue(d);},0);
+  var grandCcFees = duesData.reduce(function(s,d){
+    var t = currentTerm === "Spring 2026" ? "spring" : "fall";
+    var ccR = currentTerm === "Spring 2026" ? config.ccRateSpring : config.ccRateFall;
+    var hr2 = config.housingRates[t] || {};
+    var rRate = hr2.rentPerBrother || DEFAULT_CONFIG.housingRates[t].rentPerBrother || 2250;
+    var hasR = d.cls === "House Member" && d.rentStatus && d.rentStatus !== "N/A";
+    var gDues = d.due + (d.extraFees||[]).reduce(function(a,f){return a+f.amount;},0);
+    var gRent = hasR ? rRate : 0;
+    return s + (d.payMethod === "Credit Card" ? (gDues+gRent)*(ccR/100) : 0);
+  }, 0);
   if (document.getElementById("dues-grand-total-rev")) document.getElementById("dues-grand-total-rev").textContent = fmt(grandRev);
+  if (document.getElementById("dues-grand-cc-fees"))   document.getElementById("dues-grand-cc-fees").textContent   = fmt(grandCcFees);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -2406,10 +2396,32 @@ function dmShowRentSection() {
   if (s) s.style.display = cls === "House Member" ? "block" : "none";
 }
 function dmTogglePlan() {
-  var status = document.getElementById("dm-paystatus").value;
-  var el = document.getElementById("dm-plan-section");
-  if (el) el.style.display = status === "Payment Plan" ? "block" : "none";
+  var status   = document.getElementById("dm-paystatus").value;
+  var planEl   = document.getElementById("dm-plan-section");
+  var fullRow  = document.getElementById("dm-paid-full-row");
+  var probRow  = document.getElementById("dm-problem-row");
+  if (planEl)  planEl.style.display  = status === "Payment Plan" ? "block" : "none";
+  if (fullRow) fullRow.style.display = status === "Paid in Full" ? "flex"  : "none";
+  if (probRow) probRow.style.display = status === "Problem!"     ? "block" : "none";
+  // When switching TO Paid in Full, mark paid = due
+  if (status === "Paid in Full") {
+    var paidEl = document.getElementById("dm-paid");
+    var dueEl  = document.getElementById("dm-due");
+    if (paidEl && dueEl) paidEl.value = dueEl.value;
+    var cb = document.getElementById("dm-paid-full-check");
+    if (cb) cb.checked = true;
+  }
   dmRefreshTotal();
+}
+
+function dmTogglePaidFull() {
+  // Checkbox is purely visual — status drives everything
+  // If user unchecks, switch to Problem!
+  var cb = document.getElementById("dm-paid-full-check");
+  if (cb && !cb.checked) {
+    document.getElementById("dm-paystatus").value = "Problem!";
+    dmTogglePlan();
+  }
 }
 function dmToggleRentPlan() {
   var rentStatusEl = document.getElementById("dm-rentstatus");
@@ -2467,10 +2479,7 @@ function dmRefreshTotal() {
   var discountAmt = hasDiscount ? (config.earlyPayDiscount || 50) : 0;
   var dmDiscAmtEl = document.getElementById("dm-discount-amount");
   if (dmDiscAmtEl) dmDiscAmtEl.textContent = fmt(config.earlyPayDiscount || 50);
-  var gross      = baseDue + extraTotal - discountAmt;
-  var ccDed      = method === "Credit Card" ? gross*(ccRate/100) : 0;
-  var netDues    = gross - ccDed;
-
+  // ── House/rent vars ────────────────────────────────────────────────
   var cls          = document.getElementById("dm-class").value;
   var isHouse      = cls === "House Member";
   var termKey      = currentTerm === "Spring 2026" ? "spring" : "fall";
@@ -2481,18 +2490,36 @@ function dmRefreshTotal() {
   var rentPaid        = parseFloat((document.getElementById("dm-rentpaid")         ||{}).value) || 0;
   var rentInstalls    = parseInt((document.getElementById("dm-rent-installments")  ||{}).value) || 1;
   var rentInstPaid    = parseInt((document.getElementById("dm-rent-inst-paid")     ||{}).value) || 0;
-  var rentEarlyDiscCb = document.getElementById("dm-rent-early-discount");
+  var rentEarlyDiscCb  = document.getElementById("dm-rent-early-discount");
   var hasRentEarlyDisc = (rentEarlyDiscCb && rentEarlyDiscCb.checked && rentStatus === "Paid in Full");
-  var rentDiscAmt     = hasRentEarlyDisc ? (config.rentEarlyDiscount || 50) : 0;
-  var rentDiscAmtEl   = document.getElementById("dm-rent-disc-amount");
+  var rentDiscAmt      = hasRentEarlyDisc ? (config.rentEarlyDiscount || 50) : 0;
+  var rentDiscAmtEl    = document.getElementById("dm-rent-disc-amount");
   if (rentDiscAmtEl) rentDiscAmtEl.textContent = fmt(config.rentEarlyDiscount || 50);
+  var hasRentTracked   = isHouse && rentStatus && rentStatus !== "N/A";
 
-  // Rent only counts toward "owed" if status is tracked (not N/A)
-  var rentOwed = (isHouse && rentStatus !== "N/A") ? (rentRate - rentDiscAmt) : 0;
+  // ── Dues vars ────────────────────────────────────────────────────────
+  var grossDues  = baseDue + extraTotal;           // CC on full amount before discount
+  var grossRent  = hasRentTracked ? rentRate : 0;  // CC on full rent before discount
+  var grossTotal = grossDues + grossRent;
+
+  // CC on full gross (not reduced by discounts)
+  var ccDed     = method === "Credit Card" ? grossTotal * (ccRate / 100) : 0;
+  var duesCcDed = method === "Credit Card" && grossTotal > 0 ? ccDed * (grossDues / grossTotal) : 0;
+  var rentCcDed = method === "Credit Card" && grossTotal > 0 ? ccDed * (grossRent / grossTotal) : 0;
+
+  // Net = gross - discounts - CC fees
+  var netDues  = grossDues - duesCcDed;           // CC on full dues, discount separate
+  var rentNet  = hasRentTracked ? (grossRent - rentCcDed) : 0;
+  var rentOwed = rentNet;
 
   var totalOwed   = netDues + rentOwed;
-  var totalPaid   = duesPaid + (isHouse && rentStatus !== "N/A" ? rentPaid : 0);
+  // Paid so far = what's actually been received by chapter (net of CC)
+  // For Paid in Full: full net amount. For Payment Plan: installments paid × (rate/installs) × (1-CC)
+  var totalPaid   = duesPaid + (hasRentTracked ? rentPaid : 0);
   var totalRemain = totalOwed - totalPaid;
+  // Discount is shown separately — it reduces what brother owes, not chapter revenue
+  var duesDiscNote = discountAmt > 0 ? " (−"+fmt(discountAmt)+" disc)" : "";
+  var rentDiscNote = rentDiscAmt  > 0 ? " (−"+fmt(rentDiscAmt)+" disc)" : "";
 
   // CC warning
   var ccWarn = document.getElementById("dm-cc-warning");
@@ -2555,10 +2582,10 @@ function dmRefreshTotal() {
 
   // Breakdown
   var bd = "Dues: "+fmt(baseDue);
-  if (extraTotal > 0)  bd += " + Fees: "+fmt(extraTotal);
-  if (discountAmt > 0) bd += " &minus; Early Discount: "+fmt(discountAmt);
-  if (ccDed > 0)       bd += " &minus; CC "+ccRate+"%: "+fmt(ccDed);
-  if (isHouse && rentStatus !== "N/A") bd += " &nbsp;&middot;&nbsp; Rent: "+fmt(rentRate);
+  if (extraTotal > 0)      bd += " + Fees: "+fmt(extraTotal);
+  if (ccDed > 0)           bd += " &minus; CC "+ccRate+"%: "+fmt(ccDed);
+  if (discountAmt > 0)     bd += " | Early disc (separate): &minus;"+fmt(discountAmt);
+  if (isHouse && hasRentTracked) bd += " | Rent: "+fmt(grossRent)+(rentCcDed>0?" &minus; CC: "+fmt(rentCcDed):"")+(rentDiscAmt>0?" | Rent disc: &minus;"+fmt(rentDiscAmt):"");
   var breakdown = document.getElementById("dm-breakdown");
   if (breakdown) breakdown.innerHTML = bd;
 }
@@ -2662,10 +2689,17 @@ function openDuesModal(idx) {
 
   document.getElementById("dues-modal-title").textContent = "Edit \u2014 " + d.name;
 
-  // Show/hide sections manually (don't call toggle functions that overwrite values)
+  // Show/hide dues payment UI
   var planSection = document.getElementById("dm-plan-section");
   if (planSection) planSection.style.display = payStatus === "Payment Plan" ? "block" : "none";
+  var fullRow = document.getElementById("dm-paid-full-row");
+  if (fullRow) fullRow.style.display = payStatus === "Paid in Full" ? "flex" : "none";
+  var probRow = document.getElementById("dm-problem-row");
+  if (probRow) probRow.style.display = payStatus === "Problem!" ? "block" : "none";
+  var paidFullCb = document.getElementById("dm-paid-full-check");
+  if (paidFullCb) paidFullCb.checked = (payStatus === "Paid in Full");
 
+  // Show/hide rent sections
   var rentSection = document.getElementById("dm-rent-section");
   if (rentSection) rentSection.style.display = d.cls === "House Member" ? "block" : "none";
 
