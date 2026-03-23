@@ -312,6 +312,9 @@
       <span id="sync-status" style="font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:.3px;cursor:pointer" onclick="manualSync()" title="Click to sync from server">⟳ Loading…</span>
       <div id="termToggle" class="term-badge" onclick="toggleTerm()">Spring 2026 ▾</div>
       <button class="btn btn-ghost btn-sm" onclick="window.print()">⎙ Print</button>
+      <button class="btn btn-ghost btn-sm" onclick="exportBackup()" title="Export roster backup" style="font-size:11px">⬇ Backup</button>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('import-file').click()" title="Restore from backup" style="font-size:11px">⬆ Restore</button>
+      <input type="file" id="import-file" accept=".json" style="display:none" onchange="importBackup(this.files[0]);this.value=''">
       <button class="btn btn-ghost btn-sm" onclick="changePassword()" title="Change password" style="font-size:11px">🔑</button>
       <button class="btn btn-ghost btn-sm" onclick="logout()" title="Lock app" style="font-size:11px">🔒</button>
     </div>
@@ -1142,111 +1145,127 @@
 // ═══════════════════════════════════════════════════════════════
 // DATA
 // ═══════════════════════════════════════════════════════════════
-const FUNDS = {
-  Operating: 23851.34,
-  Savings: 17411.72,
-  Housing: 14972.69,
-  "Graduate Fund": 143.03
+const STARTING_BALANCES = {
+  "Operating":      23851.34,
+  "Savings":        17411.72,
+  "Housing":        14972.69,
+  "Graduate Fund":  143.03
 };
+
+function getFunds() {
+  // Compute live balances: starting + all IN - all paid OUT, by account
+  var balances = {};
+  Object.keys(STARTING_BALANCES).forEach(function(k){ balances[k] = STARTING_BALANCES[k]; });
+  txList.forEach(function(t) {
+    var acct = t.account || "Operating";
+    if (!balances.hasOwnProperty(acct)) balances[acct] = 0;
+    if (t.dir === "IN") {
+      balances[acct] += (parseFloat(t.amount) || 0);
+    } else if (t.dir === "OUT" && t.paid) {
+      balances[acct] -= (parseFloat(t.amount) || 0);
+    }
+  });
+  return balances;
+}
 const DUES_DATA_SPRING = [
-  {name:"Aden Perez",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Aiden Hornback",cls:"Member",brotherhood:false,due:600,paid:550,notes:""},
-  {name:"Alex Boyer",cls:"Member",brotherhood:false,due:600,paid:550,notes:""},
-  {name:"Alexander Compton",cls:"House Member",brotherhood:true,due:2770,paid:2770,notes:""},
-  {name:"Alexander Mooney",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Andrew Bird",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Andrew Crosley",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Andrew Hester",cls:"House Member",brotherhood:true,due:2770,paid:2770,notes:""},
-  {name:"Asher Pettus",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Ayden Sandefur",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Blake Wulfekuhle",cls:"Member",brotherhood:false,due:600,paid:550,notes:""},
-  {name:"Bradley Wagoner",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Brandon Valle",cls:"New Member",brotherhood:true,due:420,paid:420,notes:""},
-  {name:"Braydon Smith",cls:"New Member",brotherhood:true,due:420,paid:420,notes:""},
-  {name:"Brice Lamont",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Britton Rowe",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Caden Lange",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Caden Lucas",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Cai Coburn",cls:"Member",brotherhood:false,due:600,paid:550,notes:""},
-  {name:"Camden Cloud",cls:"Member",brotherhood:true,due:600,paid:285,notes:"Dues payback owed"},
-  {name:"Cameron Vick",cls:"New Member",brotherhood:true,due:420,paid:420,notes:""},
-  {name:"Carson Cloud",cls:"Member",brotherhood:false,due:600,paid:550,notes:""},
-  {name:"Carter Chapman",cls:"Member",brotherhood:true,due:600,paid:285,notes:"Dues payback owed"},
-  {name:"Carter Smith",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Cavin Ashman",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Charlie Uland",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Chayce Merchant",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Chuck Hagan",cls:"Member",brotherhood:false,due:600,paid:550,notes:""},
-  {name:"Clay Manley",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Clayton Roberts",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Connor Armstrong",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Connor Eaton",cls:"House Member",brotherhood:true,due:2770,paid:2770,notes:""},
-  {name:"Dalton Buhs",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Daniel Campbell",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Devin Frazier",cls:"House Member",brotherhood:true,due:2770,paid:2770,notes:""},
-  {name:"Donovan Perez",cls:"Member",brotherhood:false,due:600,paid:550,notes:""},
-  {name:"Eli Chapman",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Eli Robson",cls:"Member",brotherhood:false,due:600,paid:550,notes:""},
-  {name:"Elijah Martin",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Ethan Vietze",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Gage Beck",cls:"New Member",brotherhood:true,due:420,paid:420,notes:""},
-  {name:"Gage Czirr",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Grayson Roederer",cls:"New Member",brotherhood:true,due:420,paid:420,notes:""},
-  {name:"Hayden Harvey",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Hayden Kirchberg",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Hudson Hatcher",cls:"Member",brotherhood:false,due:600,paid:550,notes:""},
-  {name:"Hunter Falls",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Ian Salyer",cls:"New Member",brotherhood:true,due:420,paid:0,notes:"Problem - $0 paid"},
-  {name:"Ian Stanley",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Indy Abshere",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Jack Barlow",cls:"House Member",brotherhood:true,due:2770,paid:2770,notes:""},
-  {name:"Jack Rhody",cls:"Member",brotherhood:false,due:600,paid:550,notes:""},
-  {name:"Jack Woolf",cls:"House Member",brotherhood:true,due:2770,paid:2770,notes:""},
-  {name:"Jackson Smith",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Jagger Tomes",cls:"House Member",brotherhood:true,due:2770,paid:2770,notes:""},
-  {name:"Jakob Barker",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Jayce Hicks",cls:"House Member",brotherhood:true,due:2770,paid:2770,notes:""},
-  {name:"Jett Meffert",cls:"Member",brotherhood:false,due:600,paid:550,notes:""},
-  {name:"Jody Hopgood",cls:"House Member",brotherhood:true,due:2770,paid:2770,notes:""},
-  {name:"Jonah Hall",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Jude Scott",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Kaden Stalcup",cls:"Member",brotherhood:false,due:600,paid:550,notes:""},
-  {name:"Kellen Patterson",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Kieran Heintz",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Korben Walling",cls:"House Member",brotherhood:true,due:2770,paid:2770,notes:""},
-  {name:"Landon Terry",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Layne True",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Logan Bell",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Lucas Dunning",cls:"House Member",brotherhood:false,due:2750,paid:2750,notes:""},
-  {name:"Luke Humphrey",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Manny Summers-Bates",cls:"House Member",brotherhood:true,due:2770,paid:2770,notes:""},
-  {name:"Mason Strunk",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Matt Donohue",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Micah Chapek",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Michael Mitchell",cls:"Member",brotherhood:true,due:600,paid:285,notes:"Dues payback owed"},
-  {name:"Miles Harvey",cls:"House Member",brotherhood:true,due:2770,paid:2770,notes:""},
-  {name:"Mitchell Brunski",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Nathan Richards",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Noah Rugama",cls:"Member",brotherhood:false,due:600,paid:550,notes:""},
-  {name:"Paul Fugett",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Preston Adams",cls:"New Member",brotherhood:true,due:420,paid:0,notes:"Problem - $0 paid"},
-  {name:"Rhett Morgan",cls:"House Member",brotherhood:true,due:2770,paid:2770,notes:""},
-  {name:"Ryan Dilts",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Ryan Riggs",cls:"Member",brotherhood:false,due:600,paid:550,notes:""},
-  {name:"Salvador Leon",cls:"Member",brotherhood:true,due:600,paid:285,notes:"Payment plan"},
-  {name:"Sonny Blackwell",cls:"House Member",brotherhood:true,due:2770,paid:2770,notes:""},
-  {name:"Spencer Crum",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Tanner Blood",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Tanner Redmon",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Thomas Fairchild",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Thomas Feickert",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Thomas Mitchell",cls:"Member",brotherhood:false,due:600,paid:550,notes:""},
-  {name:"Trenton Hamilton",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Trey Ward",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Will Rhody",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Will Weitlauf",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"William Fowler",cls:"Member",brotherhood:true,due:600,paid:570,notes:""},
-  {name:"Wyatt Wassom",cls:"House Member",brotherhood:true,due:2770,paid:2770,notes:""},
+  {name:"Aden Perez",cls:"Member",due:600,paid:300,payStatus:"Payment Plan",payMethod:"Credit Card",earlyDiscount:false,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:4,installmentsPaid:2,extraFees:[{"label": "Brother Hood", "amount": 20}, {"label": "Missed Initiation", "amount": 25}],notes:""},
+  {name:"Aiden Hornback",cls:"Member",due:600,paid:600,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[],notes:""},
+  {name:"Alex Boyer",cls:"Member",due:600,paid:600,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:false,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[],notes:""},
+  {name:"Alexander Compton",cls:"House Member",due:600,paid:645,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:true,rentStatus:"Paid in Full",rentPaid:2250,rentInstallments:1,rentInstallmentsPaid:1,installments:1,installmentsPaid:1,extraFees:[{"label": "Broho Fee", "amount": 20}, {"label": "Broho T Shirt", "amount": 25}],notes:""},
+  {name:"Alexander Mooney",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:false,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Andrew Bird",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Andrew Crosley",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Bank Account",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood ", "amount": 20}],notes:""},
+  {name:"Andrew Hester",cls:"House Member",due:600,paid:645,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:true,rentStatus:"Paid in Full",rentPaid:2250,rentInstallments:1,rentInstallmentsPaid:1,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Brotherhood TShirt", "amount": 25}],notes:""},
+  {name:"Asher Pettus",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Ayden Sandefur",cls:"Member",due:600,paid:150,payStatus:"Payment Plan",payMethod:"Credit Card",earlyDiscount:false,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:4,installmentsPaid:1,extraFees:[{"label": "Late Fee", "amount": 25}, {"label": "Late Fee", "amount": 25}, {"label": "Brotherhood Fee", "amount": 20}, {"label": "Brotherhood Tshirt", "amount": 25}],notes:""},
+  {name:"Blake Wulfekuhle",cls:"Member",due:600,paid:600,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:false,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[],notes:""},
+  {name:"Bradley Wagoner",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Brandon Valle",cls:"New Member",due:400,paid:133.33,payStatus:"Payment Plan",payMethod:"Credit Card",earlyDiscount:false,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:3,installmentsPaid:1,extraFees:[],notes:""},
+  {name:"Braydon Smith",cls:"New Member",due:400,paid:400,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:false,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[],notes:""},
+  {name:"Brice Lamont",cls:"Member",due:600,paid:670,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:false,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Late Fee", "amount": 50}],notes:""},
+  {name:"Britton Rowe",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Caden Lange",cls:"Member",due:600,paid:670,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Brotherhood Tshirt", "amount": 25}, {"label": "Missed Hash Fine", "amount": 25}],notes:""},
+  {name:"Caden Lucas",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Cai Coburn",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Camden Cloud",cls:"Member",due:600,paid:645,payStatus:"Paid in Full",payMethod:"Bank Account",earlyDiscount:false,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Brotherhood Tshirt", "amount": 25}],notes:"Dues payback owed"},
+  {name:"Cameron Vick",cls:"New Member",due:400,paid:420,payStatus:"Payment Plan",payMethod:"Credit Card",earlyDiscount:false,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:3,installmentsPaid:1,extraFees:[],notes:""},
+  {name:"Carson Cloud",cls:"Member",due:600,paid:600,payStatus:"Paid in Full",payMethod:"Bank Account",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[],notes:""},
+  {name:"Carter Chapman",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:false,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:"Dues payback owed"},
+  {name:"Carter Smith",cls:"Member",due:600,paid:645,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Brotherhood T Shirt", "amount": 25}],notes:""},
+  {name:"Cavin Ashman",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Charlie Uland",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Chayce Merchant",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Chuck Hagan",cls:"Member",due:600,paid:720,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:false,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Late Fee", "amount": 50}, {"label": "Brotherhood Fee", "amount": 20}, {"label": "Missed Hash Fine", "amount": 25}, {"label": "Missed Meeting Fine", "amount": 25}],notes:""},
+  {name:"Clay Manley",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Clayton Roberts",cls:"Member",due:600,paid:645,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Brotherhood Tshirt", "amount": 25}],notes:""},
+  {name:"Connor Armstrong",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Connor Eaton",cls:"House Member",due:600,paid:645,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:true,rentStatus:"Paid in Full",rentPaid:2250,rentInstallments:1,rentInstallmentsPaid:1,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Brotherhood Tshirt", "amount": 25}],notes:""},
+  {name:"Dalton Buhs",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Daniel Campbell",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Devin Frazier",cls:"House Member",due:600,paid:645,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:false,rentEarlyDiscount:false,rentStatus:"Paid in Full",rentPaid:2250,rentInstallments:1,rentInstallmentsPaid:1,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Brotherhood Tshirt", "amount": 25}],notes:""},
+  {name:"Donovan Perez",cls:"Member",due:600,paid:720,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:false,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Late Fee", "amount": 50}, {"label": "Fine J board", "amount": 25}, {"label": "Brotherhood Fee", "amount": 20}, {"label": "Late Fee", "amount": 25}],notes:""},
+  {name:"Eli Chapman",cls:"Member",due:600,paid:720,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "House Damage Fine", "amount": 100}],notes:""},
+  {name:"Eli Robson",cls:"Member",due:600,paid:625,payStatus:"Paid in Full",payMethod:"Bank Account",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Missed Meeting", "amount": 25}],notes:""},
+  {name:"Elijah Martin",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Ethan Vietze",cls:"Member",due:600,paid:645,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Brotherhood Tshirt", "amount": 25}],notes:""},
+  {name:"Gage Beck",cls:"New Member",due:400,paid:420,payStatus:"Payment Plan",payMethod:"Credit Card",earlyDiscount:false,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:3,installmentsPaid:1,extraFees:[],notes:""},
+  {name:"Gage Czirr",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Grayson Roederer",cls:"New Member",due:400,paid:400,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:false,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[],notes:""},
+  {name:"Hayden Harvey",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Bank Account",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Hayden Kirchberg",cls:"Member",due:600,paid:645,payStatus:"Paid in Full",payMethod:"Bank Account",earlyDiscount:false,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Brotherhood Tshirt", "amount": 25}],notes:""},
+  {name:"Hudson Hatcher",cls:"Member",due:600,paid:300,payStatus:"Payment Plan",payMethod:"Credit Card",earlyDiscount:false,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:4,installmentsPaid:2,extraFees:[],notes:""},
+  {name:"Hunter Falls",cls:"Member",due:600,paid:645,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Missed Meeting Fine", "amount": 25}],notes:""},
+  {name:"Ian Salyer",cls:"New Member",due:400,paid:400,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:false,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[],notes:"Problem - $0 paid"},
+  {name:"Ian Stanley",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:false,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Indy Abshere",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood", "amount": 20}],notes:""},
+  {name:"Jack Barlow",cls:"House Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Bank Account",earlyDiscount:true,rentEarlyDiscount:true,rentStatus:"Paid in Full",rentPaid:2250,rentInstallments:1,rentInstallmentsPaid:1,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Jack Rhody",cls:"Member",due:600,paid:600,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[],notes:""},
+  {name:"Jack Woolf",cls:"House Member",due:600,paid:645,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:true,rentStatus:"Paid in Full",rentPaid:2250,rentInstallments:1,rentInstallmentsPaid:1,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Brotherhood Tshirt", "amount": 25}],notes:""},
+  {name:"Jackson Smith",cls:"Member",due:600,paid:645,payStatus:"Paid in Full",payMethod:"Bank Account",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Brotherhood Tshirt", "amount": 25}],notes:""},
+  {name:"Jagger Tomes",cls:"House Member",due:600,paid:300,payStatus:"Payment Plan",payMethod:"Credit Card",earlyDiscount:false,rentEarlyDiscount:true,rentStatus:"Paid in Full",rentPaid:2250,rentInstallments:1,rentInstallmentsPaid:1,installments:4,installmentsPaid:2,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Late Fee", "amount": 25}],notes:""},
+  {name:"Jakob Barker",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Jayce Hicks",cls:"House Member",due:600,paid:645,payStatus:"Paid in Full",payMethod:"Bank Account",earlyDiscount:true,rentEarlyDiscount:true,rentStatus:"Paid in Full",rentPaid:2250,rentInstallments:1,rentInstallmentsPaid:1,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Brotherhood Tshirt", "amount": 25}],notes:""},
+  {name:"Jett Meffert",cls:"Member",due:600,paid:600,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[],notes:""},
+  {name:"Jody Hopgood",cls:"House Member",due:600,paid:625,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"Payment Plan",rentPaid:1125,rentInstallments:4,rentInstallmentsPaid:2,installments:1,installmentsPaid:1,extraFees:[{"label": "Tshirt", "amount": 25}],notes:""},
+  {name:"Jonah Hall",cls:"Member",due:600,paid:150,payStatus:"Payment Plan",payMethod:"Credit Card",earlyDiscount:false,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:4,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Late Fee", "amount": 25}],notes:""},
+  {name:"Jude Scott",cls:"Member",due:600,paid:645,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Brotherhood Tshirt", "amount": 25}],notes:""},
+  {name:"Kaden Stalcup",cls:"Member",due:600,paid:300,payStatus:"Payment Plan",payMethod:"Credit Card",earlyDiscount:false,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:4,installmentsPaid:2,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Missed Hashes", "amount": 50}],notes:""},
+  {name:"Kellen Patterson",cls:"Member",due:600,paid:670,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:false,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Missed Hash", "amount": 25}, {"label": "Missed Retreat", "amount": 25}],notes:""},
+  {name:"Kieran Heintz",cls:"Member",due:600,paid:300,payStatus:"Payment Plan",payMethod:"Bank Account",earlyDiscount:false,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:4,installmentsPaid:2,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Late Fee", "amount": 25}],notes:""},
+  {name:"Korben Walling",cls:"House Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:true,rentStatus:"Paid in Full",rentPaid:2250,rentInstallments:1,rentInstallmentsPaid:1,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Landon Terry",cls:"Member",due:600,paid:645,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Brotherhood Tshirt", "amount": 25}],notes:""},
+  {name:"Layne True",cls:"Member",due:600,paid:300,payStatus:"Payment Plan",payMethod:"Credit Card",earlyDiscount:false,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:4,installmentsPaid:2,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Missed Hash", "amount": 25}],notes:""},
+  {name:"Logan Bell",cls:"Member",due:600,paid:645,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Brotherhood Tshirt", "amount": 25}],notes:""},
+  {name:"Lucas Dunning",cls:"House Member",due:600,paid:600,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:true,rentStatus:"Paid in Full",rentPaid:2250,rentInstallments:1,rentInstallmentsPaid:1,installments:1,installmentsPaid:1,extraFees:[],notes:""},
+  {name:"Luke Humphrey",cls:"Member",due:600,paid:670,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:false,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Late Fee", "amount": 50}, {"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Manny Summers-Bates",cls:"House Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"Payment Plan",rentPaid:2250,rentInstallments:4,rentInstallmentsPaid:4,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Mason Strunk",cls:"Member",due:600,paid:300,payStatus:"Payment Plan",payMethod:"Credit Card",earlyDiscount:false,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:4,installmentsPaid:2,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Judicial Board Fine", "amount": 25}],notes:""},
+  {name:"Matt Donohue",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Micah Chapek",cls:"Member",due:600,paid:300,payStatus:"Payment Plan",payMethod:"Credit Card",earlyDiscount:false,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:4,installmentsPaid:2,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Michael Mitchell",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:false,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:"Dues payback owed"},
+  {name:"Miles Harvey",cls:"House Member",due:600,paid:645,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:true,rentStatus:"Paid in Full",rentPaid:2250,rentInstallments:1,rentInstallmentsPaid:1,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Brotherhood Tshirt", "amount": 25}],notes:""},
+  {name:"Mitchell Brunski",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Bank Account",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Nathan Richards",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Noah Rugama",cls:"Member",due:600,paid:0,payStatus:"Problem!",payMethod:"Bank Account",earlyDiscount:false,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:0,extraFees:[{"label": "Late Fee", "amount": 50}, {"label": "Late Fee 2", "amount": 25}],notes:""},
+  {name:"Paul Fugett",cls:"Member",due:600,paid:645,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Brotherhood Tshirt", "amount": 25}],notes:""},
+  {name:"Preston Adams",cls:"New Member",due:400,paid:133.33,payStatus:"Payment Plan",payMethod:"Credit Card",earlyDiscount:false,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:3,installmentsPaid:1,extraFees:[],notes:"Problem - $0 paid"},
+  {name:"Rhett Morgan",cls:"House Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:true,rentStatus:"Paid in Full",rentPaid:2250,rentInstallments:1,rentInstallmentsPaid:1,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Ryan Dilts",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Ryan Riggs",cls:"Member",due:600,paid:650,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Fine", "amount": 25}, {"label": "Fine", "amount": 25}],notes:""},
+  {name:"Salvador Leon",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:"Payment plan"},
+  {name:"Sonny Blackwell",cls:"House Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"Payment Plan",rentPaid:1125,rentInstallments:4,rentInstallmentsPaid:2,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Spencer Crum",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Bank Account",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Tanner Blood",cls:"Member",due:600,paid:450,payStatus:"Payment Plan",payMethod:"Credit Card",earlyDiscount:false,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:4,installmentsPaid:3,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Late Fee", "amount": 25}],notes:""},
+  {name:"Tanner Redmon",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Bank Account",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Thomas Fairchild",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Bank Account",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Thomas Feickert",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Thomas Mitchell",cls:"Member",due:600,paid:600,payStatus:"Paid in Full",payMethod:"Bank Account",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[],notes:""},
+  {name:"Trenton Hamilton",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Trey Ward",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Will Rhody",cls:"Member",due:600,paid:645,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Brotherhood Tshirt", "amount": 25}],notes:""},
+  {name:"Will Weitlauf",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"William Fowler",cls:"Member",due:300,paid:320,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:false,rentEarlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
+  {name:"Wyatt Wassom",cls:"House Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",earlyDiscount:true,rentEarlyDiscount:true,rentStatus:"Paid in Full",rentPaid:2250,rentInstallments:1,rentInstallmentsPaid:1,installments:1,installmentsPaid:1,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:""},
 ];
 const SPRING_EXP = [
   {section:"Officers",item:"President",budgeted:20,spent:0},
@@ -1939,6 +1958,7 @@ function renderDashboard() {
   var exp = currentTerm === "Spring 2026" ? springExp : fallExp;
   var totalBudgeted = exp.reduce(function(s,i){return s+i.budgeted;},0);
   var totalSpent    = exp.reduce(function(s,i){return s+i.spent;},0);
+  var FUNDS = getFunds();
   var totalFunds    = Object.values(FUNDS).reduce(function(a,b){return a+b;},0);
   var duesColl  = duesData.reduce(function(s,d){return s+d.paid;},0);
   var duesExp   = duesData.reduce(function(s,d){return s+d.due;},0);
@@ -3510,6 +3530,7 @@ function renderReports() {
       +'<div class="kpi-value" style="color:'+k.color+'">'+k.value+'</div></div>';
   }).join("");
 
+  var FUNDS = getFunds();
   var totalFunds = Object.values(FUNDS).reduce(function(a,b){return a+b;},0);
   var accts = document.getElementById("rpt-accounts");
   if (accts) accts.innerHTML = Object.entries(FUNDS).map(function(p){
@@ -3595,13 +3616,15 @@ function downloadReport() {
   var startD = range[0], endD = range[1];
   var termForExp = reportTimeframe==="semester" ? reportTerm : currentTerm;
   var exp = termForExp==="Spring 2026" ? springExp : fallExp;
-  var txOut = txList.filter(function(t){return t.dir==="OUT"&&t.date>=startD&&t.date<=endD;});
+  var txOut = txList.filter(function(t){
+  var FUNDS = getFunds();return t.dir==="OUT"&&t.date>=startD&&t.date<=endD;});
   var txIn  = txList.filter(function(t){return t.dir==="IN" &&t.date>=startD&&t.date<=endD;});
   var totalOut = txOut.reduce(function(s,t){return s+t.amount;},0);
   var totalIn  = txIn.reduce(function(s,t){return s+t.amount;},0);
   var net = totalIn - totalOut;
   var totalBudgeted = exp.reduce(function(s,i){return s+i.budgeted;},0);
   var totalSpent    = exp.reduce(function(s,i){return s+i.spent;},0);
+  var FUNDS = getFunds();
   var totalFunds = Object.values(FUNDS).reduce(function(a,b){return a+b;},0);
   var duesColl = duesData.reduce(function(s,d){return s+d.paid;},0);
   var duesExp  = duesData.reduce(function(s,d){return s+d.due;},0);
@@ -3835,6 +3858,7 @@ function discardEditChanges() {
 // WELCOME MODAL
 // ═══════════════════════════════════════════════════════════════
 function openWelcome() {
+  var FUNDS = getFunds();
   var totalFunds  = Object.values(FUNDS).reduce(function(a,b){return a+b;},0);
   var duesColl    = duesData.reduce(function(s,d){return s+d.paid;},0);
   var duesExp     = duesData.reduce(function(s,d){return s+d.due;},0);
@@ -4239,22 +4263,54 @@ async function init() {
   // Only pull from Supabase if localStorage has no data (first ever load)
   // or if user explicitly requests a sync. This prevents Supabase
   // from overwriting locally-saved changes on refresh.
-  var hasLocalData = localStorage.getItem("fiji_spring_exp") !== null;
+  // Always start from localStorage (which is seeded from DUES_DATA_SPRING on first load).
+  // Push to Supabase to keep remote in sync — never pull and overwrite local.
+  setSyncStatus("syncing");
+  pushAll().then(function(){ setSyncStatus("ok"); }).catch(function(){ setSyncStatus("offline"); });
+}
 
-  if (!hasLocalData) {
-    // First time — pull from Supabase to seed local cache
-    var pulled = await pullAll();
-    if (pulled) {
-      recomputeExpSpent();
-      syncRosterCounts();
+// Backup & restore
+function exportBackup() {
+  var backup = {
+    exported: new Date().toISOString(),
+    term: currentTerm,
+    duesData: duesData,
+    springExp: springExp,
+    fallExp: fallExp,
+    txList: txList,
+    config: config
+  };
+  var json = JSON.stringify(backup, null, 2);
+  var blob = new Blob([json], {type: "application/json"});
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement("a");
+  a.href   = url;
+  a.download = "fiji-budget-backup-" + new Date().toISOString().slice(0,10) + ".json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function importBackup(file) {
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var b = JSON.parse(e.target.result);
+      if (b.duesData)  { duesData  = b.duesData;  localStorage.setItem("fiji_dues_spring", JSON.stringify(duesData)); }
+      if (b.springExp) { springExp = b.springExp; localStorage.setItem("fiji_spring_exp",  JSON.stringify(springExp)); }
+      if (b.fallExp)   { fallExp   = b.fallExp;   localStorage.setItem("fiji_fall_exp",    JSON.stringify(fallExp)); }
+      if (b.txList)    { txList    = b.txList;     localStorage.setItem("fiji_tx",          JSON.stringify(txList)); }
+      if (b.config)    { config    = Object.assign({}, DEFAULT_CONFIG, b.config); localStorage.setItem("fiji_config", JSON.stringify(config)); }
+      pushAll().catch(function(){});
       refreshAll();
+      alert("Backup restored — " + (b.duesData||[]).length + " brothers loaded.");
+    } catch(err) {
+      alert("Error reading backup: " + err.message);
     }
-  } else {
-    // We have local data — push it to Supabase to keep in sync,
-    // but don't overwrite local with remote
-    setSyncStatus("syncing");
-    pushAll().then(function(){ setSyncStatus("ok"); }).catch(function(){ setSyncStatus("offline"); });
-  }
+  };
+  reader.readAsText(file);
 }
 
 // Manual sync — pull latest from Supabase on demand
