@@ -491,7 +491,7 @@
         <table class="data-table">
           <thead>
             <tr>
-              <th>Term</th><th>Date</th><th>Type</th><th>Amount</th><th>Budget / Category</th><th>Account</th><th>Card</th><th>Notes</th><th>Status</th><th></th>
+              <th>Date</th><th>Type</th><th>Amount</th><th>Budget / Category</th><th>Account</th><th>Card</th><th>Notes</th><th>Status</th><th></th>
             </tr>
           </thead>
           <tbody id="tx-tbody"></tbody>
@@ -2182,6 +2182,9 @@ function duesStatus(d) {
 // CORE STATE OPS
 // ═══════════════════════════════════════════════════════════════
 function recomputeExpSpent() {
+  // Budget spent = ALL OUT transactions (paid + pending)
+  // This reflects true allocation regardless of whether the card has cleared.
+  // Live bank balance (getFunds) only counts paid=true transactions separately.
   springExp.forEach(function(line) {
     line.spent = parseFloat(txList
       .filter(function(t){return t.dir==="OUT" && isSpring(t.term) && t.budget===line.item;})
@@ -2859,20 +2862,20 @@ function filterTx() {
   tbody.innerHTML = filtered.map(function(t) {
     var isPending = t.dir==="OUT" && !t.paid;
     return '<tr class="'+(isPending?"flagged-row":"")+'">'
-      +'<td class="mono" style="font-size:11px;color:var(--muted)">'+t.date+'</td>'
-      +'<td style="font-size:12.5px">'+t.notes+'</td>'
+      +'<td class="mono" style="font-size:11px;color:var(--muted)">'+t.term+' '+t.date+'</td>'
       +'<td><span class="badge '+(t.dir==="OUT"?"badge-red":"badge-green")+'">'+t.dir+'</span></td>'
       +'<td class="mono" style="font-weight:700;color:'+(t.dir==="OUT"?"var(--red)":"var(--green)")+'">'+
         (t.dir==="OUT"?"-":"+")+' '+fmt(t.amount)+'</td>'
       +'<td style="font-size:12px;color:var(--blue)">'+(t.budget||t.category||"—")+'</td>'
       +'<td style="font-size:11.5px">'+t.account+'</td>'
       +'<td style="font-size:11px;color:var(--muted)">'+(t.card||"—")+'</td>'
-      +'<td style="font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+t.notes+'</td>'
+      +'<td style="font-size:12px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+((t.notes||"").replace(/"/g,"&quot;"))+'">'+t.notes+'</td>'
       +'<td>'+(t.dir==="IN"?'<span class="badge badge-green">Received</span>':
                t.paid?'<span class="badge badge-blue">Paid</span>':
                '<span class="badge badge-amber">Pending</span>')+'</td>'
       +'<td><div style="display:flex;gap:4px">'
-        +(isPending?'<button class="btn btn-ghost btn-sm" style="padding:3px 8px;font-size:10px" onclick="markPaid(\''+t.id+'\')">✓ Mark Paid</button>':'')
+        +(isPending?'<button class="btn btn-ghost btn-sm" style="padding:3px 8px;font-size:10px" onclick="markPaid(\''+t.id+'\')">✓ Paid</button>':'')
+        +'<button class="btn btn-ghost btn-sm" style="padding:3px 8px;font-size:10px" onclick="editTx(\''+t.id+'\')">✎</button>'
         +'<button class="btn btn-danger btn-sm" style="padding:3px 8px;font-size:10px" onclick="deleteTx(\''+t.id+'\')">✕</button>'
       +'</div></td></tr>';
   }).join("");
@@ -2916,6 +2919,9 @@ function openTxModal(dir) {
 }
 function closeTxModal() {
   document.getElementById("tx-modal").classList.remove("open");
+  editTxId = null;
+  var btn = document.getElementById("m-save-btn");
+  if (btn) btn.textContent = "Save Transaction";
   clearReceipt();
 }
 
@@ -2927,27 +2933,82 @@ function saveTx() {
   var notes  = document.getElementById("m-notes").value;
   if (!amount || !date) { alert("Please enter a date and amount."); return; }
 
-  var newTx;
-  if (txModalDir === "OUT") {
-    var budget = document.getElementById("m-budget").value;
-    var card   = document.getElementById("m-card").value;
-    var paid   = document.getElementById("m-paid").value === "true";
-    newTx = {id:"o"+Date.now(), term:term, date:date, amount:amount, budget:budget, account:account, card:card, paid:paid, notes:notes, dir:"OUT"};
+  var tx;
+  if (editTxId) {
+    // Editing existing transaction
+    tx = txList.find(function(t){ return t.id === editTxId; });
+    if (!tx) { alert("Transaction not found."); return; }
+    tx.term    = term;
+    tx.date    = date;
+    tx.amount  = amount;
+    tx.account = account;
+    tx.notes   = notes;
+    if (tx.dir === "OUT") {
+      tx.budget = document.getElementById("m-budget").value;
+      tx.card   = document.getElementById("m-card").value;
+      tx.paid   = document.getElementById("m-paid").value === "true";
+    } else {
+      tx.category = document.getElementById("m-category").value;
+    }
+    pushTx(tx).catch(function(){});
   } else {
-    var category = document.getElementById("m-category").value;
-    newTx = {id:"i"+Date.now(), term:term, date:date, amount:amount, category:category, account:account, notes:notes, dir:"IN", paid:true};
+    // New transaction
+    if (txModalDir === "OUT") {
+      var budget = document.getElementById("m-budget").value;
+      var card   = document.getElementById("m-card").value;
+      var paid   = document.getElementById("m-paid").value === "true";
+      tx = {id:"o"+Date.now(), term:term, date:date, amount:amount, budget:budget, account:account, card:card, paid:paid, notes:notes, dir:"OUT"};
+    } else {
+      var category = document.getElementById("m-category").value;
+      tx = {id:"i"+Date.now(), term:term, date:date, amount:amount, category:category, account:account, notes:notes, dir:"IN", paid:true};
+    }
+    txList.push(tx);
+    if (pendingReceipt && tx.id) {
+      attachReceiptToTx(tx.id, tx.budget || tx.category || 'Other', pendingReceipt);
+      pendingReceipt = null;
+    }
+    pushTx(tx).catch(function(){});
   }
-  txList.push(newTx);
-  // Attach receipt if one was selected
-  if (pendingReceipt && newTx.id) {
-    attachReceiptToTx(newTx.id, newTx.budget || newTx.category || 'Other', pendingReceipt);
-    pendingReceipt = null;
-  }
+  recomputeExpSpent();
   closeTxModal();
-  pushTx(newTx).catch(function(){});
-  if (txModalDir === "OUT") pushExp().catch(function(){});
+  if (tx.dir === "OUT") pushExp().catch(function(){});
   refreshAll();
   renderReceiptVault();
+}
+
+function editTx(id) {
+  var t = txList.find(function(t){ return t.id === id; });
+  if (!t) return;
+  editTxId = id;
+  txModalDir = t.dir;
+  document.getElementById("tx-modal-title").textContent = t.dir === "OUT" ? "Edit Expense" : "Edit Income";
+  document.getElementById("m-save-btn").textContent = "Save Changes";
+  document.getElementById("m-out-fields").style.display = t.dir === "OUT" ? "block" : "none";
+  document.getElementById("m-in-fields").style.display  = t.dir === "IN"  ? "block" : "none";
+  document.getElementById("m-term").value   = t.term   || currentTerm;
+  document.getElementById("m-date").value   = t.date   || "";
+  document.getElementById("m-amount").value = t.amount || "";
+  document.getElementById("m-account").value= t.account|| "Operating";
+  document.getElementById("m-notes").value  = t.notes  || "";
+  if (t.dir === "OUT") {
+    // Populate budget dropdown first, then set value
+    var exp = isSpring(t.term) ? springExp : fallExp;
+    var sel = document.getElementById("m-budget");
+    if (sel) {
+      sel.innerHTML = exp.map(function(e){
+        return "<option"+(e.item===t.budget?" selected":"")+">"+e.item+"</option>";
+      }).join("");
+    }
+    var cardSel = document.getElementById("m-card");
+    if (cardSel) cardSel.value = t.card || cardSel.options[0].value;
+    var paidSel = document.getElementById("m-paid");
+    if (paidSel) paidSel.value = t.paid ? "true" : "false";
+  } else {
+    var catSel = document.getElementById("m-category");
+    if (catSel) catSel.value = t.category || "Other";
+  }
+  clearReceipt();
+  document.getElementById("tx-modal").classList.add("open");
 }
 
 // ═══════════════════════════════════════════════════════════════
