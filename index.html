@@ -352,12 +352,13 @@
 
     html, body { overflow: hidden; font-size: 13px; }
 
-    /* Header — compact wordmark, hide subtitle */
-    header { padding: 0 16px; height: 50px; }
-    header::after { opacity: 0.15; }
+    /* Header — compact on mobile */
+    header { padding: 0 14px; height: 48px; }
+    header::after { opacity: 0.12; }
     .header-left { gap: 0; }
-    #app-subtitle { display: none !important; }
-    .app-title-wordmark { margin-left: 0 !important; padding-left: 0 !important; border-left: none !important; }
+    .hdr-subtitle { display: none !important; }
+    .hdr-hide-mobile { display: none !important; }
+    .term-badge { padding: 3px 10px; font-size: 9.5px; letter-spacing: 1px; }
 
     /* Hide desktop nav — replaced by bottom tab bar */
     nav { display: none !important; }
@@ -551,7 +552,7 @@
 <div id="app" style="display:none">
   <header>
     <div class="header-left">
-      <!-- Option C: Pure wordmark -->
+      <!-- Wordmark logo — Option C -->
       <div style="display:flex;flex-direction:column;justify-content:center;line-height:1;">
         <div style="font-family:var(--font-display);font-size:15px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:var(--text);">CHI ETA</div>
         <div style="display:flex;align-items:center;gap:5px;margin-top:3px;">
@@ -560,18 +561,19 @@
           <div style="height:0.5px;width:18px;background:var(--gold);opacity:0.6;"></div>
         </div>
       </div>
-      <!-- Subtitle (officer name / year — updated by updateHeaderSubtitle) -->
-      <div id="app-subtitle" style="font-family:var(--font-mono);font-size:10px;color:var(--dim);letter-spacing:0.5px;margin-left:18px;padding-left:18px;border-left:1px solid var(--border2);">Budget 2026 · Jakob Barker</div>
+      <!-- Subtitle — hidden on mobile via CSS -->
+      <div id="app-subtitle" class="hdr-subtitle" style="font-family:var(--font-mono);font-size:10px;color:var(--dim);letter-spacing:0.5px;margin-left:18px;padding-left:18px;border-left:1px solid var(--border2);">Budget 2026 · Jakob Barker</div>
     </div>
-    <div style="display:flex;gap:10px;align-items:center">
-      <span id="sync-status" style="font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:.3px;cursor:pointer" onclick="manualSync()" title="Click to sync from server">⟳ Loading…</span>
+    <!-- Right side actions -->
+    <div style="display:flex;gap:6px;align-items:center">
+      <span id="sync-status" class="hdr-hide-mobile" style="font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:.3px;cursor:pointer" onclick="manualSync()" title="Click to sync">⟳</span>
       <div id="termToggle" class="term-badge" onclick="toggleTerm()">Spring 2026 ▾</div>
-      <button class="btn btn-ghost btn-sm" onclick="window.print()">⎙ Print</button>
-      <button class="btn btn-ghost btn-sm" onclick="exportBackup()" title="Export roster backup" style="font-size:11px" class="btn btn-ghost btn-sm hdr-hide-mobile">⬇ Backup</button>
-      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('import-file').click()" title="Restore from backup" style="font-size:11px" class="btn btn-ghost btn-sm hdr-hide-mobile">⬆ Restore</button>
+      <button class="btn btn-ghost btn-sm hdr-hide-mobile" onclick="window.print()">⎙ Print</button>
+      <button class="btn btn-ghost btn-sm hdr-hide-mobile" onclick="exportBackup()" title="Backup">⬇ Backup</button>
+      <button class="btn btn-ghost btn-sm hdr-hide-mobile" onclick="document.getElementById('import-file').click()" title="Restore">⬆ Restore</button>
       <input type="file" id="import-file" accept=".json" style="display:none" onchange="importBackup(this.files[0]);this.value=''">
-      <button class="btn btn-ghost btn-sm" onclick="changePassword()" title="Change password" style="font-size:11px">🔑</button>
-      <button class="btn btn-ghost btn-sm" onclick="logout()" title="Lock app" style="font-size:11px">🔒</button>
+      <button class="btn btn-ghost btn-sm hdr-hide-mobile" onclick="changePassword()" title="Change password">🔑</button>
+      <button class="btn btn-ghost btn-sm" onclick="logout()" title="Lock app">🔒</button>
     </div>
   </header>
   <nav>
