@@ -340,6 +340,164 @@
     .card { border: 1px solid #ccc; }
   }
 
+
+  /* ══════════════════════════════════════════════════════
+     MOBILE — max-width 768px
+  ══════════════════════════════════════════════════════ */
+  @media (max-width: 768px) {
+
+    html, body { overflow: hidden; font-size: 13px; }
+
+    /* Header — compact wordmark, hide subtitle */
+    header { padding: 0 16px; height: 50px; }
+    header::after { opacity: 0.15; }
+    .header-left { gap: 0; }
+    #app-subtitle { display: none !important; }
+    .app-title-wordmark { margin-left: 0 !important; padding-left: 0 !important; border-left: none !important; }
+
+    /* Hide desktop nav — replaced by bottom tab bar */
+    nav { display: none !important; }
+
+    /* Bottom tab bar */
+    #mobile-nav {
+      display: flex !important;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 56px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      z-index: 50;
+      padding: 0 4px;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    .mob-tab {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      padding: 6px 2px;
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-family: var(--font-display);
+      font-size: 7.5px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .mob-tab svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.5; }
+    .mob-tab.active { color: var(--gold); }
+    .mob-tab.active svg { stroke: var(--gold); }
+
+    /* More menu */
+    #mobile-more-menu {
+      display: none;
+      position: fixed;
+      bottom: 56px; left: 0; right: 0;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      z-index: 49;
+      padding: 8px 0;
+    }
+    #mobile-more-menu.open { display: block; }
+    .mob-more-item {
+      display: block; width: 100%;
+      padding: 13px 22px;
+      background: transparent; border: none;
+      color: var(--muted);
+      font-family: var(--font-display);
+      font-size: 12px; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      text-align: left; cursor: pointer;
+      border-bottom: 1px solid var(--border);
+    }
+    .mob-more-item:last-child { border-bottom: none; }
+    .mob-more-item.active { color: var(--gold); }
+
+    /* Content area — add bottom padding for tab bar */
+    #content {
+      padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+    }
+
+    /* Views — tighter padding */
+    .view { padding: 16px 14px; }
+
+    /* Header buttons — hide less important ones on mobile */
+    .hdr-hide-mobile { display: none !important; }
+
+    /* KPI grid — 2 cols on mobile */
+    .kpi-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .kpi { padding: 14px 14px; }
+    .kpi-value { font-size: 21px; }
+
+    /* Two-col → single col */
+    .two-col { grid-template-columns: 1fr; gap: 12px; }
+
+    /* Three-col → single col */
+    .three-col { grid-template-columns: 1fr; gap: 12px; }
+
+    /* Section title smaller */
+    .section-title { font-size: 17px; letter-spacing: 2px; }
+    .page-header { margin-bottom: 14px; }
+
+    /* Tables — horizontal scroll */
+    .table-scroll-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .data-table { min-width: 540px; }
+    .data-table th, .data-table td { padding: 8px 10px; font-size: 11.5px; }
+
+    /* Filter bar — wrap nicely */
+    .filter-bar { gap: 8px; }
+    .filter-bar input, .filter-bar select { min-width: 0; flex: 1; font-size: 12px; }
+
+    /* Modals — full-screen on mobile */
+    .modal-bg { align-items: flex-end; }
+    .modal {
+      width: 100% !important;
+      max-width: 100% !important;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
+      max-height: 88vh;
+      padding: 20px 18px 32px;
+    }
+
+    /* Form rows — stack on mobile */
+    .form-row.cols2,
+    .form-row.cols3,
+    .form-row.cols4 { grid-template-columns: 1fr; }
+
+    /* Buttons — full width in modals */
+    .modal .btn { padding: 10px 14px; }
+
+    /* Card header */
+    .card-header { font-size: 8.5px; padding: 11px 14px 9px; }
+
+    /* Welcome modal */
+    #welcome-modal .modal {
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
+      padding: 28px 18px 24px;
+    }
+
+    /* Reports — hide less useful on mobile */
+    .rpt-hide-mobile { display: none; }
+
+    /* Scrollbar hidden on mobile */
+    ::-webkit-scrollbar { display: none; }
+  }
+
+  @media (max-width: 480px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .kpi-value { font-size: 19px; }
+    header { height: 46px; }
+  }
+
 </style>
 
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTEwIj4KICA8cGF0aCBmaWxsPSIjZmZmZmZmIiBzdHJva2U9IiMxMTExMTEiIHN0cm9rZS13aWR0aD0iMyIKICAgIGQ9Ik0xMCw4IEw5MCw4IEw5MCw1NSBROTAsODUgNTAsMTAwIFExMCw4NSAxMCw1NSBaIi8+CiAgPHBhdGggZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMTExMTExIiBzdHJva2Utd2lkdGg9IjEiCiAgICBkPSJNMTUsMTMgTDg1LDEzIEw4NSw1NCBRODUsODIgNTAsOTYgUTE1LDgyIDE1LDU0IFoiLz4KICA8bGluZSB4MT0iMTUiIHkxPSIzOCIgeDI9Ijg1IiB5Mj0iMzgiIHN0cm9rZT0iIzExMTExMSIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgPGxpbmUgeDE9IjUwIiB5MT0iMTMiIHgyPSI1MCIgeTI9IjM4IiBzdHJva2U9IiMxMTExMTEiIHN0cm9rZS13aWR0aD0iMSIvPgogIDx0ZXh0IHg9IjMyIiB5PSIzMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9Ikdlb3JnaWEsc2VyaWYiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxMTExMTEiIGxldHRlci1zcGFjaW5nPSIwLjUiPkZJSkk8L3RleHQ+CiAgPHRleHQgeD0iNjgiIHk9IjMyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iR2VvcmdpYSxzZXJpZiIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjQwMCIgZmlsbD0iIzExMTExMSIgbGV0dGVyLXNwYWNpbmc9IjEiPlhIPC90ZXh0PgogIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDUwLDY3KSI+CiAgICA8bGluZSB4MT0iMCIgeTE9Ii0xNCIgeDI9IjAiIHkyPSIxNCIgc3Ryb2tlPSIjMTExMTExIiBzdHJva2Utd2lkdGg9IjEuMiIvPgogICAgPGxpbmUgeDE9Ii0xNCIgeTE9IjAiIHgyPSIxNCIgeTI9IjAiIHN0cm9rZT0iIzExMTExMSIgc3Ryb2tlLXdpZHRoPSIxLjIiLz4KICAgIDxsaW5lIHgxPSItMTAiIHkxPSItMTAiIHgyPSIxMCIgeTI9IjEwIiBzdHJva2U9IiMxMTExMTEiIHN0cm9rZS13aWR0aD0iMS4yIi8+CiAgICA8bGluZSB4MT0iMTAiIHkxPSItMTAiIHgyPSItMTAiIHkyPSIxMCIgc3Ryb2tlPSIjMTExMTExIiBzdHJva2Utd2lkdGg9IjEuMiIvPgogICAgPGNpcmNsZSBmaWxsPSJub25lIiBzdHJva2U9IiMxMTExMTEiIHN0cm9rZS13aWR0aD0iMC44IiBjeD0iMCIgY3k9IjAiIHI9IjEyIi8+CiAgICA8Y2lyY2xlIGZpbGw9IiMxMTExMTEiIGN4PSIwIiBjeT0iMCIgcj0iMiIvPgogIDwvZz4KICA8dGV4dCB4PSI1MCIgeT0iMTA0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iR2VvcmdpYSxzZXJpZiIgZm9udC1zaXplPSI2IiBmaWxsPSIjMTExMTExIiBsZXR0ZXItc3BhY2luZz0iMiI+Q0hJIEVUQTwvdGV4dD4KPC9zdmc+">
@@ -405,8 +563,8 @@
       <span id="sync-status" style="font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:.3px;cursor:pointer" onclick="manualSync()" title="Click to sync from server">⟳ Loading…</span>
       <div id="termToggle" class="term-badge" onclick="toggleTerm()">Spring 2026 ▾</div>
       <button class="btn btn-ghost btn-sm" onclick="window.print()">⎙ Print</button>
-      <button class="btn btn-ghost btn-sm" onclick="exportBackup()" title="Export roster backup" style="font-size:11px">⬇ Backup</button>
-      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('import-file').click()" title="Restore from backup" style="font-size:11px">⬆ Restore</button>
+      <button class="btn btn-ghost btn-sm" onclick="exportBackup()" title="Export roster backup" style="font-size:11px" class="btn btn-ghost btn-sm hdr-hide-mobile">⬇ Backup</button>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('import-file').click()" title="Restore from backup" style="font-size:11px" class="btn btn-ghost btn-sm hdr-hide-mobile">⬆ Restore</button>
       <input type="file" id="import-file" accept=".json" style="display:none" onchange="importBackup(this.files[0]);this.value=''">
       <button class="btn btn-ghost btn-sm" onclick="changePassword()" title="Change password" style="font-size:11px">🔑</button>
       <button class="btn btn-ghost btn-sm" onclick="logout()" title="Lock app" style="font-size:11px">🔒</button>
@@ -422,6 +580,38 @@
     <button class="nav-btn" onclick="showView('reports',this)">Reports</button>
     <button class="nav-btn" onclick="showView('settings',this)">⚙ Settings</button>
   </nav>
+
+  <!-- Mobile bottom tab bar (hidden on desktop, shown on mobile via CSS) -->
+  <div id="mobile-nav" style="display:none">
+    <button class="mob-tab active" id="mob-tab-dashboard" onclick="showView('dashboard',this);closeMobileMore()">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dash
+    </button>
+    <button class="mob-tab" id="mob-tab-revenues" onclick="showView('revenues',this);closeMobileMore()">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      Dues
+    </button>
+    <button class="mob-tab" id="mob-tab-transactions" onclick="showView('transactions',this);closeMobileMore()">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      Ledger
+    </button>
+    <button class="mob-tab" id="mob-tab-budgeting" onclick="showView('budgeting',this);closeMobileMore()">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Budget
+    </button>
+    <button class="mob-tab" id="mob-tab-more" onclick="toggleMobileMore(this)">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.5" fill="currentColor" stroke="none"/></svg>
+      More
+    </button>
+  </div>
+
+  <!-- More menu overlay -->
+  <div id="mobile-more-menu">
+    <button class="mob-more-item" onclick="showView('expenditures',null);closeMobileMore()">Expenditures</button>
+    <button class="mob-more-item" onclick="showView('calculations',null);closeMobileMore()">Calculations & Rates</button>
+    <button class="mob-more-item" onclick="showView('reports',null);closeMobileMore()">Reports</button>
+    <button class="mob-more-item" onclick="showView('settings',null);closeMobileMore()">⚙ Settings</button>
+  </div>
   <div id="content">
 
     <!-- ═══════════════════════════════════════ DASHBOARD ═══════════════════════════════════════ -->
@@ -459,10 +649,10 @@
 
       <div class="card">
         <div class="card-header"><span>Recent Transactions</span><span style="color:var(--gold);cursor:pointer;font-size:10px" onclick="showView('transactions',document.querySelectorAll('.nav-btn')[3])">View All →</span></div>
-        <table class="data-table">
+        <div class="table-scroll-wrap"><table class="data-table">
           <thead><tr><th>Date</th><th>Description</th><th>Budget Line</th><th>Amount</th><th>Account</th><th>Status</th></tr></thead>
           <tbody id="dash-recent"></tbody>
-        </table>
+        </table></div>
       </div>
 
       <!-- Chapter Health Indicator -->
@@ -497,7 +687,7 @@
             <button class="btn btn-ghost btn-sm" onclick="openRosterModal()">✎ Edit Roster</button>
           </div>
         </div>
-        <table class="data-table">
+        <div class="table-scroll-wrap"><table class="data-table">
           <thead><tr><th>Brother</th><th>Class</th><th>Base Dues</th><th>Early Discount</th><th>Rent</th><th>Dues Status</th><th>Rent Status</th><th>Method</th><th style="color:var(--gold)">Net to Chapter</th><th></th></tr></thead>
           <tbody id="dues-tbody"></tbody>
           <tfoot><tr class="total-row">
@@ -508,7 +698,7 @@
             <td class="mono" style="color:var(--gold)" id="dues-total-revenue"></td>
             <td></td>
           </tr></tfoot>
-        </table>
+        </table></div>
         <div style="padding:10px 14px;font-size:11px;color:var(--muted);border-top:1px solid var(--border)">
           <span>Grand Total Revenue to Chapter: </span>
           <strong style="color:var(--gold);font-family:var(--font-mono)" id="dues-grand-total-rev">—</strong>
@@ -543,10 +733,10 @@
             </label>
           </div>
         </div>
-        <table class="data-table" id="exp-table">
+        <div class="table-scroll-wrap"><table class="data-table" id="exp-table">
           <thead><tr><th>Line Item</th><th>Section</th><th>Budgeted</th><th>Spent</th><th>Remaining</th><th>% of Budget</th><th>% Spent</th></tr></thead>
           <tbody id="exp-tbody"></tbody>
-        </table>
+        </table></div>
       </div>
     </div>
 
@@ -582,14 +772,14 @@
           <span id="tx-count-label">Transactions</span>
           <span style="font-family:var(--font-mono);font-size:10px;color:var(--muted)" id="tx-total-label"></span>
         </div>
-        <table class="data-table">
+        <div class="table-scroll-wrap"><table class="data-table">
           <thead>
             <tr>
               <th>Date</th><th>Dir</th><th>Amount</th><th>Budget / Category</th><th>Account</th><th>Notes</th><th>Status</th>
             </tr>
           </thead>
           <tbody id="tx-tbody"></tbody>
-        </table>
+        </table></div>
         <div class="empty" id="tx-empty" style="display:none">No transactions match your filters.</div>
       </div>
 
@@ -895,10 +1085,10 @@
       <!-- Committee budget table -->
       <div class="card" style="margin-bottom:18px">
         <div class="card-header"><span id="rpt-committee-header">Committee Budget</span></div>
-        <table class="data-table">
+        <div class="table-scroll-wrap"><table class="data-table">
           <thead><tr><th>Section / Item</th><th style="text-align:right">Budgeted</th><th style="text-align:right">Spent</th><th style="text-align:right">Remaining</th><th style="text-align:right">% Used</th><th>Health</th></tr></thead>
           <tbody id="rpt-committee-tbody"></tbody>
-        </table>
+        </table></div>
       </div>
       <!-- Expenses in period -->
       <div class="card">
@@ -906,10 +1096,10 @@
           <span id="rpt-tx-header">Expenses in Period</span>
           <span style="font-family:var(--font-mono);font-size:10px;color:var(--muted)" id="rpt-tx-total"></span>
         </div>
-        <table class="data-table">
+        <div class="table-scroll-wrap"><table class="data-table">
           <thead><tr><th>Date</th><th>Description</th><th>Budget Line</th><th>Account</th><th style="text-align:right">Amount</th></tr></thead>
           <tbody id="rpt-tx-tbody"></tbody>
-        </table>
+        </table></div>
         <div id="rpt-tx-more" style="padding:12px 20px;font-size:11px;color:var(--dim);text-align:center;display:none"></div>
       </div>
 
@@ -964,17 +1154,17 @@
         <div class="two-col" style="margin-bottom:16px">
           <div class="card">
             <div class="card-header"><span>Spring 2026 Budget Lines</span></div>
-            <table class="data-table" id="edit-spring-budget-table">
+            <div class="table-scroll-wrap"><table class="data-table" id="edit-spring-budget-table">
               <thead><tr><th>Section</th><th>Line Item</th><th style="text-align:right">Budgeted ($)</th></tr></thead>
               <tbody id="edit-spring-tbody"></tbody>
-            </table>
+            </table></div>
           </div>
           <div class="card">
             <div class="card-header"><span>Fall 2026 Budget Lines</span></div>
-            <table class="data-table">
+            <div class="table-scroll-wrap"><table class="data-table">
               <thead><tr><th>Section</th><th>Line Item</th><th style="text-align:right">Budgeted ($)</th></tr></thead>
               <tbody id="edit-fall-tbody"></tbody>
-            </table>
+            </table></div>
           </div>
         </div>
       </div>
@@ -1510,7 +1700,7 @@ function getFunds() {
   return balances;
 }
 const DUES_DATA_SPRING = [
-  {name:"Aden Perez",cls:"Member",due:600,paid:300,payStatus:"Payment Plan",payMethod:"Credit Card",installments:4,installmentsPaid:2,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brother Hood", "amount": 20}, {"label": "Missed Initiation", "amount": 25}],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Aden Perez",cls:"Member",due:600,paid:600,payStatus:"Payment Plan",payMethod:"Credit Card",installments:4,installmentsPaid:4,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brother Hood", "amount": 20}, {"label": "Missed Initiation", "amount": 25}],notes:"",financialProbation:0,brotherhood:""},
   {name:"Aiden Hornback",cls:"Member",due:600,paid:600,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Alex Boyer",cls:"Member",due:600,paid:600,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Alexander Compton",cls:"House Member",due:600,paid:645,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"Paid in Full",rentPaid:2250,rentInstallments:1,rentInstallmentsPaid:1,rentEarlyDiscount:true,extraFees:[{"label": "Broho Fee", "amount": 20}, {"label": "Broho T Shirt", "amount": 25}],notes:"",financialProbation:0,brotherhood:""},
@@ -1522,7 +1712,7 @@ const DUES_DATA_SPRING = [
   {name:"Ayden Sandefur",cls:"Member",due:600,paid:150,payStatus:"Payment Plan",payMethod:"Credit Card",installments:4,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Late Fee", "amount": 25}, {"label": "Late Fee", "amount": 25}, {"label": "Brotherhood Fee", "amount": 20}, {"label": "Brotherhood Tshirt", "amount": 25}],notes:"",financialProbation:0,brotherhood:""},
   {name:"Blake Wulfekuhle",cls:"Member",due:600,paid:600,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Bradley Wagoner",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Brandon Valle",cls:"New Member",due:400,paid:133.33,payStatus:"Payment Plan",payMethod:"Credit Card",installments:3,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Brandon Valle",cls:"New Member",due:400,paid:266.67,payStatus:"Payment Plan",payMethod:"Credit Card",installments:3,installmentsPaid:2,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Braydon Smith",cls:"New Member",due:400,paid:400,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Brice Lamont",cls:"Member",due:600,paid:670,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Late Fee", "amount": 50}],notes:"",financialProbation:0,brotherhood:""},
   {name:"Britton Rowe",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:"",financialProbation:0,brotherhood:""},
@@ -1530,7 +1720,7 @@ const DUES_DATA_SPRING = [
   {name:"Caden Lucas",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:"",financialProbation:0,brotherhood:""},
   {name:"Cai Coburn",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:"",financialProbation:0,brotherhood:""},
   {name:"Camden Cloud",cls:"Member",due:600,paid:645,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Brotherhood Tshirt", "amount": 25}],notes:"Dues payback owed",financialProbation:0,brotherhood:""},
-  {name:"Cameron Vick",cls:"New Member",due:400,paid:420,payStatus:"Payment Plan",payMethod:"Credit Card",installments:3,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Cameron Vick",cls:"New Member",due:400,paid:266.67,payStatus:"Payment Plan",payMethod:"Credit Card",installments:3,installmentsPaid:2,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Carson Cloud",cls:"Member",due:600,paid:600,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Carter Chapman",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:"Dues payback owed",financialProbation:0,brotherhood:""},
   {name:"Carter Smith",cls:"Member",due:600,paid:645,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Brotherhood T Shirt", "amount": 25}],notes:"",financialProbation:0,brotherhood:""},
@@ -1555,7 +1745,7 @@ const DUES_DATA_SPRING = [
   {name:"Grayson Roederer",cls:"New Member",due:400,paid:400,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Hayden Harvey",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:"",financialProbation:0,brotherhood:""},
   {name:"Hayden Kirchberg",cls:"Member",due:600,paid:645,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Brotherhood Tshirt", "amount": 25}],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Hudson Hatcher",cls:"Member",due:600,paid:300,payStatus:"Payment Plan",payMethod:"Credit Card",installments:4,installmentsPaid:2,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Hudson Hatcher",cls:"Member",due:600,paid:450,payStatus:"Payment Plan",payMethod:"Credit Card",installments:4,installmentsPaid:3,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Hunter Falls",cls:"Member",due:600,paid:645,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Missed Meeting Fine", "amount": 25}],notes:"",financialProbation:0,brotherhood:""},
   {name:"Ian Salyer",cls:"New Member",due:400,paid:400,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"Problem - $0 paid",financialProbation:0,brotherhood:""},
   {name:"Ian Stanley",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:"",financialProbation:0,brotherhood:""},
@@ -1564,38 +1754,38 @@ const DUES_DATA_SPRING = [
   {name:"Jack Rhody",cls:"Member",due:600,paid:600,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Jack Woolf",cls:"House Member",due:600,paid:645,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"Paid in Full",rentPaid:2250,rentInstallments:1,rentInstallmentsPaid:1,rentEarlyDiscount:true,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Brotherhood Tshirt", "amount": 25}],notes:"",financialProbation:0,brotherhood:""},
   {name:"Jackson Smith",cls:"Member",due:600,paid:645,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Brotherhood Tshirt", "amount": 25}],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Jagger Tomes",cls:"House Member",due:600,paid:300,payStatus:"Payment Plan",payMethod:"Credit Card",installments:4,installmentsPaid:2,earlyDiscount:false,rentStatus:"Paid in Full",rentPaid:2250,rentInstallments:1,rentInstallmentsPaid:1,rentEarlyDiscount:true,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Late Fee", "amount": 25}],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Jagger Tomes",cls:"House Member",due:600,paid:450,payStatus:"Payment Plan",payMethod:"Credit Card",installments:4,installmentsPaid:3,earlyDiscount:false,rentStatus:"Paid in Full",rentPaid:2250,rentInstallments:1,rentInstallmentsPaid:1,rentEarlyDiscount:true,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Late Fee", "amount": 25}],notes:"",financialProbation:0,brotherhood:""},
   {name:"Jakob Barker",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:"",financialProbation:0,brotherhood:""},
   {name:"Jayce Hicks",cls:"House Member",due:600,paid:645,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"Paid in Full",rentPaid:2250,rentInstallments:1,rentInstallmentsPaid:1,rentEarlyDiscount:true,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Brotherhood Tshirt", "amount": 25}],notes:"",financialProbation:0,brotherhood:""},
   {name:"Jett Meffert",cls:"Member",due:600,paid:600,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Jody Hopgood",cls:"House Member",due:600,paid:625,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"Payment Plan",rentPaid:1125,rentInstallments:4,rentInstallmentsPaid:2,rentEarlyDiscount:false,extraFees:[{"label": "Tshirt", "amount": 25}],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Jody Hopgood",cls:"House Member",due:600,paid:625,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"Payment Plan",rentPaid:1687.5,rentInstallments:4,rentInstallmentsPaid:3,rentEarlyDiscount:false,extraFees:[{"label": "Tshirt", "amount": 25}],notes:"",financialProbation:0,brotherhood:""},
   {name:"Jonah Hall",cls:"Member",due:600,paid:150,payStatus:"Payment Plan",payMethod:"Credit Card",installments:4,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Late Fee", "amount": 25}],notes:"",financialProbation:0,brotherhood:""},
   {name:"Jude Scott",cls:"Member",due:600,paid:645,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Brotherhood Tshirt", "amount": 25}],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Kaden Stalcup",cls:"Member",due:600,paid:300,payStatus:"Payment Plan",payMethod:"Credit Card",installments:4,installmentsPaid:2,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Missed Hashes", "amount": 50}],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Kaden Stalcup",cls:"Member",due:600,paid:450,payStatus:"Payment Plan",payMethod:"Credit Card",installments:4,installmentsPaid:3,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Missed Hashes", "amount": 50}],notes:"",financialProbation:0,brotherhood:""},
   {name:"Kellen Patterson",cls:"Member",due:600,paid:670,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Missed Hash", "amount": 25}, {"label": "Missed Retreat", "amount": 25}],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Kieran Heintz",cls:"Member",due:600,paid:300,payStatus:"Payment Plan",payMethod:"Bank Account",installments:4,installmentsPaid:2,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Late Fee", "amount": 25}],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Kieran Heintz",cls:"Member",due:600,paid:450,payStatus:"Payment Plan",payMethod:"Bank Account",installments:4,installmentsPaid:3,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Late Fee", "amount": 25}],notes:"",financialProbation:0,brotherhood:""},
   {name:"Korben Walling",cls:"House Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"Paid in Full",rentPaid:2250,rentInstallments:1,rentInstallmentsPaid:1,rentEarlyDiscount:true,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:"",financialProbation:0,brotherhood:""},
   {name:"Landon Terry",cls:"Member",due:600,paid:645,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Brotherhood Tshirt", "amount": 25}],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Layne True",cls:"Member",due:600,paid:300,payStatus:"Payment Plan",payMethod:"Credit Card",installments:4,installmentsPaid:2,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Missed Hash", "amount": 25}],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Layne True",cls:"Member",due:600,paid:450,payStatus:"Payment Plan",payMethod:"Credit Card",installments:4,installmentsPaid:3,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Missed Hash", "amount": 25}],notes:"",financialProbation:0,brotherhood:""},
   {name:"Logan Bell",cls:"Member",due:600,paid:645,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Brotherhood Tshirt", "amount": 25}],notes:"",financialProbation:0,brotherhood:""},
   {name:"Lucas Dunning",cls:"House Member",due:600,paid:600,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"Paid in Full",rentPaid:2250,rentInstallments:1,rentInstallmentsPaid:1,rentEarlyDiscount:true,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Luke Humphrey",cls:"Member",due:600,paid:670,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Late Fee", "amount": 50}, {"label": "Brotherhood Fee", "amount": 20}],notes:"",financialProbation:0,brotherhood:""},
   {name:"Manny Summers-Bates",cls:"House Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"Payment Plan",rentPaid:2250,rentInstallments:4,rentInstallmentsPaid:4,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Mason Strunk",cls:"Member",due:600,paid:300,payStatus:"Payment Plan",payMethod:"Credit Card",installments:4,installmentsPaid:2,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Judicial Board Fine", "amount": 25}],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Mason Strunk",cls:"Member",due:600,paid:450,payStatus:"Payment Plan",payMethod:"Credit Card",installments:4,installmentsPaid:3,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Judicial Board Fine", "amount": 25}],notes:"",financialProbation:0,brotherhood:""},
   {name:"Matt Donohue",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Micah Chapek",cls:"Member",due:600,paid:300,payStatus:"Payment Plan",payMethod:"Credit Card",installments:4,installmentsPaid:2,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Micah Chapek",cls:"Member",due:600,paid:450,payStatus:"Payment Plan",payMethod:"Credit Card",installments:4,installmentsPaid:3,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:"",financialProbation:0,brotherhood:""},
   {name:"Michael Mitchell",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:"Dues payback owed",financialProbation:0,brotherhood:""},
   {name:"Miles Harvey",cls:"House Member",due:600,paid:645,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"Paid in Full",rentPaid:2250,rentInstallments:1,rentInstallmentsPaid:1,rentEarlyDiscount:true,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Brotherhood Tshirt", "amount": 25}],notes:"",financialProbation:0,brotherhood:""},
   {name:"Mitchell Brunski",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:"",financialProbation:0,brotherhood:""},
   {name:"Nathan Richards",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:"",financialProbation:0,brotherhood:""},
   {name:"Noah Rugama",cls:"Member",due:600,paid:0,payStatus:"Problem!",payMethod:"Bank Account",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Late Fee", "amount": 50}, {"label": "Late Fee 2", "amount": 25}],notes:"",financialProbation:0,brotherhood:""},
   {name:"Paul Fugett",cls:"Member",due:600,paid:645,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Brotherhood Tshirt", "amount": 25}],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Preston Adams",cls:"New Member",due:400,paid:133.33,payStatus:"Payment Plan",payMethod:"Credit Card",installments:3,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"Problem - $0 paid",financialProbation:0,brotherhood:""},
+  {name:"Preston Adams",cls:"New Member",due:400,paid:266.67,payStatus:"Payment Plan",payMethod:"Credit Card",installments:3,installmentsPaid:2,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"Problem - $0 paid",financialProbation:0,brotherhood:""},
   {name:"Rhett Morgan",cls:"House Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"Paid in Full",rentPaid:2250,rentInstallments:1,rentInstallmentsPaid:1,rentEarlyDiscount:true,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:"",financialProbation:0,brotherhood:""},
   {name:"Ryan Dilts",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:"",financialProbation:0,brotherhood:""},
   {name:"Ryan Riggs",cls:"Member",due:600,paid:650,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Fine", "amount": 25}, {"label": "Fine", "amount": 25}],notes:"",financialProbation:0,brotherhood:""},
   {name:"Salvador Leon",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:"Payment plan",financialProbation:0,brotherhood:""},
-  {name:"Sonny Blackwell",cls:"House Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"Payment Plan",rentPaid:1125,rentInstallments:4,rentInstallmentsPaid:2,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Sonny Blackwell",cls:"House Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"Payment Plan",rentPaid:1687.5,rentInstallments:4,rentInstallmentsPaid:3,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:"",financialProbation:0,brotherhood:""},
   {name:"Spencer Crum",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:"",financialProbation:0,brotherhood:""},
   {name:"Tanner Blood",cls:"Member",due:600,paid:450,payStatus:"Payment Plan",payMethod:"Credit Card",installments:4,installmentsPaid:3,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}, {"label": "Late Fee", "amount": 25}],notes:"",financialProbation:0,brotherhood:""},
   {name:"Tanner Redmon",cls:"Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:"",financialProbation:0,brotherhood:""},
@@ -1730,7 +1920,7 @@ const SPRING_EXP = [
   {section:"Committees",item:"IFC",budgeted:0,spent:0},
   {section:"Committees",item:"Build to Lead",budgeted:0,spent:0},
   {section:"Committees",item:"Intramurals",budgeted:200,spent:0},
-  {section:"Committees",item:"Pig Dinner",budgeted:3706.5,spent:4874.54},
+  {section:"Committees",item:"Pig Dinner",budgeted:3706.5,spent:4743.1},
   {section:"Committees",item:"Brotherhood",budgeted:500,spent:85.47},
   {section:"Committees",item:"Mental Health",budgeted:200,spent:50.82},
   {section:"Committees",item:"Parent Relations",budgeted:0,spent:0},
@@ -1740,7 +1930,7 @@ const SPRING_EXP = [
   {section:"IHQ",item:"IFC Fees",budgeted:1276,spent:1278.6},
   {section:"IHQ",item:"LegFi Fee",budgeted:3528,spent:3780},
   {section:"IHQ",item:"Member Fees",budgeted:3125,spent:3000},
-  {section:"IHQ",item:"Graduate Gifts",budgeted:200,spent:946.6},
+  {section:"IHQ",item:"Graduate Gifts",budgeted:200,spent:1001.7},
   {section:"Officers",item:"Treasurer",budgeted:20,spent:0},
   {section:"Officers",item:"President",budgeted:20,spent:0},
   {section:"Officers",item:"Executive Discretionary",budgeted:150,spent:54.69},
@@ -1748,9 +1938,9 @@ const SPRING_EXP = [
   {section:"Officers",item:"Corresponding Secretary",budgeted:20,spent:0},
   {section:"Officers",item:"Recording Secretary",budgeted:20,spent:0},
   {section:"Other",item:"Other Org Philanthropy",budgeted:700,spent:671.18},
-  {section:"Other",item:"Spring Sing",budgeted:1200,spent:691.02},
+  {section:"Other",item:"Lawncare",budgeted:2000,spent:0},
   {section:"Other",item:"Shenanigans",budgeted:0,spent:0},
-  {section:"Other",item:"Strategic Planning Retreat",budgeted:50,spent:45.72},
+  {section:"Other",item:"Spring Sing",budgeted:1200,spent:691.02},
   {section:"Other",item:"Cabinet Retreat",budgeted:50,spent:0},
   {section:"Other",item:"Misc.",budgeted:800,spent:752.49},
   {section:"Other",item:"Brotherhood Retreat",budgeted:7000,spent:6275.55},
@@ -1762,7 +1952,7 @@ const SPRING_EXP = [
   {section:"Other",item:"FIJI Academy",budgeted:172.46,spent:172.46},
   {section:"Other",item:"Tent",budgeted:0,spent:0},
   {section:"Other",item:"Formal",budgeted:800,spent:450},
-  {section:"Other",item:"Lawncare",budgeted:2000,spent:0}
+  {section:"Other",item:"Strategic Planning Retreat",budgeted:50,spent:45.72}
 ];
 const FALL_EXP = [
   {section:"Officers",item:"President",budgeted:0,spent:0},
@@ -1819,46 +2009,47 @@ const TX_OUT_SEED = [
   {id:"o1774668181348",term:"Spring 2026",date:"2026-04-25",amount:200,budget:"Social",account:"Operating",card:"Check",paid:false,notes:"Colby DJ Islander",dir:"OUT"},
   {id:"o1774592526652",term:"Spring 2026",date:"2026-04-11",amount:1791,budget:"Pig Dinner",account:"Operating",card:"Check",paid:false,notes:"MAC Reservation for Pig Dinner - Needs to go to Jake Edmunds",dir:"OUT"},
   {id:"o1774668142599",term:"Spring 2026",date:"2026-04-11",amount:150,budget:"Formal",account:"Operating",card:"Check",paid:false,notes:"Cayden Bailey - DJ Formal",dir:"OUT"},
-  {id:"o1774895223556",term:"Spring 2026",date:"2026-03-30",amount:273.76,budget:"Spring Sing",account:"Operating",card:"Jakob Card",paid:true,notes:"Spring Sing Costumes - Hobby Lobby",dir:"OUT"},
+  {id:"o1774656380298",term:"Spring 2026",date:"2026-04-03",amount:1001.7,budget:"Graduate Gifts",account:"Operating",card:"Jakob Card",paid:true,notes:"Stoles ",dir:"OUT"},
+  {id:"o1775152823003",term:"Spring 2026",date:"2026-04-02",amount:80.56,budget:"Pig Dinner",account:"Operating",card:"Jakob Card",paid:true,notes:"Pig for Pig Dinner",dir:"OUT"},
   {id:"o1774895715370",term:"Spring 2026",date:"2026-03-30",amount:326.47,budget:"Spring Sing",account:"Operating",card:"Jakob Card",paid:true,notes:"Spring Sing Costumes - Shein ",dir:"OUT"},
+  {id:"o1774895223556",term:"Spring 2026",date:"2026-03-30",amount:273.76,budget:"Spring Sing",account:"Operating",card:"Jakob Card",paid:true,notes:"Spring Sing Costumes - Hobby Lobby",dir:"OUT"},
   {id:"o1774895243756",term:"Spring 2026",date:"2026-03-30",amount:6.35,budget:"Spring Sing",account:"Operating",card:"Jakob Card",paid:true,notes:"Spring Sing Costumes - Good Will",dir:"OUT"},
   {id:"o1774656396882",term:"Spring 2026",date:"2026-03-28",amount:150,budget:"IFC Fees",account:"Operating",card:"Check",paid:false,notes:"Golf Scramble",dir:"OUT"},
-  {id:"o1774656380298",term:"Spring 2026",date:"2026-03-28",amount:946.6,budget:"Graduate Gifts",account:"Operating",card:"Check",paid:false,notes:"Stoles ",dir:"OUT"},
-  {id:"o1774592450186",term:"Spring 2026",date:"2026-03-27",amount:21.18,budget:"Other Org Philanthropy",account:"Operating",card:"Check",paid:false,notes:"Check for Addison's MOTH Poster",dir:"OUT"},
+  {id:"o1774592501151",term:"Spring 2026",date:"2026-03-27",amount:2871.54,budget:"Pig Dinner",account:"Operating",card:"Check",paid:false,notes:"Aramark for Pig Dinner",dir:"OUT"},
   {id:"o1774591563110",term:"Spring 2026",date:"2026-03-27",amount:63.35,budget:"Spring Sing",account:"Operating",card:"Jakob Card",paid:true,notes:"Backdrops",dir:"OUT"},
+  {id:"o1774592450186",term:"Spring 2026",date:"2026-03-27",amount:21.18,budget:"Other Org Philanthropy",account:"Operating",card:"Check",paid:false,notes:"Check for Addison's MOTH Poster",dir:"OUT"},
   {id:"o1774592469236",term:"Spring 2026",date:"2026-03-27",amount:200,budget:"Other Org Philanthropy",account:"Operating",card:"Check",paid:true,notes:"Check for DAA Graduation",dir:"OUT"},
-  {id:"o1774592501151",term:"Spring 2026",date:"2026-03-27",amount:3083.54,budget:"Pig Dinner",account:"Operating",card:"Check",paid:false,notes:"Aramark for Pig Dinner",dir:"OUT"},
   {id:"o1774564444355",term:"Spring 2026",date:"2026-03-26",amount:21.09,budget:"Spring Sing",account:"Operating",card:"Jakob Card",paid:true,notes:"Backdrops",dir:"OUT"},
   {id:"o1774564488939",term:"Spring 2026",date:"2026-03-26",amount:63.58,budget:"Brotherhood",account:"Operating",card:"Jakob Card",paid:true,notes:"Bean bags",dir:"OUT"},
   {id:"o1774416169063",term:"Spring 2026",date:"2026-03-25",amount:306.76,budget:"Social",account:"Operating",card:"Jakob Card",paid:true,notes:"Lights",dir:"OUT"},
+  {id:"o1774564375273",term:"Spring 2026",date:"2026-03-25",amount:225,budget:"Formal",account:"Operating",card:"Jakob Card",paid:true,notes:"Formal Payment Pt. 2",dir:"OUT"},
   {id:"o1774416834157",term:"Spring 2026",date:"2026-03-25",amount:208.67,budget:"Housing",account:"Operating",card:"Jakob Card",paid:true,notes:"Consolidated Paper Group",dir:"OUT"},
   {id:"o1774416184296",term:"Spring 2026",date:"2026-03-25",amount:317.99,budget:"Social",account:"Operating",card:"Jakob Card",paid:true,notes:"Speaker",dir:"OUT"},
-  {id:"o1774564375273",term:"Spring 2026",date:"2026-03-25",amount:225,budget:"Formal",account:"Operating",card:"Jakob Card",paid:true,notes:"Formal Payment Pt. 2",dir:"OUT"},
   {id:"o62",term:"Spring 2026",date:"2026-03-10",amount:1372,budget:"Greek Week",account:"Operating",card:"Check",paid:true,notes:"Head Fees for Greek Week",dir:"OUT"},
   {id:"o56",term:"Spring 2026",date:"2026-03-05",amount:15.89,budget:"Brotherhood",account:"Operating",card:"Jakob Card",paid:true,notes:"Bean bags for house",dir:"OUT"},
   {id:"o57",term:"Spring 2026",date:"2026-03-05",amount:10.94,budget:"Social",account:"Operating",card:"Jakob Card",paid:false,notes:"Nails for boards - Check for Indy - NEED",dir:"OUT"},
   {id:"o60",term:"Spring 2026",date:"2026-03-04",amount:5.61,budget:"Executive Discretionary",account:"Operating",card:"Jakob Card",paid:true,notes:"Saving Hayden",dir:"OUT"},
   {id:"o61",term:"Spring 2026",date:"2026-03-04",amount:312,budget:"Misc.",account:"Operating",card:"Jakob Card",paid:true,notes:"Bronze Owl Pins",dir:"OUT"},
+  {id:"o59",term:"Spring 2026",date:"2026-03-03",amount:24.37,budget:"Executive Discretionary",account:"Operating",card:"Jakob Card",paid:true,notes:"Saving Hayden",dir:"OUT"},
   {id:"o55",term:"Spring 2026",date:"2026-03-03",amount:9000,budget:"House Rent",account:"Housing",card:"Jakob Card",paid:true,notes:"March Rent",dir:"OUT"},
   {id:"o58",term:"Spring 2026",date:"2026-03-03",amount:5.53,budget:"Executive Discretionary",account:"Operating",card:"Jakob Card",paid:true,notes:"Saving Hayden",dir:"OUT"},
-  {id:"o59",term:"Spring 2026",date:"2026-03-03",amount:24.37,budget:"Executive Discretionary",account:"Operating",card:"Jakob Card",paid:true,notes:"Saving Hayden",dir:"OUT"},
   {id:"o54",term:"Spring 2026",date:"2026-03-02",amount:50,budget:"Other Org Philanthropy",account:"Operating",card:"Check",paid:false,notes:"Chi O Tournament - WRITTEN",dir:"OUT"},
   {id:"o53",term:"Spring 2026",date:"2026-03-01",amount:50.82,budget:"Mental Health",account:"Operating",card:"Check",paid:false,notes:"Pizza for bible study - NEED",dir:"OUT"},
-  {id:"o51",term:"Spring 2026",date:"2026-02-28",amount:32.65,budget:"Philanthropy",account:"Operating",card:"Check",paid:true,notes:"Sal Return from philanthropy",dir:"OUT"},
   {id:"o52",term:"Spring 2026",date:"2026-02-28",amount:50,budget:"Philanthropy",account:"Operating",card:"Check",paid:false,notes:"Caden Return from philanthropy - NEED",dir:"OUT"},
-  {id:"o50",term:"Spring 2026",date:"2026-02-27",amount:1873.15,budget:"Composite",account:"Operating",card:"Check",paid:true,notes:"Composite 1/2",dir:"OUT"},
+  {id:"o51",term:"Spring 2026",date:"2026-02-28",amount:32.65,budget:"Philanthropy",account:"Operating",card:"Check",paid:true,notes:"Sal Return from philanthropy",dir:"OUT"},
   {id:"o49",term:"Spring 2026",date:"2026-02-27",amount:29.38,budget:"Philanthropy",account:"Operating",card:"Check",paid:true,notes:"Manny Philanthropy supplies",dir:"OUT"},
-  {id:"o47",term:"Spring 2026",date:"2026-02-23",amount:150,budget:"Other Org Philanthropy",account:"Operating",card:"Jakob Card",paid:false,notes:"Lion Bowl",dir:"OUT"},
+  {id:"o50",term:"Spring 2026",date:"2026-02-27",amount:1873.15,budget:"Composite",account:"Operating",card:"Check",paid:true,notes:"Composite 1/2",dir:"OUT"},
   {id:"o48",term:"Spring 2026",date:"2026-02-23",amount:156.57,budget:"Recruitment",account:"Operating",card:"Jakob Card",paid:true,notes:"Payton Superbowl Dinner",dir:"OUT"},
   {id:"o46",term:"Spring 2026",date:"2026-02-23",amount:200,budget:"Other Org Philanthropy",account:"Operating",card:"Jakob Card",paid:false,notes:"Bike4Alz Golf Scramble",dir:"OUT"},
-  {id:"o44",term:"Spring 2026",date:"2026-02-21",amount:395.41,budget:"Philanthropy",account:"Operating",card:"Jakob Card",paid:true,notes:"Amazon order for Phil. Items",dir:"OUT"},
+  {id:"o47",term:"Spring 2026",date:"2026-02-23",amount:150,budget:"Other Org Philanthropy",account:"Operating",card:"Jakob Card",paid:false,notes:"Lion Bowl",dir:"OUT"},
   {id:"o45",term:"Spring 2026",date:"2026-02-21",amount:329.45,budget:"Philanthropy",account:"Operating",card:"Jakob Card",paid:true,notes:"Dunk tank",dir:"OUT"},
-  {id:"o43",term:"Spring 2026",date:"2026-02-17",amount:19.18,budget:"Executive Discretionary",account:"Operating",card:"Jakob Card",paid:true,notes:"Adjustment",dir:"OUT"},
+  {id:"o44",term:"Spring 2026",date:"2026-02-21",amount:395.41,budget:"Philanthropy",account:"Operating",card:"Jakob Card",paid:true,notes:"Amazon order for Phil. Items",dir:"OUT"},
   {id:"o41",term:"Spring 2026",date:"2026-02-17",amount:34.99,budget:"Misc.",account:"Operating",card:"Jakob Card",paid:true,notes:"New tie",dir:"OUT"},
   {id:"o42",term:"Spring 2026",date:"2026-02-17",amount:20,budget:"Historian",account:"Operating",card:"Jakob Card",paid:true,notes:"White Boards + Marker",dir:"OUT"},
+  {id:"o43",term:"Spring 2026",date:"2026-02-17",amount:19.18,budget:"Executive Discretionary",account:"Operating",card:"Jakob Card",paid:true,notes:"Adjustment",dir:"OUT"},
   {id:"o40",term:"Spring 2026",date:"2026-02-11",amount:69.51,budget:"Housing",account:"Operating",card:"Jakob Card",paid:true,notes:"House Supplies",dir:"OUT"},
-  {id:"o38",term:"Spring 2026",date:"2026-02-10",amount:50,budget:"Other Org Philanthropy",account:"Operating",card:"Jakob Card",paid:true,notes:"Check for MOTH",dir:"OUT"},
   {id:"o39",term:"Spring 2026",date:"2026-02-10",amount:100,budget:"Misc.",account:"Operating",card:"Jakob Card",paid:true,notes:"Check for Coming Home King",dir:"OUT"},
+  {id:"o38",term:"Spring 2026",date:"2026-02-10",amount:50,budget:"Other Org Philanthropy",account:"Operating",card:"Jakob Card",paid:true,notes:"Check for MOTH",dir:"OUT"},
   {id:"o37",term:"Spring 2026",date:"2026-02-09",amount:252,budget:"LegFi Fee",account:"Operating",card:"Jakob Card",paid:true,notes:"New Member fee",dir:"OUT"},
   {id:"o36",term:"Spring 2026",date:"2026-02-07",amount:119.87,budget:"Brotherhood Retreat",account:"Operating",card:"Jakob Card",paid:true,notes:"New Member award dinner",dir:"OUT"},
   {id:"o35",term:"Spring 2026",date:"2026-02-06",amount:6.69,budget:"Brotherhood Retreat",account:"Operating",card:"Jakob Card",paid:true,notes:"Sandwich",dir:"OUT"},
@@ -1898,12 +2089,18 @@ const TX_OUT_SEED = [
   {id:"o1",term:"Spring 2026",date:"2026-01-05",amount:2505.88,budget:"T-Shirt",account:"Operating",card:"Jakob Card",paid:true,notes:"Rush Shirts",dir:"OUT"}
 ];
 const TX_IN_SEED = [
+  {id:"i1775247244210",term:"Spring 2026",date:"2026-04-03",amount:221,category:"Other",account:"Operating",notes:"Philanthrophy",dir:"IN",paid:true},
+  {id:"i1775247187877",term:"Spring 2026",date:"2026-04-03",amount:450,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
+  {id:"i1775247179094",term:"Spring 2026",date:"2026-04-03",amount:145.27,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
+  {id:"i1775088895493",term:"Spring 2026",date:"2026-04-02",amount:129.14,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
+  {id:"i1775153032217",term:"Spring 2026",date:"2026-04-02",amount:129.14,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
+  {id:"i1775088994409",term:"Spring 2026",date:"2026-04-02",amount:544.78,category:"Rent",account:"Housing",notes:"",dir:"IN",paid:true},
   {id:"i1774592965998",term:"Spring 2026",date:"2026-03-24",amount:544.78,category:"Rent",account:"Housing",notes:"",dir:"IN",paid:true},
   {id:"i1774229120302",term:"Spring 2026",date:"2026-03-23",amount:96.85,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
-  {id:"i59",term:"Spring 2026",date:"2026-03-05",amount:169.49,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i60",term:"Spring 2026",date:"2026-03-05",amount:544.78,category:"Rent",account:"Housing",notes:"",dir:"IN",paid:true},
-  {id:"i57",term:"Spring 2026",date:"2026-03-04",amount:175,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
+  {id:"i59",term:"Spring 2026",date:"2026-03-05",amount:169.49,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i58",term:"Spring 2026",date:"2026-03-04",amount:1291.34,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
+  {id:"i57",term:"Spring 2026",date:"2026-03-04",amount:175,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i56",term:"Spring 2026",date:"2026-03-03",amount:145.27,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i55",term:"Spring 2026",date:"2026-03-02",amount:387.4,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i52",term:"Spring 2026",date:"2026-02-27",amount:121.06,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
@@ -1914,13 +2111,13 @@ const TX_IN_SEED = [
   {id:"i49",term:"Spring 2026",date:"2026-02-21",amount:581.1,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i48",term:"Spring 2026",date:"2026-02-17",amount:1089.56,category:"Rent",account:"Housing",notes:"",dir:"IN",paid:true},
   {id:"i47",term:"Spring 2026",date:"2026-02-17",amount:290.55,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
-  {id:"i45",term:"Spring 2026",date:"2026-02-11",amount:544.78,category:"Rent",account:"Housing",notes:"",dir:"IN",paid:true},
   {id:"i43",term:"Spring 2026",date:"2026-02-11",amount:48.42,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
+  {id:"i45",term:"Spring 2026",date:"2026-02-11",amount:544.78,category:"Rent",account:"Housing",notes:"",dir:"IN",paid:true},
   {id:"i42",term:"Spring 2026",date:"2026-02-10",amount:200,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i41",term:"Spring 2026",date:"2026-02-10",amount:668.26,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
-  {id:"i39",term:"Spring 2026",date:"2026-02-09",amount:670,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i40",term:"Spring 2026",date:"2026-02-09",amount:978.18,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i44",term:"Spring 2026",date:"2026-02-09",amount:544.78,category:"Rent",account:"Housing",notes:"",dir:"IN",paid:true},
+  {id:"i39",term:"Spring 2026",date:"2026-02-09",amount:670,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i38",term:"Spring 2026",date:"2026-02-08",amount:101.73,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i31",term:"Spring 2026",date:"2026-02-05",amount:67.79,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i36",term:"Spring 2026",date:"2026-02-05",amount:544.78,category:"Rent",account:"Housing",notes:"",dir:"IN",paid:true},
@@ -2096,7 +2293,7 @@ var fallExp = (_storedFall && _storedFall.length === FALL_EXP.length)
   ? _storedFall
   : FALL_EXP.map(function(e){ return Object.assign({},e); });
 // Seed version — bump this date whenever the seed data is updated from a backup
-const SEED_VERSION = "2026-03-31";
+const SEED_VERSION = "2026-04-04";
 
 // Force-load from seed if localStorage seed version is older than current seed
 var _storedSeedVer = localStorage.getItem("fiji_seed_version");
@@ -2487,6 +2684,10 @@ function showView(id, btn) {
   var el = document.getElementById("view-"+id);
   if (el) el.classList.add("active");
   if (btn) btn.classList.add("active");
+  // Sync mobile tab bar
+  document.querySelectorAll(".mob-tab").forEach(function(b){b.classList.remove("active");});
+  var mobTab = document.getElementById("mob-tab-"+id);
+  if (mobTab) mobTab.classList.add("active");
   if      (id === "dashboard")    renderDashboard();
   else if (id === "revenues")     renderRevenues();
   else if (id === "expenditures") renderExpenditures();
@@ -2802,7 +3003,7 @@ function renderDashboard() {
       +'<div style="font-size:28px;font-weight:700;color:'+healthColor+';font-family:var(--font-display)">'+healthLabel+'</div>'
       +'<div style="font-size:12px;color:var(--muted)">'+healthDesc+'</div>'
       +'</div>'
-      +'<table class="data-table" style="font-size:12px">'
+      +'<div class="table-scroll-wrap"><table class="data-table" style="font-size:12px">'
       +'<thead><tr>'
       +'<th>Account</th>'
       +'<th style="text-align:right">Current Balance</th>'
@@ -2827,7 +3028,7 @@ function renderDashboard() {
         +'<td class="mono" style="text-align:right;color:var(--green)">+'+fmt(outstandingDues+outstandingRent)+'</td>'
         +'<td class="mono" style="text-align:right;color:var(--amber)">−'+fmt(operatingRemaining+housingRemaining)+'</td>'
         +'<td class="mono" style="text-align:right;font-weight:700;color:'+(totalEnd>=endGoal?"var(--gold)":totalEnd>=0?"var(--amber)":"var(--red)")+'">'+fmt(totalEnd)+'</td>'
-      +'</tr></tbody></table>'
+      +'</tr></tbody></table></div>'
       +'<div style="margin-top:12px;padding:10px 14px;background:rgba(201,168,76,0.07);border-radius:6px;display:flex;justify-content:space-between;align-items:center">'
       +'<div>'
         +'<span style="font-size:12px;color:var(--muted)">End-of-Term Goal</span>'
@@ -3982,9 +4183,9 @@ function renderCalculations() {
   }).join("") + '<tr class="total-row"><td>Total</td>'
     +'<td class="mono" style="text-align:right">'+brothers.spring.total+'</td>'
     +'<td class="mono" style="text-align:right">'+brothers.fall.total+'</td></tr>';
-  document.getElementById("calc-brothers").innerHTML = '<table class="data-table" style="font-size:12px">'
+  document.getElementById("calc-brothers").innerHTML = '<div class="table-scroll-wrap"><table class="data-table" style="font-size:12px">'
     +'<thead><tr><th>Class</th><th style="text-align:right">Spring</th><th style="text-align:right">Fall</th></tr></thead>'
-    +'<tbody>'+broRows+'</tbody></table>';
+    +'<tbody>'+broRows+'</tbody></table></div>';
 
   // Dues rates table
   var ratesRows = [["New Member","newMember"],["Member","member"],["House Member","houseMember"]].map(function(p) {
@@ -4023,9 +4224,9 @@ function renderCalculations() {
     ratesRows += '<tr style="background:rgba(78,158,110,0.03)"><td style="font-size:11px;color:var(--muted)">Early Rent Discount</td>'
       +'<td class="mono" style="text-align:right;color:var(--green)" colspan="2">−'+fmt(config.rentEarlyDiscount||50)+'</td></tr>';
   }
-  document.getElementById("calc-rates").innerHTML = '<table class="data-table" style="font-size:12px">'
+  document.getElementById("calc-rates").innerHTML = '<div class="table-scroll-wrap"><table class="data-table" style="font-size:12px">'
     +'<thead><tr><th>Class</th><th style="text-align:right">Spring</th><th style="text-align:right">Fall</th></tr></thead>'
-    +'<tbody>'+ratesRows+'</tbody></table>';
+    +'<tbody>'+ratesRows+'</tbody></table></div>';
 
   // IHQ fees
   var feeRows = ihq.map(function(f,i) {
@@ -4038,9 +4239,9 @@ function renderCalculations() {
     +'<td class="mono" style="text-align:right">'+fmt(ihqPerBroTotal)+'</td>'
     +'<td class="mono" style="text-align:right">'+fmt(ihqSpringTotal)+'</td>'
     +'<td class="mono" style="text-align:right">'+fmt(ihqFallTotal)+'</td></tr>';
-  document.getElementById("calc-fees").innerHTML = '<table class="data-table" style="font-size:12px">'
+  document.getElementById("calc-fees").innerHTML = '<div class="table-scroll-wrap"><table class="data-table" style="font-size:12px">'
     +'<thead><tr><th>Fee</th><th style="text-align:right">Per Bro</th><th style="text-align:right">Spring</th><th style="text-align:right">Fall</th></tr></thead>'
-    +'<tbody>'+feeRows+'</tbody></table>';
+    +'<tbody>'+feeRows+'</tbody></table></div>';
 
   // Housing (edit mode only section)
   // Housing/Rent section — always visible, editable in edit mode
@@ -4148,7 +4349,7 @@ function renderCalculations() {
         // Spring
         +'<div>'
           +'<div class="mono" style="font-size:9px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin-bottom:10px">Spring 2026</div>'
-          +'<table class="data-table" style="font-size:12px">'
+          +'<div class="table-scroll-wrap"><table class="data-table" style="font-size:12px">'
           +'<tbody>'
           +'<tr><td style="color:var(--muted)">Total Rent to Corp</td><td class="mono" style="text-align:right">'+fmt(hr.spring.rent)+'</td></tr>'
           +'<tr><td style="color:var(--muted)">Per Installment ('+spRI+'x)</td><td class="mono" style="text-align:right;color:var(--blue)">'+fmt(spInstAmt)+'</td></tr>'
@@ -4158,12 +4359,12 @@ function renderCalculations() {
           +'<tr><td style="color:var(--muted)">Non-House Brothers</td><td class="mono" style="text-align:right">'+spNonHouse+'</td></tr>'
           +'<tr><td style="color:var(--muted);font-weight:600">Total Parlor Collected</td><td class="mono" style="text-align:right;font-weight:700;color:var(--green)">'+fmt(spParlorTotal)+'</td></tr>'
           +'<tr><td style="color:var(--muted)">Rent / House Member</td><td class="mono" style="text-align:right;color:var(--blue)">'+fmt(hr.spring.rentPerBrother||2250)+'</td></tr>'
-          +'</tbody></table>'
+          +'</tbody></table></div>'
         +'</div>'
         // Fall
         +'<div>'
           +'<div class="mono" style="font-size:9px;letter-spacing:1px;color:var(--blue);text-transform:uppercase;margin-bottom:10px">Fall 2026</div>'
-          +'<table class="data-table" style="font-size:12px">'
+          +'<div class="table-scroll-wrap"><table class="data-table" style="font-size:12px">'
           +'<tbody>'
           +'<tr><td style="color:var(--muted)">Total Rent to Corp</td><td class="mono" style="text-align:right">'+fmt(hr.fall.rent)+'</td></tr>'
           +'<tr><td style="color:var(--muted)">Per Installment ('+faRI+'x)</td><td class="mono" style="text-align:right;color:var(--blue)">'+fmt(faInstAmt)+'</td></tr>'
@@ -4173,7 +4374,7 @@ function renderCalculations() {
           +'<tr><td style="color:var(--muted)">Non-House Brothers</td><td class="mono" style="text-align:right">'+faNonHouse+'</td></tr>'
           +'<tr><td style="color:var(--muted);font-weight:600">Total Parlor Collected</td><td class="mono" style="text-align:right;font-weight:700;color:var(--green)">'+fmt(faParlorTotal)+'</td></tr>'
           +'<tr><td style="color:var(--muted)">Rent / House Member</td><td class="mono" style="text-align:right;color:var(--blue)">'+fmt(hr.fall.rentPerBrother||2250)+'</td></tr>'
-          +'</tbody></table>'
+          +'</tbody></table></div>'
         +'</div>'
         +'</div>'
         +'<div style="margin-top:10px;font-size:11px;color:var(--dim);padding-top:8px;border-top:1px solid var(--border)">'
@@ -4211,7 +4412,7 @@ function renderCalculations() {
         + '</div>';
     } else {
       var liveBalances = getFunds();
-      balEl.innerHTML = '<table class="data-table" style="font-size:12px">'
+      balEl.innerHTML = '<div class="table-scroll-wrap"><table class="data-table" style="font-size:12px">'
         + '<thead><tr><th>Account</th><th style="text-align:right">Starting Balance</th><th style="text-align:right">Live Balance</th><th style="text-align:right">Change</th></tr></thead>'
         + '<tbody>'
         + accts.map(function(acct) {
@@ -4225,7 +4426,7 @@ function renderCalculations() {
               + '<td class="mono" style="text-align:right;color:' + diffColor + '">' + (diff>=0?'+':'') + fmt(diff) + '</td>'
               + '</tr>';
           }).join('')
-        + '</tbody></table>'
+        + '</tbody></table></div>'
         + '<div style="font-size:11px;color:var(--muted);margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">'
         + 'Starting balances set at term open. Live balance = starting + deposits − paid expenses. '
         + 'Click <b>✎ Edit</b> to update starting balances.</div>'
@@ -4237,7 +4438,7 @@ function renderCalculations() {
   }
 
   // Revenue breakdown
-  document.getElementById("calc-revenue").innerHTML = '<table class="data-table" style="font-size:12px">'
+  document.getElementById("calc-revenue").innerHTML = '<div class="table-scroll-wrap"><table class="data-table" style="font-size:12px">'
     +'<thead><tr><th>Term</th><th style="text-align:right">Dues + Fees</th>'
     +'<th style="text-align:right">IHQ Costs</th><th style="text-align:right">Net to Chapter</th>'
     +'<th style="text-align:right;color:var(--muted)">Housing (Pass-Through)</th></tr></thead><tbody>'
@@ -4253,10 +4454,10 @@ function renderCalculations() {
     +'<td class="mono" style="text-align:right;color:var(--red)">&minus;'+fmt(ihqSpringTotal+ihqFallTotal)+'</td>'
     +'<td class="mono" style="text-align:right;font-weight:700;color:var(--gold)">'+fmt(springChapter+fallChapter)+'</td>'
     +'<td class="mono" style="text-align:right;color:var(--muted)">'+fmt(springHousingRev+fallHousingRev)+'</td></tr>'
-    +'</tbody></table>';
+    +'</tbody></table></div>';
 
   // Surplus
-  document.getElementById("calc-surplus").innerHTML = '<table class="data-table" style="font-size:12px">'
+  document.getElementById("calc-surplus").innerHTML = '<div class="table-scroll-wrap"><table class="data-table" style="font-size:12px">'
     +'<thead><tr><th>Term</th><th style="text-align:right">Net Revenue</th><th style="text-align:right">Budgeted</th>'
     +'<th style="text-align:right">Spent</th><th style="text-align:right">Budget Surplus</th></tr></thead><tbody>'
     +'<tr><td>Spring 2026</td><td class="mono" style="text-align:right">'+fmt(springChapter)+'</td>'
@@ -4267,7 +4468,7 @@ function renderCalculations() {
     +'<td class="mono" style="text-align:right">'+fmt(fallBudgeted)+'</td>'
     +'<td class="mono" style="text-align:right">'+fmt(fallSpent)+'</td>'
     +'<td class="mono" style="text-align:right;font-weight:700;color:'+(fallSurplus>=0?"var(--green)":"var(--red)")+'">'+(fallSurplus>=0?"+":"")+fmt(fallSurplus)+'</td></tr>'
-    +'</tbody></table>';
+    +'</tbody></table></div>';
 
   // Budget breakdown
   var sections = {spring:{}, fall:{}};
@@ -4276,7 +4477,7 @@ function renderCalculations() {
   var allSections = Object.keys(Object.assign({}, sections.spring, sections.fall));
   var sTot = Object.values(sections.spring).reduce(function(a,b){return a+b;},0);
   var fTot = Object.values(sections.fall).reduce(function(a,b){return a+b;},0);
-  document.getElementById("calc-breakdown").innerHTML = '<table class="data-table" style="font-size:12px">'
+  document.getElementById("calc-breakdown").innerHTML = '<div class="table-scroll-wrap"><table class="data-table" style="font-size:12px">'
     +'<thead><tr><th>Section</th><th style="text-align:right">Spring</th><th style="text-align:right">Spring %</th>'
     +'<th style="text-align:right">Fall</th><th style="text-align:right">Fall %</th></tr></thead><tbody>'
     +allSections.map(function(s) {
@@ -4288,7 +4489,7 @@ function renderCalculations() {
     }).join("")
     +'<tr class="total-row"><td>Total</td><td class="mono" style="text-align:right">'+fmt(sTot)+'</td><td></td>'
     +'<td class="mono" style="text-align:right">'+fmt(fTot)+'</td><td></td></tr>'
-    +'</tbody></table>';
+    +'</tbody></table></div>';
 }
 
 function toggleCalcEdit() {
@@ -4506,7 +4707,7 @@ function renderCommitteeDrilldown() {
     +'<div><div class="kpi-label">Remaining</div><div class="mono" style="font-size:18px;font-weight:700;color:'+(totalB-totalS<0?"var(--red)":"var(--green)")+'">'+fmt(totalB-totalS)+'</div></div>'
     +'<div><div class="kpi-label">% Used</div><div class="mono" style="font-size:18px;font-weight:700">'+pct(totalS/totalB)+'</div></div>'
     +'</div>'
-    +'<table class="data-table"><thead><tr><th>Line Item</th><th style="text-align:right">Budgeted</th>'
+    +'<div class="table-scroll-wrap"><table class="data-table"><thead><tr><th>Line Item</th><th style="text-align:right">Budgeted</th>'
     +'<th style="text-align:right">Spent</th><th style="text-align:right">Remaining</th><th>Progress</th></tr></thead><tbody>'
     +items.map(function(i){
       var rem=i.budgeted-i.spent; var over=rem<0;
@@ -4520,7 +4721,7 @@ function renderCommitteeDrilldown() {
     +'<tr class="total-row"><td>Total</td><td class="mono" style="text-align:right">'+fmt(totalB)+'</td>'
     +'<td class="mono" style="text-align:right">'+fmt(totalS)+'</td>'
     +'<td class="mono" style="text-align:right;color:'+(totalS>totalB?"var(--red)":"var(--green)")+'">'+fmt(totalB-totalS)+'</td><td></td></tr>'
-    +'</tbody></table>';
+    +'</tbody></table></div>';
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -4773,7 +4974,7 @@ function renderReports() {
     if (!arRows.length) {
       arEl.innerHTML = '<div style="text-align:center;color:var(--green);padding:16px">✓ All brothers are paid in full.</div>';
     } else {
-      arEl.innerHTML = '<table class="data-table" style="font-size:12px"><thead><tr>'
+      arEl.innerHTML = '<div class="table-scroll-wrap"><table class="data-table" style="font-size:12px"><thead><tr>'
         +'<th>Brother</th><th>Status</th><th style="text-align:right">Owed (Dues)</th>'
         +'<th style="text-align:right">Owed (Rent)</th><th style="text-align:right">Total Owed</th>'
         +'<th>Prob. Level</th></tr></thead><tbody>'
@@ -4805,7 +5006,7 @@ function renderReports() {
           }).join('')
         +'<tr class="total-row"><td>Total</td><td></td><td></td><td></td>'
           +'<td class="mono" style="text-align:right;font-weight:700;color:var(--red)">'+fmt(arTotal)+'</td><td></td></tr>'
-        +'</tbody></table>';
+        +'</tbody></table></div>';
     }
     if (arTotalEl) arTotalEl.textContent = arTotal > 0 ? fmt(arTotal) + ' outstanding' : '✓ $0 outstanding';
   }
@@ -4817,7 +5018,7 @@ function renderReports() {
     if (!onProb.length) {
       probEl.innerHTML = '<div style="text-align:center;color:var(--green);padding:16px">✓ No brothers on financial probation.</div>';
     } else {
-      probEl.innerHTML = '<table class="data-table" style="font-size:12px"><thead><tr>'
+      probEl.innerHTML = '<div class="table-scroll-wrap"><table class="data-table" style="font-size:12px"><thead><tr>'
         +'<th>Brother</th><th>Class</th><th>Probation Level</th><th>Dues Status</th><th style="text-align:right">Balance Owed</th>'
         +'</tr></thead><tbody>'
         + onProb.map(function(d) {
@@ -4835,7 +5036,7 @@ function renderReports() {
               +'<td class="mono" style="text-align:right;color:var(--red);font-weight:700">'+fmt(owed)+'</td>'
               +'</tr>';
           }).join('')
-        +'</tbody></table>';
+        +'</tbody></table></div>';
     }
   }
 
@@ -5553,11 +5754,11 @@ function renderCommitteeBudget() {
   var wrap = document.getElementById("bud-comm-table-wrap");
   if (wrap) wrap.innerHTML = filtered.length===0
     ? '<div style="padding:32px;text-align:center;color:var(--dim)">No items match filter.</div>'
-    : '<table class="data-table">'
+    : '<div class="table-scroll-wrap"><table class="data-table">'
       +'<thead><tr><th>Line Item</th><th style="text-align:right">Budgeted</th>'
       +'<th style="text-align:right">Spent</th><th style="text-align:right">Remaining</th>'
       +'<th>Progress</th><th>Status</th></tr></thead>'
-      +'<tbody>'+rows+'</tbody></table>';
+      +'<tbody>'+rows+'</tbody></table></div>';
 
   // ── Charts ────────────────────────────────────────────────────────────
   var secOrder  = ["Officers","Committees","IHQ","Other","Housing Corp"];
@@ -5667,6 +5868,31 @@ function renderCommitteeBudget() {
   }
 }
 
+
+
+// ── MOBILE NAV ──────────────────────────────────────────────
+function toggleMobileMore(btn) {
+  var menu = document.getElementById('mobile-more-menu');
+  if (!menu) return;
+  var isOpen = menu.classList.contains('open');
+  menu.classList.toggle('open');
+  var mobTab = document.getElementById('mob-tab-more');
+  if (mobTab) mobTab.classList.toggle('active', !isOpen);
+}
+function closeMobileMore() {
+  var menu = document.getElementById('mobile-more-menu');
+  if (menu) menu.classList.remove('open');
+  var mobTab = document.getElementById('mob-tab-more');
+  if (mobTab) mobTab.classList.remove('active');
+}
+// Close more menu when tapping outside
+document.addEventListener('click', function(e) {
+  var menu = document.getElementById('mobile-more-menu');
+  var moreBtn = document.getElementById('mob-tab-more');
+  if (menu && menu.classList.contains('open') && !menu.contains(e.target) && e.target !== moreBtn && !moreBtn.contains(e.target)) {
+    closeMobileMore();
+  }
+});
 
 async function init() {
   recomputeExpSpent();
