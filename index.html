@@ -2311,10 +2311,7 @@ if (_storedSeedVer !== SEED_VERSION) {
   localStorage.setItem("fiji_spring_exp",    JSON.stringify(SPRING_EXP.map(function(e){ return Object.assign({}, e); })));
   localStorage.setItem("fiji_fall_exp",      JSON.stringify(FALL_EXP.map(function(e){ return Object.assign({}, e); })));
   localStorage.setItem("fiji_seed_version",  SEED_VERSION);
-  // Reset password hash so default password works again
-  var _cfg = JSON.parse(localStorage.getItem("fiji_config") || "{}");
-  delete _cfg.passwordHash;
-  localStorage.setItem("fiji_config", JSON.stringify(_cfg));
+  // Keep config/password intact
 }
 
 let txList = JSON.parse(localStorage.getItem("fiji_tx") || "null") || [...TX_OUT_SEED, ...TX_IN_SEED];
@@ -5453,14 +5450,13 @@ async function tryLogin() {
   var inputHash = await hashStr(input);
 
   if (inputHash === storedHash) {
-    // Correct — save hash to local config and unlock
+    // Correct — unlock and show app (no full reinit needed, data still in memory)
     config.passwordHash = storedHash;
     saveLocal();
     localStorage.setItem("fiji_authed","1");
     document.getElementById("login-screen").style.display = "none";
     document.getElementById("app").style.display = "flex";
-  // Data is loaded from localStorage or seeds automatically
-    init();
+    refreshAll();
   } else {
     errorEl.style.display = "block";
     errorEl.textContent = "\u2715 Incorrect password. Try again.";
@@ -5490,7 +5486,12 @@ async function changePassword() {
 
 function logout() {
   localStorage.removeItem("fiji_authed");
-  location.reload();
+  document.getElementById("login-screen").style.display = "flex";
+  document.getElementById("app").style.display = "none";
+  var inp = document.getElementById("login-input");
+  if (inp) { inp.value = ""; setTimeout(function(){ inp.focus(); }, 100); }
+  var err = document.getElementById("login-error");
+  if (err) err.style.display = "none";
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -6882,16 +6883,11 @@ async function manualSync() {
 }
 
 (async function authCheck() {
-  if (localStorage.getItem("fiji_authed") === "1") {
-    document.getElementById("login-screen").style.display = "none";
-    document.getElementById("app").style.display = "flex";
-  // Data is loaded from localStorage or seeds automatically
-    init();
-  } else {
-    document.getElementById("login-screen").style.display = "flex";
-    document.getElementById("app").style.display = "none";
-    setTimeout(function(){ var el = document.getElementById("login-input"); if(el) el.focus(); }, 100);
-  }
+  // Always open the app directly — login only required after manually locking
+  document.getElementById("login-screen").style.display = "none";
+  document.getElementById("app").style.display = "flex";
+  localStorage.setItem("fiji_authed", "1");
+  init();
 })();
 
 </script>
