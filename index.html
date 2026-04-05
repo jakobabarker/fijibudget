@@ -2311,7 +2311,10 @@ if (_storedSeedVer !== SEED_VERSION) {
   localStorage.setItem("fiji_spring_exp",    JSON.stringify(SPRING_EXP.map(function(e){ return Object.assign({}, e); })));
   localStorage.setItem("fiji_fall_exp",      JSON.stringify(FALL_EXP.map(function(e){ return Object.assign({}, e); })));
   localStorage.setItem("fiji_seed_version",  SEED_VERSION);
-  // Keep config/password — don't wipe settings
+  // Reset password hash so default password works again
+  var _cfg = JSON.parse(localStorage.getItem("fiji_config") || "{}");
+  delete _cfg.passwordHash;
+  localStorage.setItem("fiji_config", JSON.stringify(_cfg));
 }
 
 let txList = JSON.parse(localStorage.getItem("fiji_tx") || "null") || [...TX_OUT_SEED, ...TX_IN_SEED];
