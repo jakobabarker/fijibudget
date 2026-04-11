@@ -270,6 +270,9 @@
   .flagged-row td:first-child { border-left: 2px solid var(--amber); }
   .unpaid-row  td:first-child { border-left: 2px solid var(--red); }
   .early-pay-row td:first-child::after { content: " ✓"; font-size: 10px; color: var(--green); }
+  .exp-main-row:hover td { background: rgba(255,252,240,0.02); }
+  .exp-main-row td { transition: background 0.12s; }
+  .exp-detail-panel { width: 100%; }
   .tx-main-row:hover td { background: rgba(255,252,240,0.02); }
   .tx-detail-row td { padding: 0 !important; }
   .tx-main-row.flagged-row { border-left: 3px solid var(--amber); }
@@ -350,157 +353,102 @@
   ══════════════════════════════════════════════════════ */
   @media (max-width: 768px) {
 
-    html, body { overflow: hidden; font-size: 13px; }
+    html, body { overflow: hidden; -webkit-text-size-adjust: 100%; }
 
-    /* Header — compact on mobile */
+    /* ── Header ── */
     header { padding: 0 14px; height: 48px; }
     header::after { opacity: 0.12; }
-    .header-left { gap: 0; }
     .hdr-subtitle { display: none !important; }
     .hdr-hide-mobile { display: none !important; }
-    .term-badge { padding: 3px 10px; font-size: 9.5px; letter-spacing: 1px; }
+    .header-left { gap: 0; }
+    .term-badge { padding: 4px 11px; font-size: 10px; letter-spacing: 1px; }
 
-    /* Hide desktop nav — replaced by bottom tab bar */
+    /* ── Hide desktop nav, show mobile nav ── */
     nav { display: none !important; }
+    #mobile-nav { display: flex !important; }
 
-    /* Bottom tab bar */
-    #mobile-nav {
-      display: flex !important;
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      height: 56px;
-      background: var(--surface);
-      border-top: 1px solid var(--border);
-      z-index: 50;
-      padding: 0 4px;
-      padding-bottom: env(safe-area-inset-bottom, 0px);
-    }
-    .mob-tab {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 3px;
-      padding: 6px 2px;
-      background: transparent;
-      border: none;
-      color: var(--muted);
-      font-family: var(--font-display);
-      font-size: 7.5px;
-      font-weight: 700;
-      letter-spacing: 0.8px;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: color 0.15s;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .mob-tab svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.5; }
-    .mob-tab.active { color: var(--gold); }
-    .mob-tab.active svg { stroke: var(--gold); }
+    /* ── Content — pad bottom for tab bar ── */
+    #content { padding-bottom: calc(58px + env(safe-area-inset-bottom, 0px)); overflow-y: auto; -webkit-overflow-scrolling: touch; }
 
-    /* More menu */
-    #mobile-more-menu {
-      display: none;
-      position: fixed;
-      bottom: 56px; left: 0; right: 0;
-      background: var(--surface);
-      border-top: 1px solid var(--border);
-      z-index: 49;
-      padding: 8px 0;
-    }
-    #mobile-more-menu.open { display: block; }
-    .mob-more-item {
-      display: block; width: 100%;
-      padding: 13px 22px;
-      background: transparent; border: none;
-      color: var(--muted);
-      font-family: var(--font-display);
-      font-size: 12px; font-weight: 700;
-      letter-spacing: 1.5px; text-transform: uppercase;
-      text-align: left; cursor: pointer;
-      border-bottom: 1px solid var(--border);
-    }
-    .mob-more-item:last-child { border-bottom: none; }
-    .mob-more-item.active { color: var(--gold); }
+    /* ── Views ── */
+    .view { padding: 14px 12px 20px; }
+    .page-header { margin-bottom: 12px; }
+    .section-title { font-size: 16px; letter-spacing: 2px; }
+    .page-header .eyebrow { font-size: 8.5px; margin-bottom: 4px; }
 
-    /* Content area — add bottom padding for tab bar */
-    #content {
-      padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
-    }
+    /* ── KPI grid: 2 cols ── */
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 9px; margin-bottom: 14px; }
+    .kpi { padding: 12px 13px; }
+    .kpi-label { font-size: 8px; letter-spacing: 1px; margin-bottom: 7px; }
+    .kpi-value { font-size: 20px; }
+    .kpi-sub { font-size: 9.5px; margin-top: 3px; }
 
-    /* Views — tighter padding */
-    .view { padding: 16px 14px; }
+    /* ── Layout stacking ── */
+    .two-col   { grid-template-columns: 1fr; gap: 10px; margin-bottom: 12px; }
+    .three-col { grid-template-columns: 1fr; gap: 10px; margin-bottom: 12px; }
 
-    /* Header buttons — hide less important ones on mobile */
-    .hdr-hide-mobile { display: none !important; }
+    /* ── Cards ── */
+    .card { border-radius: 10px; }
+    .card-header { padding: 10px 13px 8px; font-size: 8.5px; }
 
-    /* KPI grid — 2 cols on mobile */
-    .kpi-grid {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      margin-bottom: 16px;
-    }
-    .kpi { padding: 14px 14px; }
-    .kpi-value { font-size: 21px; }
+    /* ── Tables — horizontal scroll ── */
+    .table-scroll-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 10px; }
+    .data-table { min-width: 520px; font-size: 12px; }
+    .data-table th { padding: 8px 10px; font-size: 8px; letter-spacing: 0.7px; }
+    .data-table td { padding: 8px 10px; }
 
-    /* Two-col → single col */
-    .two-col { grid-template-columns: 1fr; gap: 12px; }
+    /* ── Filter bar ── */
+    .filter-bar { gap: 7px; }
+    .filter-bar input { width: 100%; }
+    .filter-bar select { flex: 1; min-width: 0; font-size: 12px; }
 
-    /* Three-col → single col */
-    .three-col { grid-template-columns: 1fr; gap: 12px; }
-
-    /* Section title smaller */
-    .section-title { font-size: 17px; letter-spacing: 2px; }
-    .page-header { margin-bottom: 14px; }
-
-    /* Tables — horizontal scroll */
-    .table-scroll-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-    .data-table { min-width: 540px; }
-    .data-table th, .data-table td { padding: 8px 10px; font-size: 11.5px; }
-
-    /* Filter bar — wrap nicely */
-    .filter-bar { gap: 8px; }
-    .filter-bar input, .filter-bar select { min-width: 0; flex: 1; font-size: 12px; }
-
-    /* Modals — full-screen on mobile */
+    /* ── Modals — sheet from bottom ── */
     .modal-bg { align-items: flex-end; }
     .modal {
-      width: 100% !important;
-      max-width: 100% !important;
-      border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
-      max-height: 88vh;
-      padding: 20px 18px 32px;
+      width: 100% !important; max-width: 100% !important;
+      border-radius: 14px 14px 0 0 !important;
+      max-height: 90vh; padding: 20px 16px;
+      padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    }
+    .modal-title { font-size: 14px; letter-spacing: 2px; margin-bottom: 16px; }
+
+    /* ── Modal handle bar ── */
+    .modal::before {
+      content: ''; display: block; width: 36px; height: 4px;
+      background: var(--border2); border-radius: 2px;
+      margin: -8px auto 16px;
     }
 
-    /* Form rows — stack on mobile */
-    .form-row.cols2,
-    .form-row.cols3,
-    .form-row.cols4 { grid-template-columns: 1fr; }
+    /* ── Form stacking ── */
+    .form-row.cols2, .form-row.cols3, .form-row.cols4 { grid-template-columns: 1fr; }
 
-    /* Buttons — full width in modals */
-    .modal .btn { padding: 10px 14px; }
+    /* ── Buttons ── */
+    .btn { padding: 9px 14px; font-size: 11px; }
+    .btn-sm { padding: 5px 10px; font-size: 9.5px; }
 
-    /* Card header */
-    .card-header { font-size: 8.5px; padding: 11px 14px 9px; }
+    /* ── Welcome modal ── */
+    #welcome-modal .modal { border-radius: 14px 14px 0 0 !important; padding: 24px 16px 28px; }
 
-    /* Welcome modal */
-    #welcome-modal .modal {
-      border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
-      padding: 28px 18px 24px;
+    /* ── Expenditure detail panel ── */
+    .exp-detail-panel div[style*="grid-template-columns:repeat(4"] {
+      grid-template-columns: repeat(2,1fr) !important;
     }
 
-    /* Reports — hide less useful on mobile */
-    .rpt-hide-mobile { display: none; }
+    /* ── Transaction detail rows ── */
+    .tx-detail-row > td > div { flex-direction: column; align-items: flex-start !important; gap: 10px !important; }
 
-    /* Scrollbar hidden on mobile */
+    /* ── Scrollbar hidden on mobile ── */
     ::-webkit-scrollbar { display: none; }
+
+    /* ── Impact preview ── */
+    #m-impact-content > div { flex-direction: column !important; gap: 4px !important; align-items: flex-start !important; }
   }
 
-  @media (max-width: 480px) {
-    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-    .kpi-value { font-size: 19px; }
-    header { height: 46px; }
+  /* ── Extra small (< 400px) ── */
+  @media (max-width: 400px) {
+    .kpi-value { font-size: 18px; }
+    header { height: 44px; }
+    .term-badge { font-size: 9px; padding: 3px 9px; }
   }
 
 </style>
@@ -1910,10 +1858,10 @@ const SPRING_EXP = [
   {section:"Committees",item:"Publications",budgeted:150,spent:128.47},
   {section:"Committees",item:"Recruitment",budgeted:2000,spent:1702.06},
   {section:"Committees",item:"Foundations of Courage",budgeted:0,spent:0},
-  {section:"Committees",item:"Housing",budgeted:1500,spent:425.21},
-  {section:"Committees",item:"Greek Week",budgeted:2172,spent:1372},
+  {section:"Committees",item:"Housing",budgeted:1500,spent:471.64},
+  {section:"Committees",item:"Greek Week",budgeted:2172,spent:1928.32},
   {section:"Committees",item:"Homecoming",budgeted:0,spent:0},
-  {section:"Committees",item:"Social",budgeted:2000,spent:835.69},
+  {section:"Committees",item:"Social",budgeted:2000,spent:893.95},
   {section:"Committees",item:"Big Brother",budgeted:0,spent:0},
   {section:"Committees",item:"T-Shirt",budgeted:2500,spent:2505.88},
   {section:"Committees",item:"Scholarship",budgeted:200,spent:0},
@@ -1926,11 +1874,11 @@ const SPRING_EXP = [
   {section:"Committees",item:"IFC",budgeted:0,spent:0},
   {section:"Committees",item:"Build to Lead",budgeted:0,spent:0},
   {section:"Committees",item:"Intramurals",budgeted:200,spent:0},
-  {section:"Committees",item:"Pig Dinner",budgeted:3706.5,spent:4743.1},
+  {section:"Committees",item:"Pig Dinner",budgeted:3706.5,spent:5621.23},
   {section:"Committees",item:"Brotherhood",budgeted:500,spent:85.47},
   {section:"Committees",item:"Mental Health",budgeted:200,spent:50.82},
   {section:"Committees",item:"Parent Relations",budgeted:0,spent:0},
-  {section:"Housing Corp",item:"House Rent",budgeted:36000,spent:17400},
+  {section:"Housing Corp",item:"House Rent",budgeted:36000,spent:26400},
   {section:"Housing Corp",item:"Parlor Fees",budgeted:2050,spent:2075},
   {section:"IHQ",item:"Insurance Fees",budgeted:12250,spent:12000},
   {section:"IHQ",item:"IFC Fees",budgeted:1276,spent:1278.6},
@@ -1944,9 +1892,9 @@ const SPRING_EXP = [
   {section:"Officers",item:"Corresponding Secretary",budgeted:20,spent:0},
   {section:"Officers",item:"Recording Secretary",budgeted:20,spent:0},
   {section:"Other",item:"Other Org Philanthropy",budgeted:700,spent:671.18},
-  {section:"Other",item:"Lawncare",budgeted:2000,spent:0},
+  {section:"Other",item:"Strategic Planning Retreat",budgeted:50,spent:45.72},
   {section:"Other",item:"Shenanigans",budgeted:0,spent:0},
-  {section:"Other",item:"Spring Sing",budgeted:1200,spent:691.02},
+  {section:"Other",item:"Lawncare",budgeted:2000,spent:0},
   {section:"Other",item:"Cabinet Retreat",budgeted:50,spent:0},
   {section:"Other",item:"Misc.",budgeted:800,spent:752.49},
   {section:"Other",item:"Brotherhood Retreat",budgeted:7000,spent:6275.55},
@@ -1957,8 +1905,8 @@ const SPRING_EXP = [
   {section:"Other",item:"Owed to Housing Corp",budgeted:0,spent:0},
   {section:"Other",item:"FIJI Academy",budgeted:172.46,spent:172.46},
   {section:"Other",item:"Tent",budgeted:0,spent:0},
-  {section:"Other",item:"Formal",budgeted:800,spent:450},
-  {section:"Other",item:"Strategic Planning Retreat",budgeted:50,spent:45.72}
+  {section:"Other",item:"Formal",budgeted:800,spent:1130.2},
+  {section:"Other",item:"Spring Sing",budgeted:1200,spent:691.02}
 ];
 const FALL_EXP = [
   {section:"Officers",item:"President",budgeted:0,spent:0},
@@ -2013,40 +1961,53 @@ const FALL_EXP = [
 ];
 const TX_OUT_SEED = [
   {id:"o1774668181348",term:"Spring 2026",date:"2026-04-25",amount:200,budget:"Social",account:"Operating",card:"Check",paid:false,notes:"Colby DJ Islander",dir:"OUT"},
+  {id:"o1775937403538",term:"Spring 2026",date:"2026-04-11",amount:15,budget:"Formal",account:"Operating",card:"Jakob Card",paid:true,notes:"White Squirrel fee",dir:"OUT"},
+  {id:"o1774668142599",term:"Spring 2026",date:"2026-04-11",amount:175,budget:"Formal",account:"Operating",card:"Check",paid:false,notes:"Cayden Bailey - DJ Formal",dir:"OUT"},
+  {id:"o1775937390355",term:"Spring 2026",date:"2026-04-11",amount:640.2,budget:"Formal",account:"Operating",card:"Jakob Card",paid:true,notes:"Tab for Formal",dir:"OUT"},
+  {id:"o1775937594754",term:"Spring 2026",date:"2026-04-11",amount:9000,budget:"House Rent",account:"Housing",card:"Jakob Card",paid:true,notes:"April Transfer",dir:"OUT"},
+  {id:"o1775937472254",term:"Spring 2026",date:"2026-04-11",amount:13.72,budget:"Pig Dinner",account:"Operating",card:"Jakob Card",paid:true,notes:"",dir:"OUT"},
   {id:"o1774592526652",term:"Spring 2026",date:"2026-04-11",amount:1791,budget:"Pig Dinner",account:"Operating",card:"Check",paid:false,notes:"MAC Reservation for Pig Dinner - Needs to go to Jake Edmunds",dir:"OUT"},
-  {id:"o1774668142599",term:"Spring 2026",date:"2026-04-11",amount:150,budget:"Formal",account:"Operating",card:"Check",paid:false,notes:"Cayden Bailey - DJ Formal",dir:"OUT"},
+  {id:"o1775937320756",term:"Spring 2026",date:"2026-04-11",amount:7,budget:"Social",account:"Operating",card:"Check",paid:true,notes:"Jayce Repairs",dir:"OUT"},
+  {id:"o1775627182994",term:"Spring 2026",date:"2026-04-08",amount:107.89,budget:"Pig Dinner",account:"Operating",card:"Check",paid:true,notes:"Table Markers and Programs",dir:"OUT"},
+  {id:"o1775626188419",term:"Spring 2026",date:"2026-04-08",amount:145.92,budget:"Greek Week",account:"Operating",card:"Jagger Card",paid:true,notes:"Canstruct",dir:"OUT"},
+  {id:"o1775626169553",term:"Spring 2026",date:"2026-04-08",amount:155.04,budget:"Greek Week",account:"Operating",card:"Jagger Card",paid:true,notes:"Canstruct",dir:"OUT"},
+  {id:"o1775626203004",term:"Spring 2026",date:"2026-04-08",amount:127.68,budget:"Greek Week",account:"Operating",card:"Jagger Card",paid:true,notes:"Canstruct",dir:"OUT"},
+  {id:"o1775626220536",term:"Spring 2026",date:"2026-04-08",amount:91.2,budget:"Greek Week",account:"Operating",card:"Jagger Card",paid:true,notes:"Canstruct",dir:"OUT"},
+  {id:"o1775626239053",term:"Spring 2026",date:"2026-04-08",amount:36.48,budget:"Greek Week",account:"Operating",card:"Jagger Card",paid:true,notes:"Canstruct",dir:"OUT"},
+  {id:"o1775532401789",term:"Spring 2026",date:"2026-04-07",amount:46.43,budget:"Housing",account:"Operating",card:"Check",paid:false,notes:"Housing re-supply",dir:"OUT"},
+  {id:"o1775532456722",term:"Spring 2026",date:"2026-04-07",amount:51.26,budget:"Social",account:"Operating",card:"Check",paid:true,notes:"Super8 Repairs",dir:"OUT"},
   {id:"o1774656380298",term:"Spring 2026",date:"2026-04-03",amount:1001.7,budget:"Graduate Gifts",account:"Operating",card:"Jakob Card",paid:true,notes:"Stoles ",dir:"OUT"},
   {id:"o1775152823003",term:"Spring 2026",date:"2026-04-02",amount:80.56,budget:"Pig Dinner",account:"Operating",card:"Jakob Card",paid:true,notes:"Pig for Pig Dinner",dir:"OUT"},
-  {id:"o1774895715370",term:"Spring 2026",date:"2026-03-30",amount:326.47,budget:"Spring Sing",account:"Operating",card:"Jakob Card",paid:true,notes:"Spring Sing Costumes - Shein ",dir:"OUT"},
-  {id:"o1774895223556",term:"Spring 2026",date:"2026-03-30",amount:273.76,budget:"Spring Sing",account:"Operating",card:"Jakob Card",paid:true,notes:"Spring Sing Costumes - Hobby Lobby",dir:"OUT"},
   {id:"o1774895243756",term:"Spring 2026",date:"2026-03-30",amount:6.35,budget:"Spring Sing",account:"Operating",card:"Jakob Card",paid:true,notes:"Spring Sing Costumes - Good Will",dir:"OUT"},
+  {id:"o1774895223556",term:"Spring 2026",date:"2026-03-30",amount:273.76,budget:"Spring Sing",account:"Operating",card:"Jakob Card",paid:true,notes:"Spring Sing Costumes - Hobby Lobby",dir:"OUT"},
+  {id:"o1774895715370",term:"Spring 2026",date:"2026-03-30",amount:326.47,budget:"Spring Sing",account:"Operating",card:"Jakob Card",paid:true,notes:"Spring Sing Costumes - Shein ",dir:"OUT"},
   {id:"o1774656396882",term:"Spring 2026",date:"2026-03-28",amount:150,budget:"IFC Fees",account:"Operating",card:"Check",paid:false,notes:"Golf Scramble",dir:"OUT"},
-  {id:"o1774592501151",term:"Spring 2026",date:"2026-03-27",amount:2871.54,budget:"Pig Dinner",account:"Operating",card:"Check",paid:false,notes:"Aramark for Pig Dinner",dir:"OUT"},
-  {id:"o1774591563110",term:"Spring 2026",date:"2026-03-27",amount:63.35,budget:"Spring Sing",account:"Operating",card:"Jakob Card",paid:true,notes:"Backdrops",dir:"OUT"},
   {id:"o1774592450186",term:"Spring 2026",date:"2026-03-27",amount:21.18,budget:"Other Org Philanthropy",account:"Operating",card:"Check",paid:false,notes:"Check for Addison's MOTH Poster",dir:"OUT"},
+  {id:"o1774591563110",term:"Spring 2026",date:"2026-03-27",amount:63.35,budget:"Spring Sing",account:"Operating",card:"Jakob Card",paid:true,notes:"Backdrops",dir:"OUT"},
+  {id:"o1774592501151",term:"Spring 2026",date:"2026-03-27",amount:3628.06,budget:"Pig Dinner",account:"Operating",card:"Check",paid:false,notes:"Aramark for Pig Dinner",dir:"OUT"},
   {id:"o1774592469236",term:"Spring 2026",date:"2026-03-27",amount:200,budget:"Other Org Philanthropy",account:"Operating",card:"Check",paid:true,notes:"Check for DAA Graduation",dir:"OUT"},
   {id:"o1774564444355",term:"Spring 2026",date:"2026-03-26",amount:21.09,budget:"Spring Sing",account:"Operating",card:"Jakob Card",paid:true,notes:"Backdrops",dir:"OUT"},
   {id:"o1774564488939",term:"Spring 2026",date:"2026-03-26",amount:63.58,budget:"Brotherhood",account:"Operating",card:"Jakob Card",paid:true,notes:"Bean bags",dir:"OUT"},
   {id:"o1774416169063",term:"Spring 2026",date:"2026-03-25",amount:306.76,budget:"Social",account:"Operating",card:"Jakob Card",paid:true,notes:"Lights",dir:"OUT"},
-  {id:"o1774564375273",term:"Spring 2026",date:"2026-03-25",amount:225,budget:"Formal",account:"Operating",card:"Jakob Card",paid:true,notes:"Formal Payment Pt. 2",dir:"OUT"},
   {id:"o1774416834157",term:"Spring 2026",date:"2026-03-25",amount:208.67,budget:"Housing",account:"Operating",card:"Jakob Card",paid:true,notes:"Consolidated Paper Group",dir:"OUT"},
+  {id:"o1774564375273",term:"Spring 2026",date:"2026-03-25",amount:225,budget:"Formal",account:"Operating",card:"Jakob Card",paid:true,notes:"Formal Payment Pt. 2",dir:"OUT"},
   {id:"o1774416184296",term:"Spring 2026",date:"2026-03-25",amount:317.99,budget:"Social",account:"Operating",card:"Jakob Card",paid:true,notes:"Speaker",dir:"OUT"},
   {id:"o62",term:"Spring 2026",date:"2026-03-10",amount:1372,budget:"Greek Week",account:"Operating",card:"Check",paid:true,notes:"Head Fees for Greek Week",dir:"OUT"},
   {id:"o56",term:"Spring 2026",date:"2026-03-05",amount:15.89,budget:"Brotherhood",account:"Operating",card:"Jakob Card",paid:true,notes:"Bean bags for house",dir:"OUT"},
   {id:"o57",term:"Spring 2026",date:"2026-03-05",amount:10.94,budget:"Social",account:"Operating",card:"Jakob Card",paid:false,notes:"Nails for boards - Check for Indy - NEED",dir:"OUT"},
   {id:"o60",term:"Spring 2026",date:"2026-03-04",amount:5.61,budget:"Executive Discretionary",account:"Operating",card:"Jakob Card",paid:true,notes:"Saving Hayden",dir:"OUT"},
   {id:"o61",term:"Spring 2026",date:"2026-03-04",amount:312,budget:"Misc.",account:"Operating",card:"Jakob Card",paid:true,notes:"Bronze Owl Pins",dir:"OUT"},
-  {id:"o59",term:"Spring 2026",date:"2026-03-03",amount:24.37,budget:"Executive Discretionary",account:"Operating",card:"Jakob Card",paid:true,notes:"Saving Hayden",dir:"OUT"},
-  {id:"o55",term:"Spring 2026",date:"2026-03-03",amount:9000,budget:"House Rent",account:"Housing",card:"Jakob Card",paid:true,notes:"March Rent",dir:"OUT"},
   {id:"o58",term:"Spring 2026",date:"2026-03-03",amount:5.53,budget:"Executive Discretionary",account:"Operating",card:"Jakob Card",paid:true,notes:"Saving Hayden",dir:"OUT"},
-  {id:"o54",term:"Spring 2026",date:"2026-03-02",amount:50,budget:"Other Org Philanthropy",account:"Operating",card:"Check",paid:false,notes:"Chi O Tournament - WRITTEN",dir:"OUT"},
+  {id:"o55",term:"Spring 2026",date:"2026-03-03",amount:9000,budget:"House Rent",account:"Housing",card:"Jakob Card",paid:true,notes:"March Rent",dir:"OUT"},
+  {id:"o59",term:"Spring 2026",date:"2026-03-03",amount:24.37,budget:"Executive Discretionary",account:"Operating",card:"Jakob Card",paid:true,notes:"Saving Hayden",dir:"OUT"},
+  {id:"o54",term:"Spring 2026",date:"2026-03-02",amount:50,budget:"Other Org Philanthropy",account:"Operating",card:"Check",paid:true,notes:"Chi O Tournament - WRITTEN",dir:"OUT"},
   {id:"o53",term:"Spring 2026",date:"2026-03-01",amount:50.82,budget:"Mental Health",account:"Operating",card:"Check",paid:false,notes:"Pizza for bible study - NEED",dir:"OUT"},
-  {id:"o52",term:"Spring 2026",date:"2026-02-28",amount:50,budget:"Philanthropy",account:"Operating",card:"Check",paid:false,notes:"Caden Return from philanthropy - NEED",dir:"OUT"},
   {id:"o51",term:"Spring 2026",date:"2026-02-28",amount:32.65,budget:"Philanthropy",account:"Operating",card:"Check",paid:true,notes:"Sal Return from philanthropy",dir:"OUT"},
+  {id:"o52",term:"Spring 2026",date:"2026-02-28",amount:50,budget:"Philanthropy",account:"Operating",card:"Check",paid:false,notes:"Caden Return from philanthropy - NEED",dir:"OUT"},
   {id:"o49",term:"Spring 2026",date:"2026-02-27",amount:29.38,budget:"Philanthropy",account:"Operating",card:"Check",paid:true,notes:"Manny Philanthropy supplies",dir:"OUT"},
   {id:"o50",term:"Spring 2026",date:"2026-02-27",amount:1873.15,budget:"Composite",account:"Operating",card:"Check",paid:true,notes:"Composite 1/2",dir:"OUT"},
-  {id:"o48",term:"Spring 2026",date:"2026-02-23",amount:156.57,budget:"Recruitment",account:"Operating",card:"Jakob Card",paid:true,notes:"Payton Superbowl Dinner",dir:"OUT"},
   {id:"o46",term:"Spring 2026",date:"2026-02-23",amount:200,budget:"Other Org Philanthropy",account:"Operating",card:"Jakob Card",paid:false,notes:"Bike4Alz Golf Scramble",dir:"OUT"},
+  {id:"o48",term:"Spring 2026",date:"2026-02-23",amount:156.57,budget:"Recruitment",account:"Operating",card:"Jakob Card",paid:true,notes:"Payton Superbowl Dinner",dir:"OUT"},
   {id:"o47",term:"Spring 2026",date:"2026-02-23",amount:150,budget:"Other Org Philanthropy",account:"Operating",card:"Jakob Card",paid:false,notes:"Lion Bowl",dir:"OUT"},
   {id:"o45",term:"Spring 2026",date:"2026-02-21",amount:329.45,budget:"Philanthropy",account:"Operating",card:"Jakob Card",paid:true,notes:"Dunk tank",dir:"OUT"},
   {id:"o44",term:"Spring 2026",date:"2026-02-21",amount:395.41,budget:"Philanthropy",account:"Operating",card:"Jakob Card",paid:true,notes:"Amazon order for Phil. Items",dir:"OUT"},
@@ -2059,16 +2020,16 @@ const TX_OUT_SEED = [
   {id:"o37",term:"Spring 2026",date:"2026-02-09",amount:252,budget:"LegFi Fee",account:"Operating",card:"Jakob Card",paid:true,notes:"New Member fee",dir:"OUT"},
   {id:"o36",term:"Spring 2026",date:"2026-02-07",amount:119.87,budget:"Brotherhood Retreat",account:"Operating",card:"Jakob Card",paid:true,notes:"New Member award dinner",dir:"OUT"},
   {id:"o35",term:"Spring 2026",date:"2026-02-06",amount:6.69,budget:"Brotherhood Retreat",account:"Operating",card:"Jakob Card",paid:true,notes:"Sandwich",dir:"OUT"},
-  {id:"o31",term:"Spring 2026",date:"2026-02-05",amount:371.65,budget:"Brotherhood Retreat",account:"Operating",card:"Jakob Card",paid:true,notes:"Pizza",dir:"OUT"},
   {id:"o32",term:"Spring 2026",date:"2026-02-05",amount:66.44,budget:"Brotherhood Retreat",account:"Operating",card:"Jakob Card",paid:true,notes:"Drinks/Trash Bags for Broho",dir:"OUT"},
-  {id:"o33",term:"Spring 2026",date:"2026-02-05",amount:5.68,budget:"Brotherhood Retreat",account:"Operating",card:"Jakob Card",paid:true,notes:"Sand for traction",dir:"OUT"},
   {id:"o30",term:"Spring 2026",date:"2026-02-05",amount:381.63,budget:"Brotherhood Retreat",account:"Operating",card:"Jakob Card",paid:true,notes:"Chickfila",dir:"OUT"},
   {id:"o34",term:"Spring 2026",date:"2026-02-05",amount:120,budget:"Publications",account:"Operating",card:"Jakob Card",paid:true,notes:"Canva",dir:"OUT"},
+  {id:"o33",term:"Spring 2026",date:"2026-02-05",amount:5.68,budget:"Brotherhood Retreat",account:"Operating",card:"Jakob Card",paid:true,notes:"Sand for traction",dir:"OUT"},
+  {id:"o31",term:"Spring 2026",date:"2026-02-05",amount:371.65,budget:"Brotherhood Retreat",account:"Operating",card:"Jakob Card",paid:true,notes:"Pizza",dir:"OUT"},
   {id:"o29",term:"Spring 2026",date:"2026-02-04",amount:30,budget:"Misc.",account:"Operating",card:"Jakob Card",paid:true,notes:"Legfi Test",dir:"OUT"},
+  {id:"o25",term:"Spring 2026",date:"2026-02-02",amount:8400,budget:"House Rent",account:"Housing",card:"Jakob Card",paid:true,notes:"Feb. Rent",dir:"OUT"},
   {id:"o26",term:"Spring 2026",date:"2026-02-02",amount:2075,budget:"Parlor Fees",account:"Housing",card:"Jakob Card",paid:true,notes:"2026 Parlor Fees",dir:"OUT"},
   {id:"o23",term:"Spring 2026",date:"2026-02-02",amount:3528,budget:"LegFi Fee",account:"Operating",card:"Jakob Card",paid:true,notes:"LegFi Member fee",dir:"OUT"},
   {id:"o24",term:"Spring 2026",date:"2026-02-02",amount:49.3,budget:"Chaplain",account:"Operating",card:"Jakob Card",paid:true,notes:"Bibles for Bible Study",dir:"OUT"},
-  {id:"o25",term:"Spring 2026",date:"2026-02-02",amount:8400,budget:"House Rent",account:"Housing",card:"Jakob Card",paid:true,notes:"Feb. Rent",dir:"OUT"},
   {id:"o22",term:"Spring 2026",date:"2026-02-01",amount:8.47,budget:"Publications",account:"Operating",card:"Jakob Card",paid:true,notes:"SD Card Reader",dir:"OUT"},
   {id:"o20",term:"Spring 2026",date:"2026-01-31",amount:1128.6,budget:"IFC Fees",account:"Operating",card:"Jakob Card",paid:true,notes:"Head Fees ($1,128.60)",dir:"OUT"},
   {id:"o28",term:"Spring 2026",date:"2026-01-31",amount:148.4,budget:"Recruitment",account:"Operating",card:"Jakob Card",paid:true,notes:"Manny Steaks",dir:"OUT"},
@@ -2080,7 +2041,6 @@ const TX_OUT_SEED = [
   {id:"o15",term:"Spring 2026",date:"2026-01-27",amount:6,budget:"Brotherhood",account:"Operating",card:"Jakob Card",paid:true,notes:"Hot Chocolate for Brotherhood night",dir:"OUT"},
   {id:"o14",term:"Spring 2026",date:"2026-01-26",amount:3000,budget:"Member Fees",account:"Operating",card:"Jakob Card",paid:true,notes:"Member Fees",dir:"OUT"},
   {id:"o13",term:"Spring 2026",date:"2026-01-26",amount:12000,budget:"Insurance Fees",account:"Operating",card:"Jakob Card",paid:true,notes:"Insurance Fees",dir:"OUT"},
-  {id:"o12",term:"Spring 2026",date:"2026-01-24",amount:0,budget:"Pig Dinner",account:"Operating",card:"",paid:false,notes:"MAC Reservation for Pig Dinner ($1,071.97)",dir:"OUT"},
   {id:"o11",term:"Spring 2026",date:"2026-01-24",amount:45.72,budget:"Strategic Planning Retreat",account:"Operating",card:"Jagger Card",paid:true,notes:"Donuts for Retreat",dir:"OUT"},
   {id:"o10",term:"Spring 2026",date:"2026-01-23",amount:75,budget:"Formal",account:"Operating",card:"Jakob Card",paid:true,notes:"WS Venue Deposit",dir:"OUT"},
   {id:"o9",term:"Spring 2026",date:"2026-01-23",amount:136.33,budget:"Recruitment",account:"Operating",card:"Jakob Card",paid:true,notes:"Pre Rush Cookout Supplies",dir:"OUT"},
@@ -2095,38 +2055,42 @@ const TX_OUT_SEED = [
   {id:"o1",term:"Spring 2026",date:"2026-01-05",amount:2505.88,budget:"T-Shirt",account:"Operating",card:"Jakob Card",paid:true,notes:"Rush Shirts",dir:"OUT"}
 ];
 const TX_IN_SEED = [
-  {id:"i1775247244210",term:"Spring 2026",date:"2026-04-03",amount:221,category:"Other",account:"Operating",notes:"Philanthrophy",dir:"IN",paid:true},
-  {id:"i1775247187877",term:"Spring 2026",date:"2026-04-03",amount:450,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
+  {id:"i1775937456404",term:"Spring 2026",date:"2026-04-11",amount:129.14,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
+  {id:"i1775937441538",term:"Spring 2026",date:"2026-04-11",amount:314.76,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
+  {id:"i1775626057221",term:"Spring 2026",date:"2026-04-08",amount:225.98,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
+  {id:"i1775626043938",term:"Spring 2026",date:"2026-04-08",amount:750.57,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i1775247179094",term:"Spring 2026",date:"2026-04-03",amount:145.27,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
+  {id:"i1775247187877",term:"Spring 2026",date:"2026-04-03",amount:450,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
+  {id:"i1775247244210",term:"Spring 2026",date:"2026-04-03",amount:221,category:"Other",account:"Operating",notes:"Philanthrophy",dir:"IN",paid:true},
   {id:"i1775088895493",term:"Spring 2026",date:"2026-04-02",amount:129.14,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
-  {id:"i1775153032217",term:"Spring 2026",date:"2026-04-02",amount:129.14,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i1775088994409",term:"Spring 2026",date:"2026-04-02",amount:544.78,category:"Rent",account:"Housing",notes:"",dir:"IN",paid:true},
+  {id:"i1775153032217",term:"Spring 2026",date:"2026-04-02",amount:129.14,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i1774592965998",term:"Spring 2026",date:"2026-03-24",amount:544.78,category:"Rent",account:"Housing",notes:"",dir:"IN",paid:true},
   {id:"i1774229120302",term:"Spring 2026",date:"2026-03-23",amount:96.85,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i60",term:"Spring 2026",date:"2026-03-05",amount:544.78,category:"Rent",account:"Housing",notes:"",dir:"IN",paid:true},
   {id:"i59",term:"Spring 2026",date:"2026-03-05",amount:169.49,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
-  {id:"i58",term:"Spring 2026",date:"2026-03-04",amount:1291.34,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i57",term:"Spring 2026",date:"2026-03-04",amount:175,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
+  {id:"i58",term:"Spring 2026",date:"2026-03-04",amount:1291.34,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i56",term:"Spring 2026",date:"2026-03-03",amount:145.27,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i55",term:"Spring 2026",date:"2026-03-02",amount:387.4,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
-  {id:"i52",term:"Spring 2026",date:"2026-02-27",amount:121.06,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i54",term:"Spring 2026",date:"2026-02-27",amount:26.67,category:"Interest",account:"Savings",notes:"",dir:"IN",paid:true},
+  {id:"i52",term:"Spring 2026",date:"2026-02-27",amount:121.06,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i53",term:"Spring 2026",date:"2026-02-25",amount:1634.34,category:"Rent",account:"Housing",notes:"",dir:"IN",paid:true},
   {id:"i51",term:"Spring 2026",date:"2026-02-21",amount:24.21,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i50",term:"Spring 2026",date:"2026-02-21",amount:1065.35,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i49",term:"Spring 2026",date:"2026-02-21",amount:581.1,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i48",term:"Spring 2026",date:"2026-02-17",amount:1089.56,category:"Rent",account:"Housing",notes:"",dir:"IN",paid:true},
   {id:"i47",term:"Spring 2026",date:"2026-02-17",amount:290.55,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
-  {id:"i43",term:"Spring 2026",date:"2026-02-11",amount:48.42,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i45",term:"Spring 2026",date:"2026-02-11",amount:544.78,category:"Rent",account:"Housing",notes:"",dir:"IN",paid:true},
-  {id:"i42",term:"Spring 2026",date:"2026-02-10",amount:200,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
+  {id:"i43",term:"Spring 2026",date:"2026-02-11",amount:48.42,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i41",term:"Spring 2026",date:"2026-02-10",amount:668.26,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
+  {id:"i42",term:"Spring 2026",date:"2026-02-10",amount:200,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
+  {id:"i39",term:"Spring 2026",date:"2026-02-09",amount:670,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i40",term:"Spring 2026",date:"2026-02-09",amount:978.18,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i44",term:"Spring 2026",date:"2026-02-09",amount:544.78,category:"Rent",account:"Housing",notes:"",dir:"IN",paid:true},
-  {id:"i39",term:"Spring 2026",date:"2026-02-09",amount:670,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i38",term:"Spring 2026",date:"2026-02-08",amount:101.73,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
-  {id:"i31",term:"Spring 2026",date:"2026-02-05",amount:67.79,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i36",term:"Spring 2026",date:"2026-02-05",amount:544.78,category:"Rent",account:"Housing",notes:"",dir:"IN",paid:true},
+  {id:"i31",term:"Spring 2026",date:"2026-02-05",amount:67.79,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i29",term:"Spring 2026",date:"2026-02-04",amount:220,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i30",term:"Spring 2026",date:"2026-02-04",amount:3898.16,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i28",term:"Spring 2026",date:"2026-02-02",amount:726.37,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
@@ -2162,7 +2126,8 @@ const TX_IN_SEED = [
   {id:"i5",term:"Spring 2026",date:"2026-01-08",amount:38,category:"Other",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i3",term:"Spring 2026",date:"2026-01-08",amount:1598.01,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i4",term:"Spring 2026",date:"2026-01-08",amount:1100,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
-  {id:"i2",term:"Spring 2026",date:"2026-01-06",amount:750.59,category:"Other",account:"Operating",notes:"",dir:"IN",paid:true}
+  {id:"i2",term:"Spring 2026",date:"2026-01-06",amount:750.59,category:"Other",account:"Operating",notes:"",dir:"IN",paid:true},
+  {id:"i1775937697486",term:"Spring 2026",date:"2026-03-31",amount:30.53,category:"Interest",account:"Savings",notes:"March Interest",dir:"IN",paid:true}
 ];
 
 // ═══════════════════════════════════════════════════════════════
@@ -2299,7 +2264,7 @@ var fallExp = (_storedFall && _storedFall.length === FALL_EXP.length)
   ? _storedFall
   : FALL_EXP.map(function(e){ return Object.assign({},e); });
 // Seed version — bump this date whenever the seed data is updated from a backup
-const SEED_VERSION = "2026-04-04";
+const SEED_VERSION = "2026-04-11";
 
 // Force-load from seed if localStorage seed version is older than current seed
 var _storedSeedVer = localStorage.getItem("fiji_seed_version");
@@ -3279,11 +3244,13 @@ function renderExpenditures() {
 function filterExp() {
   var exp = isSpring() ? springExp : fallExp;
   var q   = (document.getElementById("exp-search")||{}).value || "";
-  var sec = (document.getElementById("exp-filter-section")||{}).value || "";
+  var sec = (document.getElementById("exp-filter-section")||document.getElementById("exp-filter-cat")||{}).value || "";
+  var hideZero = (document.getElementById("exp-hide-zero")||{}).checked || false;
   q = q.toLowerCase();
-  var filtered = exp.filter(function(i) {
-    if (q   && !i.item.toLowerCase().includes(q)) return false;
-    if (sec && i.section !== sec) return false;
+  var filtered = exp.filter(function(line) {
+    if (hideZero && !line.spent && !line.budgeted) return false;
+    if (q   && !line.item.toLowerCase().includes(q)) return false;
+    if (sec && line.section !== sec) return false;
     return true;
   });
   var tbody = document.getElementById("exp-tbody");
@@ -3292,18 +3259,199 @@ function filterExp() {
     var rem  = item.budgeted - item.spent;
     var over = rem < 0;
     var pctUsed = item.budgeted > 0 ? pct(item.spent/item.budgeted) : "—";
-    return '<tr class="'+(over?"flagged-row":"")+'">'
-      +'<td style="font-size:11px;color:var(--muted)">'+item.section+'</td>'
-      +'<td style="font-size:12.5px">'+item.item+'</td>'
-      +'<td class="mono" style="text-align:right">'+fmt(item.budgeted)+'</td>'
-      +'<td class="mono" style="text-align:right;color:'+(item.spent>0?"var(--amber)":"var(--dim)")+'">'+
-        (item.spent>0?fmt(item.spent):"—")+'</td>'
-      +'<td class="mono" style="text-align:right;color:'+(over?"var(--red)":"var(--green)")+';font-weight:700">'+
-        (item.budgeted>0?(over?"-"+fmt(Math.abs(rem)):fmt(rem)):"—")+'</td>'
-      +'<td style="width:120px">'+makeBar(item.spent,item.budgeted)+'</td>'
-      +'<td class="mono" style="text-align:right;font-size:11px;color:'+(over?"var(--red)":"var(--muted)")+'">'+pctUsed+'</td>'
-      +'</tr>';
+    var txCount = txList.filter(function(t){ return t.dir==="OUT" && t.budget===item.item && (isSpring(t.term)||!isSpring()); }).length;
+    var rowId = "exp-row-"+item.item.replace(/[^a-zA-Z0-9]/g,"_");
+    var detailId = "exp-detail-"+item.item.replace(/[^a-zA-Z0-9]/g,"_");
+    var mainRow = '<tr id="'+rowId+'" class="exp-main-row'+(over?" flagged-row":"")+'" onclick="toggleExpDetail(\''+ item.item +'\',this)" style="cursor:pointer">'+
+      '<td style="font-size:11px;color:var(--muted)">'+item.section+'</td>'+
+      '<td style="font-size:12.5px;font-weight:500">'+item.item+
+        (txCount>0?(' <span style="font-size:9px;color:var(--muted);margin-left:4px">('+txCount+' txn)</span>'):"")+"</td>"+
+      '<td class="mono" style="text-align:right">'+fmt(item.budgeted)+'</td>'+
+      '<td class="mono" style="text-align:right;color:'+(item.spent>0?"var(--amber)":"var(--dim)")+'">'+
+        (item.spent>0?fmt(item.spent):"—")+'</td>'+
+      '<td class="mono" style="text-align:right;color:'+(over?"var(--red)":"var(--green)")+';font-weight:700">'+
+        (item.budgeted>0?(over?"-"+fmt(Math.abs(rem)):fmt(rem)):"—")+'</td>'+
+      '<td style="width:120px">'+makeBar(item.spent,item.budgeted)+'</td>'+
+      '<td class="mono" style="text-align:right;font-size:11px;color:'+(over?"var(--red)":"var(--muted)")+'">'+pctUsed+'</td>'+
+      '<td style="text-align:right;padding-right:14px"><span style="font-size:10px;color:var(--muted)">'+(txCount>0?"▸":"")+"</span></td>"+
+      '</tr>';
+    var detailRow = '<tr id="'+detailId+'" style="display:none"><td colspan="8" style="padding:0">'+
+      '<div class="exp-detail-panel" id="'+detailId+'-content"></div>'+
+      '</td></tr>';
+    return mainRow + detailRow;
   }).join("");
+}
+
+var openExpDetail = null;
+function toggleExpDetail(item, rowEl) {
+  var safe = item.replace(/[^a-zA-Z0-9]/g,"_");
+  var detailRow = document.getElementById("exp-detail-"+safe);
+  if (!detailRow) return;
+  var isOpen = detailRow.style.display !== "none";
+  if (openExpDetail && openExpDetail !== item) {
+    var prev = openExpDetail.replace(/[^a-zA-Z0-9]/g,"_");
+    var prevRow = document.getElementById("exp-detail-"+prev);
+    if (prevRow) prevRow.style.display = "none";
+  }
+  if (isOpen) {
+    detailRow.style.display = "none";
+    openExpDetail = null;
+  } else {
+    renderExpDetail(item);
+    detailRow.style.display = "table-row";
+    openExpDetail = item;
+  }
+}
+
+function renderExpDetail(item) {
+  var safe = item.replace(/[^a-zA-Z0-9]/g,"_");
+  var panel = document.getElementById("exp-detail-"+safe+"-content");
+  if (!panel) return;
+  var exp = isSpring() ? springExp : fallExp;
+  var line = exp.find(function(e){ return e.item === item; });
+  if (!line) return;
+  var txns = txList.filter(function(t){
+    return t.dir==="OUT" && t.budget===item;
+  }).sort(function(a,b){ return b.date.localeCompare(a.date); });
+
+  var over = line.spent > line.budgeted;
+  var rem  = line.budgeted - line.spent;
+
+  // Summary stats
+  var avgTx = txns.length ? line.spent / txns.length : 0;
+  var largest = txns.length ? txns.reduce(function(mx,t){ return t.amount>mx.amount?t:mx; }, txns[0]) : null;
+  var pendingTxns = txns.filter(function(t){ return !t.paid; });
+  var pendingAmt  = pendingTxns.reduce(function(s,t){ return s+t.amount; },0);
+
+  // AI-style summary
+  var summary = generateExpSummary(item, line, txns);
+
+  var html = '<div style="background:var(--surface2);border-top:1px solid rgba(200,168,75,0.12);padding:18px 20px 14px">'+
+    // Header row
+    '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;gap:16px">'+
+      '<div style="flex:1">'+
+        '<div style="font-family:var(--font-display);font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;margin-bottom:4px">'+item+' · Detail</div>'+
+        '<div style="font-size:12px;color:var(--muted);line-height:1.5">'+summary+'</div>'+
+      '</div>'+
+      '<button onclick="downloadExpReport(\''+ item +'\')" style="flex-shrink:0;padding:6px 14px;border-radius:5px;border:1px solid rgba(200,168,75,0.3);background:var(--gold-glow);color:var(--gold);font-family:var(--font-display);font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer;white-space:nowrap">⬇ Share Report</button>'+
+    '</div>'+
+    // KPI strip
+    '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px">'+
+      [
+        {l:"Budgeted", v:fmt(line.budgeted), c:"var(--text)"},
+        {l:"Spent",    v:fmt(line.spent),    c: over?"var(--red)":"var(--amber)"},
+        {l:"Remaining",v:(over?"-":"")+fmt(Math.abs(rem)), c:over?"var(--red)":"var(--green)"},
+        {l:"Avg per Tx",v:txns.length?fmt(avgTx):"—", c:"var(--muted)"}
+      ].map(function(k){
+        return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 13px">'+
+          '<div style="font-family:var(--font-display);font-size:8px;font-weight:700;letter-spacing:1.2px;color:var(--muted);text-transform:uppercase;margin-bottom:5px">'+ k.l +'</div>'+
+          '<div style="font-family:var(--font-display);font-size:17px;font-weight:700;color:'+ k.c +'">'+ k.v +'</div>'+
+          '</div>';
+      }).join("")+
+    '</div>'+
+    // Pending badge
+    (pendingTxns.length ? '<div style="margin-bottom:12px;padding:7px 12px;background:rgba(212,133,74,0.1);border:1px solid rgba(212,133,74,0.2);border-radius:6px;font-size:11px;color:var(--amber)">'+
+      '⚠ '+pendingTxns.length+' pending transaction'+(pendingTxns.length>1?"s":"")+' totalling '+fmt(pendingAmt)+' — not yet cleared from balance</div>' : "")+
+    // Transactions list
+    (txns.length ? (
+      '<div style="font-family:var(--font-display);font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:8px">Transactions ('+ txns.length +')</div>'+
+      '<div style="border:1px solid var(--border);border-radius:8px;overflow:hidden">'+
+      txns.map(function(t,i){
+        return '<div style="display:flex;align-items:center;gap:12px;padding:9px 13px;border-bottom:'+(i<txns.length-1?"1px solid var(--border)":"none")+';background:'+(t.paid?"transparent":"rgba(212,133,74,0.04)")+';">'+
+          '<div class="mono" style="font-size:10px;color:var(--muted);flex-shrink:0;width:68px">'+ t.date +'</div>'+
+          '<div style="flex:1;font-size:11.5px;color:var(--text)">'+(t.notes||"—")+'</div>'+
+          '<div class="mono" style="font-size:12px;font-weight:700;color:'+(t.paid?"var(--red)":"var(--amber)")+';flex-shrink:0">-'+ fmt(t.amount) +'</div>'+
+          (t.paid?'':('<span style="font-size:9px;color:var(--amber);flex-shrink:0">Pending</span>'))+
+        '</div>';
+      }).join("")+
+      '</div>'
+    ) : '<div style="text-align:center;padding:20px;color:var(--dim);font-family:var(--font-mono);font-size:11px">No transactions logged yet</div>')+
+  '</div>';
+
+  panel.innerHTML = html;
+}
+
+function generateExpSummary(item, line, txns) {
+  if (!txns.length) return "No transactions logged yet for this line item.";
+  var over = line.spent > line.budgeted;
+  var pctUsed = line.budgeted > 0 ? Math.round(line.spent/line.budgeted*100) : 0;
+  var pending = txns.filter(function(t){ return !t.paid; });
+  var largest = txns.reduce(function(mx,t){ return t.amount>mx.amount?t:mx; }, txns[0]);
+  var parts = [];
+  parts.push(pctUsed+"% of the "+fmt(line.budgeted)+" budget has been spent across "+txns.length+" transaction"+(txns.length>1?"s":"")+".");
+  if (largest) parts.push("Largest purchase: "+fmt(largest.amount)+(largest.notes?" ("+largest.notes.substring(0,40)+(largest.notes.length>40?"...":"")+")":").")+").");
+  if (pending.length) parts.push(pending.length+" pending item"+(pending.length>1?"s":"")+" not yet cleared.");
+  if (over) parts.push("⚠ Over budget by "+fmt(line.spent-line.budgeted)+".");
+  else if (pctUsed >= 90) parts.push("Approaching budget limit.");
+  return parts.join(" ");
+}
+
+function downloadExpReport(item) {
+  var exp = isSpring() ? springExp : fallExp;
+  var line = exp.find(function(e){ return e.item === item; });
+  if (!line) return;
+  var txns = txList.filter(function(t){
+    return t.dir==="OUT" && t.budget===item;
+  }).sort(function(a,b){ return a.date.localeCompare(b.date); });
+  var o = config.officer || {};
+  var over = line.spent > line.budgeted;
+  var rem  = line.budgeted - line.spent;
+  var pending = txns.filter(function(t){ return !t.paid; });
+
+  var rows = txns.map(function(t,i){
+    return '<tr style="background:'+(i%2===0?"#f9f9f9":"#fff")+'">'+
+      '<td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:12px">'+ t.date +'</td>'+
+      '<td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:12px">'+(t.notes||"—")+'</td>'+
+      '<td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:12px;text-align:right;font-family:monospace">$'+ t.amount.toFixed(2) +'</td>'+
+      '<td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:12px;text-align:center">'+
+        (t.paid?'<span style="color:#2a6b3c;font-weight:600">Paid</span>':'<span style="color:#b45a00;font-weight:600">Pending</span>')+
+      '</td>'+
+    '</tr>';
+  }).join("");
+
+  var doc = '<!DOCTYPE html><html><head><meta charset="UTF-8">'+
+    '<title>'+ item +' — Budget Report</title>'+
+    '<style>body{font-family:'+"'Josefin Sans','Trebuchet MS',sans-serif"+';margin:0;padding:0;color:#1a1a1a;background:#fff}'+
+    '.page{max-width:680px;margin:0 auto;padding:40px 36px}'+
+    'h1{font-size:22px;font-weight:700;letter-spacing:3px;text-transform:uppercase;margin:0 0 2px}'+
+    '.sub{font-size:11px;letter-spacing:1.5px;color:#888;text-transform:uppercase;margin-bottom:28px}'+
+    '.rule{height:1px;background:#c8a84b;opacity:.4;margin-bottom:24px}'+
+    '.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}'+
+    '.kpi{border:1px solid #eee;border-radius:8px;padding:12px 14px}'+
+    '.kpi-l{font-size:8px;letter-spacing:1.5px;color:#aaa;text-transform:uppercase;margin-bottom:4px}'+
+    '.kpi-v{font-size:20px;font-weight:700}'+
+    '.over{color:#c0392b}.ok{color:#1a6b3c}.warn{color:#b45a00}'+
+    'table{width:100%;border-collapse:collapse;margin-top:16px}'+
+    'th{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#aaa;padding:8px 12px;text-align:left;border-bottom:2px solid #eee;font-weight:600}'+
+    '.footer{margin-top:32px;padding-top:16px;border-top:1px solid #eee;font-size:10px;color:#bbb;letter-spacing:.5px}'+
+    '@media print{body{margin:0}.page{padding:20px}}</style></head><body>'+
+    '<div class="page">'+
+    '<h1>'+ item +'</h1>'+
+    '<div class="sub">'+ currentTerm +' · Budget Report · Generated '+ new Date().toLocaleDateString() +'</div>'+
+    '<div class="rule"></div>'+
+    '<div class="kpis">'+
+      '<div class="kpi"><div class="kpi-l">Budgeted</div><div class="kpi-v">$'+ line.budgeted.toFixed(2) +'</div></div>'+
+      '<div class="kpi"><div class="kpi-l">Spent</div><div class="kpi-v '+(over?"over":"warn")+'">$'+ line.spent.toFixed(2) +'</div></div>'+
+      '<div class="kpi"><div class="kpi-l">'+(over?"Over Budget":"Remaining")+'</div><div class="kpi-v '+(over?"over":"ok")+'">'+
+        (over?"-":"")+'$'+ Math.abs(rem).toFixed(2) +'</div></div>'+
+    '</div>'+
+    (over?'<div style="padding:10px 14px;background:#fdf0f0;border:1px solid #f5c6c6;border-radius:6px;font-size:12px;color:#c0392b;margin-bottom:20px">⚠ This line item is over budget by $'+ (line.spent-line.budgeted).toFixed(2) +'</div>':"")+
+    (pending.length?'<div style="padding:10px 14px;background:#fff8ee;border:1px solid #ffe0b2;border-radius:6px;font-size:12px;color:#b45a00;margin-bottom:20px">'+ pending.length +' pending transaction'+(pending.length>1?"s":"")+' (not yet cleared from bank account)</div>':"")+
+    '<table>'+
+    '<thead><tr><th>Date</th><th>Description</th><th style="text-align:right">Amount</th><th style="text-align:center">Status</th></tr></thead>'+
+    '<tbody>'+ rows +'</tbody>'+
+    '<tfoot><tr style="background:#f5f5f5"><td colspan="2" style="padding:9px 12px;font-size:12px;font-weight:600;border-top:2px solid #ddd">Total</td>'+
+    '<td style="padding:9px 12px;font-size:12px;font-weight:700;text-align:right;border-top:2px solid #ddd;font-family:monospace">$'+ line.spent.toFixed(2) +'</td><td style="border-top:2px solid #ddd"></td></tr></tfoot>'+
+    '</table>'+
+    '<div class="footer">'+ (o.chapterName||"Chi Eta") +' · '+ (o.name||"Treasurer") +' · '+ currentTerm +'</div>'+
+    '</div></body></html>';
+
+  var win = window.open("","_blank");
+  if (win) {
+    win.document.write(doc);
+    win.document.close();
+    setTimeout(function(){ win.print(); }, 400);
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -6872,15 +7020,23 @@ function renderSettingsView() {
 // MANUAL SYNC
 async function manualSync() {
   setSyncStatus("syncing", "⟳ Syncing…");
-  var pulled = await pullAll();
-  if (pulled) {
-    recomputeExpSpent();
-    syncRosterCounts();
-    refreshAll();
+  pullAll().then(function(pulled) {
+    if (pulled) { recomputeExpSpent(); syncRosterCounts(); refreshAll(); }
     setSyncStatus("ok", "✓ Synced");
-    setTimeout(function(){ setSyncStatus("ok"); }, 2000);
-  }
+    setTimeout(function(){ setSyncStatus("ok"); }, 2500);
+  }).catch(function(){ setSyncStatus("offline"); });
 }
+
+// Auto-sync when tab becomes visible again (mobile switching apps/tabs)
+document.addEventListener("visibilitychange", function() {
+  if (document.visibilityState === "visible") {
+    setSyncStatus("syncing");
+    pullAll().then(function(pulled) {
+      if (pulled) { recomputeExpSpent(); syncRosterCounts(); refreshAll(); }
+      setSyncStatus("ok");
+    }).catch(function(){ setSyncStatus("offline"); });
+  }
+});
 
 (async function authCheck() {
   // Always open the app directly — login only required after manually locking
