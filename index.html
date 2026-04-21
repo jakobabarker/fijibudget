@@ -2300,7 +2300,9 @@ async function pushAll() {
     if (tr.length) await sbUpsert("transactions", tr);
     sbOnline = true; setSyncStatus("ok"); saveLocal();
   } catch(e) {
-    console.error("pushAll:", e); setSyncStatus("error"); saveLocal();
+    console.error("pushAll failed:", e.message || e);
+    setSyncStatus("error", "⚡ " + (e.message || "push failed").slice(0,40));
+    saveLocal();
   }
 }
 async function pushConfig() {
@@ -2330,13 +2332,25 @@ async function pushExp() {
 }
 async function pushTx(tx) {
   saveLocal(); // write to localStorage first — before any async, so a page close doesn't lose it
-  try { await sbUpsert("transactions", txToRow(tx)); setSyncStatus("ok"); }
-  catch(e) { setSyncStatus("offline"); }
+  try {
+    await sbUpsert("transactions", txToRow(tx));
+    setSyncStatus("ok");
+    sbOnline = true;
+  } catch(e) {
+    console.error("pushTx failed:", e.message);
+    setSyncStatus("error", "⚡ " + e.message.slice(0,40));
+    sbOnline = false;
+  }
 }
 async function deleteTxRemote(id) {
   saveLocal(); // write first
-  try { await sbDeleteOne("transactions", id); setSyncStatus("ok"); }
-  catch(e) { setSyncStatus("offline"); }
+  try {
+    await sbDeleteOne("transactions", id);
+    setSyncStatus("ok");
+  } catch(e) {
+    console.error("deleteTxRemote failed:", e.message);
+    setSyncStatus("error", "⚡ " + e.message.slice(0,40));
+  }
 }
 async function pullAll() {
   setSyncStatus("syncing");
@@ -2384,7 +2398,10 @@ async function pullAll() {
     }
     sbOnline = true; setSyncStatus("ok"); saveLocal(); return true;
   } catch(e) {
-    console.warn("pullAll failed:", e); sbOnline = false; setSyncStatus("offline"); return false;
+    console.error("pullAll failed:", e.message || e);
+    sbOnline = false;
+    setSyncStatus("error", "⚡ " + (e.message || "pull failed").slice(0,40));
+    return false;
   }
 }
 var _pushTimer = null;
@@ -6075,21 +6092,25 @@ document.addEventListener('click', function(e) {
 });
 
 async function init() {
-  // Render immediately from localStorage so UI appears instantly
+  // Render immediately from localStorage — this is always authoritative
   recomputeExpSpent();
   syncRosterCounts();
   updateHeaderSubtitle();
   renderDashboard();
   if (!localStorage.getItem("fiji_skip_welcome")) openWelcome();
 
-  // Then pull from Supabase to get any changes made on other devices.
-  // This is the correct direction on load: remote → local, not local → remote.
-  // pullAll will update the live data and re-render if anything changed.
+  // Push localStorage state to Supabase to keep remote in sync.
+  // We do NOT pull on load — localStorage is the source of truth.
+  // Use manual sync (⟳ button) to pull from remote when needed.
   setSyncStatus("syncing");
-  pullAll().then(function(pulled) {
-    if (pulled) { recomputeExpSpent(); syncRosterCounts(); refreshAll(); }
+  pushAll().then(function(){
     setSyncStatus("ok");
-  }).catch(function(){ setSyncStatus("offline"); });
+    sbOnline = true;
+  }).catch(function(e){
+    console.error("init push failed:", e && e.message);
+    setSyncStatus("offline");
+    sbOnline = false;
+  });
 }
 
 // Backup & restore
@@ -7044,24 +7065,27 @@ function renderSettingsView() {
 async function manualSync() {
   setSyncStatus("syncing", "⟳ Syncing…");
   _lastPullTime = Date.now();
-  pullAll().then(function(pulled) {
-    if (pulled) { recomputeExpSpent(); syncRosterCounts(); refreshAll(); }
+  // Manual sync: push local state up first, then confirm success
+  try {
+    await pushAll();
     setSyncStatus("ok", "✓ Synced");
     setTimeout(function(){ setSyncStatus("ok"); }, 2500);
-  }).catch(function(e){ setSyncStatus("offline"); });
+  } catch(e) {
+    console.error("manualSync failed:", e && e.message);
+    setSyncStatus("error", "⚡ " + ((e && e.message) || "sync failed").slice(0,30));
+  }
 }
 
 // Auto-sync when tab becomes visible again (mobile switching apps/tabs)
-// Throttled: only pull if it's been at least 30s since last pull
+// Throttled: only push if it's been at least 60s since last push
 var _lastPullTime = 0;
 document.addEventListener("visibilitychange", function() {
   if (document.visibilityState === "visible") {
     var now = Date.now();
-    if (now - _lastPullTime < 30000) return; // skip if pulled recently
+    if (now - _lastPullTime < 60000) return;
     _lastPullTime = now;
-    pullAll().then(function(pulled) {
-      if (pulled) { recomputeExpSpent(); syncRosterCounts(); refreshAll(); }
-    }).catch(function(){}); // silent fail — don't show error on background sync
+    // Push local state to Supabase — localStorage is authoritative
+    pushAll().catch(function(){});
   }
 });
 
