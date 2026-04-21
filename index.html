@@ -717,7 +717,7 @@
     </div>
     <!-- Right side actions -->
     <div style="display:flex;gap:6px;align-items:center">
-      <span id="sync-status" class="hdr-hide-mobile" style="font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:.3px;cursor:pointer" onclick="manualSync()" title="Click to sync">⟳</span>
+      <span id="sync-status" style="font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:.3px;cursor:pointer" onclick="manualSync()" title="Click to sync">⟳</span>
       <div id="termToggle" class="term-badge" onclick="toggleTerm()">Spring 2026 ▾</div>
       <button class="btn btn-ghost btn-sm hdr-hide-mobile" onclick="window.print()">⎙ Print</button>
       <button class="btn btn-ghost btn-sm hdr-hide-mobile" onclick="exportBackup()" title="Backup">⬇ Backup</button>
@@ -2144,19 +2144,26 @@ var _syncErrTimer = null;
 function setSyncStatus(state, msg) {
   const el = document.getElementById("sync-status");
   if (!el) return;
-  const map = {
-    syncing: ["var(--amber)", "⟳ Syncing…"],
-    ok:      ["var(--green)", "✓ Live"],
-    offline: ["var(--muted)", "⚡ Offline"],
-    error:   ["var(--muted)", "⚡ Offline"]  // show offline instead of alarming red error
-  };
-  const [color, text] = map[state] || map.offline;
-  el.style.color = color;
-  el.textContent = msg || text;
-  // Auto-clear syncing/ok states after a moment so indicator stays clean
   if (_syncErrTimer) { clearTimeout(_syncErrTimer); _syncErrTimer = null; }
-  if (state === "ok") {
-    _syncErrTimer = setTimeout(function(){ setSyncStatus("ok"); }, 3000);
+  if (state === "syncing") {
+    el.style.color = "var(--amber)";
+    el.textContent = msg || "⟳";
+  } else if (state === "ok") {
+    el.style.color = "var(--green)";
+    el.textContent = msg || "✓ Live";
+    // Auto-clear back to neutral after 3s
+    _syncErrTimer = setTimeout(function() {
+      el.style.color = "var(--muted)";
+      el.textContent = "⟳";
+    }, 3000);
+  } else {
+    // offline or error — show quietly, auto-clear after 8s
+    el.style.color = "var(--muted)";
+    el.textContent = "⚡";
+    _syncErrTimer = setTimeout(function() {
+      el.style.color = "var(--muted)";
+      el.textContent = "⟳";
+    }, 8000);
   }
 }
 
