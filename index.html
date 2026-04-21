@@ -2286,13 +2286,16 @@ async function pushAll() {
   setSyncStatus("syncing");
   try {
     await sbUpsert("config", { id: 1, data: config });
-    await sbDeleteAll("dues");
-    var dr = duesDataToRows(duesData);
-    if (dr.length) await sbUpsert("dues", dr);
-    await sbDeleteAll("expenditures");
+    // Upsert-only — never delete-all. Avoids race condition where a pull
+    // during the delete window sees an empty table and seeds from scratch.
+    var spRows = duesDataToRows(springDuesData);
+    var faRows = duesDataToRows(fallDuesData);
+    var allDues = spRows.concat(faRows.filter(function(fr){
+      return !spRows.some(function(sr){ return sr.id === fr.id; });
+    }));
+    if (allDues.length) await sbUpsert("dues", allDues);
     var er = expToRows(springExp,getTerms().spring).concat(expToRows(fallExp,getTerms().fall));
     if (er.length) await sbUpsert("expenditures", er);
-    await sbDeleteAll("transactions");
     var tr = txList.map(txToRow);
     if (tr.length) await sbUpsert("transactions", tr);
     sbOnline = true; setSyncStatus("ok"); saveLocal();
@@ -2307,8 +2310,6 @@ async function pushConfig() {
 }
 async function pushDues() {
   try {
-    await sbDeleteAll("dues");
-    // Push both spring AND fall rosters so neither term is dropped on switch
     var spRows = duesDataToRows(springDuesData);
     var faRows = duesDataToRows(fallDuesData);
     var all = spRows.concat(faRows.filter(function(fr){
@@ -2321,7 +2322,6 @@ async function pushDues() {
 }
 async function pushExp() {
   try {
-    await sbDeleteAll("expenditures");
     var rows = expToRows(springExp,getTerms().spring).concat(expToRows(fallExp,getTerms().fall));
     if (rows.length) await sbUpsert("expenditures", rows);
     setSyncStatus("ok");
@@ -2348,7 +2348,12 @@ async function pullAll() {
     var duesRows = await sbGet("dues", "order=name.asc");
     var expRows  = await sbGet("expenditures", "order=term.asc,section.asc");
     var txRows   = await sbGet("transactions", "order=date.desc");
-    var dbEmpty  = duesRows.length === 0 && txRows.length === 0;
+    // Only treat as "empty database needing seed" if BOTH remote AND local are empty.
+    // This prevents a push race window (delete ran, insert pending) from triggering
+    // a destructive re-seed that wipes locally-saved transactions.
+    var localTx = JSON.parse(localStorage.getItem("fiji_tx") || "null");
+    var dbEmpty  = duesRows.length === 0 && txRows.length === 0
+                   && (!localTx || localTx.length === 0);
     if (dbEmpty) {
       duesData  = DUES_DATA_SPRING.map(function(d) { return Object.assign({}, d, {payStatus:"Paid in Full",payMethod:"Bank Account",extraFees:[],installments:1,installmentsPaid:0,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,earlyDiscount:false,rentEarlyDiscount:false}); });
       springExp = SPRING_EXP.map(function(e) { return Object.assign({},e); });
@@ -2357,14 +2362,25 @@ async function pullAll() {
       recomputeExpSpent(); syncRosterCounts();
       await pushAll();
     } else {
-      if (duesRows.length) duesData  = rowsToDuesData(duesRows);
+      // If remote has data, use it. If remote is empty but local isn't,
+      // keep local data (remote may be mid-push) and push local up.
+      if (duesRows.length) {
+        duesData = rowsToDuesData(duesRows);
+      }
       if (expRows.length) {
         var sp = rowsToExp(expRows.filter(function(r){return isSpring(r.term);}));
         var fa = rowsToExp(expRows.filter(function(r){return !isSpring(r.term);}));
         if (sp.length) springExp = sp;
         if (fa.length) fallExp   = fa;
       }
-      if (txRows.length) txList = txRows.map(rowToTx);
+      if (txRows.length) {
+        txList = txRows.map(rowToTx);
+      } else if (localTx && localTx.length) {
+        // Remote tx empty but local has data — remote was mid-push, keep local
+        // and re-push to recover
+        txList = localTx;
+        pushAll().catch(function(){});
+      }
     }
     sbOnline = true; setSyncStatus("ok"); saveLocal(); return true;
   } catch(e) {
@@ -2374,10 +2390,11 @@ async function pullAll() {
 var _pushTimer = null;
 function save() {
   saveLocal();  // always write to localStorage immediately
-  // Debounce the Supabase push — wait 2s of inactivity before pushing
+  // Debounce Supabase push — push only what changed, never delete-all
   if (_pushTimer) clearTimeout(_pushTimer);
   _pushTimer = setTimeout(function() {
-    pushAll().catch(function(){});
+    pushExp().catch(function(){});
+    pushConfig().catch(function(){});
   }, 2000);
 }
 
