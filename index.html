@@ -5284,6 +5284,9 @@ function onBudgetLineChange(input) {
   }
   input.classList.add("changed");
   markEditDirty();
+  // Debounce save — persist inline edits after 1s pause
+  if (window._budgetEditTimer) clearTimeout(window._budgetEditTimer);
+  window._budgetEditTimer = setTimeout(function() { save(); }, 1000);
 }
 function deleteBudgetLine(src, idx) {
   var arr  = src === "spring" ? springExp : fallExp;
@@ -5295,8 +5298,10 @@ function deleteBudgetLine(src, idx) {
     if (!confirm("Delete budget line \"" + line.item + "\"?")) return;
   }
   arr.splice(idx, 1);
-  markEditDirty();
+  recomputeExpSpent();
+  save();
   renderEditBudget();
+  renderBudgeting();
 }
 function openAddBudgetLine(src) {
   document.getElementById("bl-src").value = src;
@@ -5349,9 +5354,11 @@ function saveBudgetLine() {
   } else {
     arr.push({section: section, item: item, budgeted: budgeted, spent: 0});
   }
-  markEditDirty();
+  recomputeExpSpent();   // recalc spent totals with new line present
+  save();                // persist to localStorage + Supabase immediately
   closeBudgetLineModal();
   renderEditBudget();
+  renderBudgeting();     // refresh budgeting view so new line appears live
 }
 function renderEditRates() {
   var els = {
