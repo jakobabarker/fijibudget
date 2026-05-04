@@ -1399,6 +1399,10 @@
       <div class="card" style="margin-bottom:18px">
         <div class="card-header">Data Management</div>
         <div style="padding:16px">
+          <div style="margin-bottom:12px;padding:10px 14px;background:rgba(200,168,75,0.07);border:1px solid rgba(200,168,75,0.2);border-radius:8px;font-size:11px;color:var(--gold)">
+            <b>Multi-device sync:</b> Use Force Push to make this device the source of truth. All other devices will receive this data on their next page load.
+            <div style="margin-top:8px"><button class="btn btn-primary btn-sm" onclick="forcePushAll()">⬆ Force Push All Data to Cloud</button></div>
+          </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
             <div style="background:rgba(255,255,255,0.03);border-radius:8px;padding:14px">
               <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px">⬇ Export Backup</div>
@@ -2604,7 +2608,9 @@ async function pushAll() {
   try {
     await sbUpsert("config", { id: 1, data: config });
     await sbDeleteAll("dues");
-    var dr = duesDataToRows(duesData);
+    var springRows = duesDataToRows(springDuesData).map(function(r){ return Object.assign({},r,{term:"spring"}); });
+    var fallRows   = duesDataToRows(fallDuesData).map(function(r){ return Object.assign({},r,{term:"fall"}); });
+    var dr = springRows.concat(fallRows);
     if (dr.length) await sbUpsert("dues", dr);
     await sbDeleteAll("expenditures");
     var er = expToRows(springExp,getTerms().spring).concat(expToRows(fallExp,getTerms().fall));
@@ -7200,6 +7206,31 @@ async function manualSync() {
     setSyncStatus("ok", "✓ Synced");
     setTimeout(function(){ setSyncStatus("ok"); }, 2500);
   }).catch(function(){ setSyncStatus("offline"); });
+}
+
+async function forcePushAll() {
+  if (!confirm("Push ALL local data to Supabase? This will overwrite the remote copy with data from this device.")) return;
+  setSyncStatus("syncing", "⟳ Pushing…");
+  try {
+    await sbUpsert("config", { id: 1, data: config });
+    await sbDeleteAll("dues");
+    var springRows = duesDataToRows(springDuesData).map(function(r){ return Object.assign({},r,{term:"spring"}); });
+    var fallRows   = duesDataToRows(fallDuesData).map(function(r){ return Object.assign({},r,{term:"fall"}); });
+    var dr = springRows.concat(fallRows);
+    if (dr.length) await sbUpsert("dues", dr);
+    await sbDeleteAll("expenditures");
+    var er = expToRows(springExp, getTerms().spring).concat(expToRows(fallExp, getTerms().fall));
+    if (er.length) await sbUpsert("expenditures", er);
+    await sbDeleteAll("transactions");
+    var tr = txList.map(txToRow);
+    if (tr.length) await sbUpsert("transactions", tr);
+    saveLocal();
+    setSyncStatus("ok", "✓ Pushed — reload other devices");
+    setTimeout(function(){ setSyncStatus("ok"); }, 4000);
+  } catch(e) {
+    console.error("forcePush:", e);
+    setSyncStatus("error", "✕ Push failed");
+  }
 }
 
 // Auto-sync when tab becomes visible again (mobile switching apps/tabs)
