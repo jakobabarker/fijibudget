@@ -2625,8 +2625,11 @@ async function pushConfig() {
 async function pushDues() {
   try {
     await sbDeleteAll("dues");
-    var rows = duesDataToRows(duesData);
-    if (rows.length) await sbUpsert("dues", rows);
+    // Push both rosters with term tag so all devices get both
+    var springRows = duesDataToRows(springDuesData).map(function(r){ return Object.assign({},r,{term:"spring"}); });
+    var fallRows   = duesDataToRows(fallDuesData).map(function(r){ return Object.assign({},r,{term:"fall"}); });
+    var allRows = springRows.concat(fallRows);
+    if (allRows.length) await sbUpsert("dues", allRows);
     setSyncStatus("ok");
   } catch(e) { console.error("pushDues:", e); setSyncStatus("error"); }
   saveLocal();
@@ -2662,14 +2665,29 @@ async function pullAll() {
     var txRows   = await sbGet("transactions", "order=date.desc");
     var dbEmpty  = duesRows.length === 0 && txRows.length === 0;
     if (dbEmpty) {
-      duesData  = DUES_DATA_SPRING.map(function(d) { return Object.assign({}, d, {payStatus:"Paid in Full",payMethod:"Bank Account",extraFees:[],installments:1,installmentsPaid:0,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,earlyDiscount:false,rentEarlyDiscount:false}); });
-      springExp = SPRING_EXP.map(function(e) { return Object.assign({},e); });
-      fallExp   = FALL_EXP.map(function(e)   { return Object.assign({},e); });
+      springDuesData = DUES_DATA_SPRING.map(function(d){ return Object.assign({},d); });
+      fallDuesData   = DUES_DATA_FALL.map(function(d){ return Object.assign({},d); });
+      duesData       = getDuesData();
+      springExp = SPRING_EXP.map(function(e){ return Object.assign({},e); });
+      fallExp   = FALL_EXP.map(function(e){ return Object.assign({},e); });
       txList    = TX_OUT_SEED.concat(TX_IN_SEED);
       recomputeExpSpent(); syncRosterCounts();
       await pushAll();
     } else {
-      if (duesRows.length) duesData  = rowsToDuesData(duesRows);
+      // Split dues rows by term field
+      var springRows = duesRows.filter(function(r){ return !r.term || r.term === "spring"; });
+      var fallRows   = duesRows.filter(function(r){ return r.term === "fall"; });
+      if (springRows.length) {
+        springDuesData = rowsToDuesData(springRows);
+      }
+      if (fallRows.length) {
+        fallDuesData = rowsToDuesData(fallRows);
+      } else if (duesRows.length && !fallRows.length) {
+        // Legacy: no term column yet — current rows are spring, fall uses seed
+        springDuesData = rowsToDuesData(duesRows);
+        // fallDuesData stays as seed (already initialized)
+      }
+      duesData = getDuesData();
       if (expRows.length) {
         var sp = rowsToExp(expRows.filter(function(r){return isSpring(r.term);}));
         var fa = rowsToExp(expRows.filter(function(r){return !isSpring(r.term);}));
@@ -6194,20 +6212,36 @@ document.addEventListener('click', function(e) {
 });
 
 async function init() {
-  recomputeExpSpent();
-  syncRosterCounts();
-  updateHeaderSubtitle();
-  renderDashboard();
-  if (!localStorage.getItem("fiji_skip_welcome")) openWelcome();
-
-  // Only pull from Supabase if localStorage has no data (first ever load)
-  // or if user explicitly requests a sync. This prevents Supabase
-  // from overwriting locally-saved changes on refresh.
-  // Always start from localStorage (which is seeded from DUES_DATA_SPRING on first load).
-  // Push to Supabase to keep remote in sync — never pull and overwrite local.
+  // Always pull from Supabase first — this is the source of truth
+  // so all devices stay in sync
   setSyncStatus("syncing");
   updateHeaderSubtitle();
-  pushAll().then(function(){ setSyncStatus("ok"); }).catch(function(){ setSyncStatus("offline"); });
+  renderDashboard(); // show something immediately
+  if (!localStorage.getItem("fiji_skip_welcome")) openWelcome();
+
+  try {
+    var pulled = await pullAll();
+    if (pulled) {
+      recomputeExpSpent();
+      syncRosterCounts();
+      updateHeaderSubtitle();
+      refreshAll();
+      setSyncStatus("ok");
+    } else {
+      // Offline — use localStorage
+      recomputeExpSpent();
+      syncRosterCounts();
+      updateHeaderSubtitle();
+      refreshAll();
+      setSyncStatus("offline");
+    }
+  } catch(e) {
+    recomputeExpSpent();
+    syncRosterCounts();
+    updateHeaderSubtitle();
+    refreshAll();
+    setSyncStatus("offline");
+  }
 }
 
 // Backup & restore
