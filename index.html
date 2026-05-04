@@ -2763,8 +2763,8 @@ function syncRosterCounts() {
   config.brotherCounts.fall.member        = fallDuesData.filter(function(d){return d.cls==="Member";}).length;
   config.brotherCounts.fall.houseMember   = fallDuesData.filter(function(d){return d.cls==="House Member";}).length;
   saveLocal();
+  // Push config only (no dues table — schema mismatch)
   pushConfig().catch(function(){});
-  pushDues().catch(function(){});
 }
 
 function refreshAll() {
@@ -7210,8 +7210,6 @@ async function forcePushAll() {
   if (!confirm("Push ALL local data to Supabase? This will overwrite the remote copy with data from this device.")) return;
   setSyncStatus("syncing", "⟳ Pushing…");
   try {
-    await sbUpsert("config", { id: 1, data: config });
-    // Store everything in config blob
     var payload = Object.assign({}, config, {
       _springRoster: springDuesData,
       _fallRoster:   fallDuesData,
@@ -7225,7 +7223,7 @@ async function forcePushAll() {
     setTimeout(function(){ setSyncStatus("ok"); }, 4000);
   } catch(e) {
     console.error("forcePush:", e);
-    setSyncStatus("error", "✕ Push failed");
+    setSyncStatus("error", "✕ Push failed — check console");
   }
 }
 
