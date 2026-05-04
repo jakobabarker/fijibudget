@@ -2606,53 +2606,42 @@ function saveLocal() {
 async function pushAll() {
   setSyncStatus("syncing");
   try {
-    await sbUpsert("config", { id: 1, data: config });
-    await sbDeleteAll("dues");
-    var springRows = duesDataToRows(springDuesData).map(function(r){ return Object.assign({},r,{term:"spring"}); });
-    var fallRows   = duesDataToRows(fallDuesData).map(function(r){ return Object.assign({},r,{term:"fall"}); });
-    var dr = springRows.concat(fallRows);
-    if (dr.length) await sbUpsert("dues", dr);
-    await sbDeleteAll("expenditures");
-    var er = expToRows(springExp,getTerms().spring).concat(expToRows(fallExp,getTerms().fall));
-    if (er.length) await sbUpsert("expenditures", er);
-    await sbDeleteAll("transactions");
-    var tr = txList.map(txToRow);
-    if (tr.length) await sbUpsert("transactions", tr);
+    // Store everything in config JSON — avoids schema issues with other tables
+    var payload = Object.assign({}, config, {
+      _springRoster: springDuesData,
+      _fallRoster:   fallDuesData,
+      _txList:       txList,
+      _springExp:    springExp,
+      _fallExp:      fallExp
+    });
+    await sbUpsert("config", { id: 1, data: payload });
     sbOnline = true; setSyncStatus("ok"); saveLocal();
   } catch(e) {
     console.error("pushAll:", e); setSyncStatus("error"); saveLocal();
   }
 }
 async function pushConfig() {
-  try { await sbUpsert("config", { id:1, data:config }); setSyncStatus("ok"); }
-  catch(e) { setSyncStatus("offline"); }
-  saveLocal();
+  return pushAll();
 }
 async function pushDues() {
   try {
-    await sbDeleteAll("dues");
-    // Push both rosters with term tag so all devices get both
-    var springRows = duesDataToRows(springDuesData).map(function(r){ return Object.assign({},r,{term:"spring"}); });
-    var fallRows   = duesDataToRows(fallDuesData).map(function(r){ return Object.assign({},r,{term:"fall"}); });
-    var allRows = springRows.concat(fallRows);
-    if (allRows.length) await sbUpsert("dues", allRows);
+    var payload = Object.assign({}, config, {
+      _springRoster: springDuesData,
+      _fallRoster:   fallDuesData,
+      _txList:       txList,
+      _springExp:    springExp,
+      _fallExp:      fallExp
+    });
+    await sbUpsert("config", { id: 1, data: payload });
     setSyncStatus("ok");
   } catch(e) { console.error("pushDues:", e); setSyncStatus("error"); }
   saveLocal();
 }
 async function pushExp() {
-  try {
-    await sbDeleteAll("expenditures");
-    var rows = expToRows(springExp,getTerms().spring).concat(expToRows(fallExp,getTerms().fall));
-    if (rows.length) await sbUpsert("expenditures", rows);
-    setSyncStatus("ok");
-  } catch(e) { console.error("pushExp:", e); setSyncStatus("error"); }
-  saveLocal();
+  return pushAll();
 }
-async function pushTx(tx) {
-  try { await sbUpsert("transactions", txToRow(tx)); setSyncStatus("ok"); }
-  catch(e) { setSyncStatus("offline"); }
-  saveLocal();
+async function pushTx() {
+  return pushAll();
 }
 async function deleteTxRemote(id) {
   try { await sbDeleteOne("transactions", id); setSyncStatus("ok"); }
@@ -2680,27 +2669,36 @@ async function pullAll() {
       recomputeExpSpent(); syncRosterCounts();
       await pushAll();
     } else {
-      // Split dues rows by term field
-      var springRows = duesRows.filter(function(r){ return !r.term || r.term === "spring"; });
-      var fallRows   = duesRows.filter(function(r){ return r.term === "fall"; });
-      if (springRows.length) {
-        springDuesData = rowsToDuesData(springRows);
-      }
-      if (fallRows.length) {
-        fallDuesData = rowsToDuesData(fallRows);
-      } else if (duesRows.length && !fallRows.length) {
-        // Legacy: no term column yet — current rows are spring, fall uses seed
+      var cd = cfgRows[0] && cfgRows[0].data ? cfgRows[0].data : {};
+      // Restore rosters from config blob
+      if (cd._springRoster && cd._springRoster.length) {
+        springDuesData = cd._springRoster;
+        localStorage.setItem("fiji_dues_spring", JSON.stringify(springDuesData));
+      } else if (duesRows.length) {
         springDuesData = rowsToDuesData(duesRows);
-        // fallDuesData stays as seed (already initialized)
+      }
+      if (cd._fallRoster && cd._fallRoster.length) {
+        fallDuesData = cd._fallRoster;
+        localStorage.setItem("fiji_dues_fall", JSON.stringify(fallDuesData));
       }
       duesData = getDuesData();
-      if (expRows.length) {
-        var sp = rowsToExp(expRows.filter(function(r){return isSpring(r.term);}));
-        var fa = rowsToExp(expRows.filter(function(r){return !isSpring(r.term);}));
-        if (sp.length) springExp = sp;
-        if (fa.length) fallExp   = fa;
+      // Restore transactions from config blob
+      if (cd._txList && cd._txList.length) {
+        txList = cd._txList;
+      } else if (txRows.length) {
+        txList = txRows.map(rowToTx);
       }
-      if (txRows.length) txList = txRows.map(rowToTx);
+      // Restore expenses from config blob
+      if (cd._springExp && cd._springExp.length) springExp = cd._springExp;
+      else if (expRows.length) {
+        var sp = rowsToExp(expRows.filter(function(r){return isSpring(r.term);}));
+        if (sp.length) springExp = sp;
+      }
+      if (cd._fallExp && cd._fallExp.length) fallExp = cd._fallExp;
+      else if (expRows.length) {
+        var fa = rowsToExp(expRows.filter(function(r){return !isSpring(r.term);}));
+        if (fa.length) fallExp = fa;
+      }
     }
     sbOnline = true; setSyncStatus("ok"); saveLocal(); return true;
   } catch(e) {
@@ -7213,17 +7211,15 @@ async function forcePushAll() {
   setSyncStatus("syncing", "⟳ Pushing…");
   try {
     await sbUpsert("config", { id: 1, data: config });
-    await sbDeleteAll("dues");
-    var springRows = duesDataToRows(springDuesData).map(function(r){ return Object.assign({},r,{term:"spring"}); });
-    var fallRows   = duesDataToRows(fallDuesData).map(function(r){ return Object.assign({},r,{term:"fall"}); });
-    var dr = springRows.concat(fallRows);
-    if (dr.length) await sbUpsert("dues", dr);
-    await sbDeleteAll("expenditures");
-    var er = expToRows(springExp, getTerms().spring).concat(expToRows(fallExp, getTerms().fall));
-    if (er.length) await sbUpsert("expenditures", er);
-    await sbDeleteAll("transactions");
-    var tr = txList.map(txToRow);
-    if (tr.length) await sbUpsert("transactions", tr);
+    // Store everything in config blob
+    var payload = Object.assign({}, config, {
+      _springRoster: springDuesData,
+      _fallRoster:   fallDuesData,
+      _txList:       txList,
+      _springExp:    springExp,
+      _fallExp:      fallExp
+    });
+    await sbUpsert("config", { id: 1, data: payload });
     saveLocal();
     setSyncStatus("ok", "✓ Pushed — reload other devices");
     setTimeout(function(){ setSyncStatus("ok"); }, 4000);
