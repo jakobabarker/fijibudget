@@ -620,6 +620,7 @@
     <button class="nav-btn" onclick="showView('transactions',this)">Transactions</button>
     <button class="nav-btn" onclick="showView('calculations',this)">Calculations & Rates</button>
     <button class="nav-btn" onclick="showView('reports',this)">Reports</button>
+    <button class="nav-btn" onclick="showView('edit',this)">✎ Edit</button>
     <button class="nav-btn" onclick="showView('settings',this)">⚙ Settings</button>
   </nav>
 
@@ -649,6 +650,7 @@
 
   <!-- More menu overlay -->
   <div id="mobile-more-menu">
+    <button class="mob-more-item" onclick="showView('edit',null);closeMobileMore()">✎ Edit</button>
     <button class="mob-more-item" onclick="showView('expenditures',null);closeMobileMore()">Expenditures</button>
     <button class="mob-more-item" onclick="showView('calculations',null);closeMobileMore()">Calculations & Rates</button>
     <button class="mob-more-item" onclick="showView('reports',null);closeMobileMore()">Reports</button>
@@ -1195,14 +1197,14 @@
       <div id="edit-budget" class="edit-pane">
         <div class="two-col" style="margin-bottom:16px">
           <div class="card">
-            <div class="card-header"><span>Spring 2026 Budget Lines</span></div>
+            <div class="card-header" id="edit-spring-hdr"><span>Spring Budget Lines</span></div>
             <div class="table-scroll-wrap"><table class="data-table" id="edit-spring-budget-table">
               <thead><tr><th>Section</th><th>Line Item</th><th style="text-align:right">Budgeted ($)</th></tr></thead>
               <tbody id="edit-spring-tbody"></tbody>
             </table></div>
           </div>
           <div class="card">
-            <div class="card-header"><span>Fall 2026 Budget Lines</span></div>
+            <div class="card-header" id="edit-fall-hdr"><span>Fall Budget Lines</span></div>
             <div class="table-scroll-wrap"><table class="data-table">
               <thead><tr><th>Section</th><th>Line Item</th><th style="text-align:right">Budgeted ($)</th></tr></thead>
               <tbody id="edit-fall-tbody"></tbody>
@@ -1846,134 +1848,154 @@ const DUES_DATA_SPRING = [
   {name:"Wyatt Wassom",cls:"House Member",due:600,paid:620,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:true,rentStatus:"Paid in Full",rentPaid:2250,rentInstallments:1,rentInstallmentsPaid:1,rentEarlyDiscount:true,extraFees:[{"label": "Brotherhood Fee", "amount": 20}],notes:"",financialProbation:0,brotherhood:""}
 ];
 const DUES_DATA_FALL = [
-  {name:"Aden Perez",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Alexander Compton",cls:"House Member",due:2750,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Aden Perez",cls:"Member",due:600,paid:600,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Alexander Compton",cls:"Member",due:600,paid:600,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Andrew Bird",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Andrew Crosley",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Andrew Hester",cls:"House Member",due:2750,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Asher Pettus",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Andrew Hester",cls:"Member",due:600,paid:600,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Asher Pettus",cls:"House Member",due:2750,paid:2750,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Ayden Sandefur",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Bradley Wagoner",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Brandon Valle",cls:"New Member",due:400,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Braydon Smith",cls:"New Member",due:400,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Brandon Valle",cls:"House Member",due:2750,paid:2750,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Braydon Smith",cls:"Member",due:600,paid:600,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Britton Rowe",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Caden Lange",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Caden Lucas",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Camden Cloud",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Cameron Vick",cls:"New Member",due:400,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Camden Cloud",cls:"House Member",due:2750,paid:2750,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Cameron Vick",cls:"Member",due:600,paid:600,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Carter Chapman",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Carter Smith",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Carter Smith",cls:"House Member",due:2750,paid:2750,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Chayce Merchant",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Chuck Hagan",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Clay Manley",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Clay Manley",cls:"House Member",due:2750,paid:2750,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Clayton Roberts",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Connor Eaton",cls:"House Member",due:2750,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Connor Eaton",cls:"Member",due:600,paid:600,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Dalton Buhs",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Daniel Campbell",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Devin Frazier",cls:"House Member",due:2750,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Devin Frazier",cls:"Member",due:600,paid:600,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Donovan Perez",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Eli Chapman",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Eli Robson",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Elijah Martin",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Elijah Martin",cls:"House Member",due:2750,paid:2750,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Ethan Vietze",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Gage Beck",cls:"New Member",due:400,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Gage Beck",cls:"Member",due:600,paid:600,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Gage Czirr",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Grayson Roederer",cls:"New Member",due:400,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Grayson Roederer",cls:"House Member",due:2750,paid:2750,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Hayden Harvey",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Hunter Falls",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Ian Salyer",cls:"New Member",due:400,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Ian Salyer",cls:"Member",due:600,paid:600,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Ian Stanley",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Indy Abshere",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Jack Barlow",cls:"House Member",due:2750,paid:0,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Jack Woolf",cls:"House Member",due:2750,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Jackson Smith",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Jagger Tomes",cls:"House Member",due:2750,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Jack Barlow",cls:"Member",due:600,paid:600,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Jack Woolf",cls:"Member",due:600,paid:600,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Jackson Smith",cls:"House Member",due:2750,paid:2750,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Jagger Tomes",cls:"Member",due:600,paid:600,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Jakob Barker",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Jayce Hicks",cls:"House Member",due:2750,paid:0,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Jayce Hicks",cls:"Member",due:600,paid:600,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Jett Meffert",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Jody Hopgood",cls:"House Member",due:2750,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Jody Hopgood",cls:"Member",due:600,paid:600,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Jonah Hall",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Jude Scott",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Korben Walling",cls:"House Member",due:2750,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Landon Terry",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Korben Walling",cls:"Member",due:600,paid:600,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Landon Terry",cls:"House Member",due:2750,paid:2750,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Logan Bell",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Lucas Dunning",cls:"House Member",due:2750,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Lucas Dunning",cls:"Member",due:600,paid:600,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Luke Humphrey",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Manny Summers-Bates",cls:"House Member",due:2750,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Manny Summers-Bates",cls:"Member",due:600,paid:600,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Mason Strunk",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Matt Donohue",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Matt Donohue",cls:"House Member",due:2750,paid:2750,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Micah Chapek",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Michael Mitchell",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Miles Harvey",cls:"House Member",due:2750,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Michael Mitchell",cls:"House Member",due:2750,paid:2750,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Miles Harvey",cls:"Member",due:600,paid:600,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Mitchell Brunski",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Nathan Richards",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Noah Rugama",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Noah Rugama",cls:"House Member",due:2750,paid:2750,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Paul Fugett",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Preston Adams",cls:"New Member",due:400,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Rhett Morgan",cls:"House Member",due:2750,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Preston Adams",cls:"Member",due:600,paid:600,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Rhett Morgan",cls:"Member",due:600,paid:600,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Ryan Riggs",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Sonny Blackwell",cls:"House Member",due:2750,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Sonny Blackwell",cls:"Member",due:600,paid:600,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Spencer Crum",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Thomas Feickert",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Trey Ward",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
-  {name:"Will Rhody",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Trey Ward",cls:"House Member",due:2750,paid:2750,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"Will Rhody",cls:"House Member",due:2750,paid:2750,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:1,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
   {name:"Will Weitlauf",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
-  {name:"William Fowler",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""}
+  {name:"William Fowler",cls:"Member",due:600,paid:0,payStatus:"Paid in Full",payMethod:"Credit Card",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"New Member 1",cls:"New Member",due:400,paid:0,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"New Member 2",cls:"New Member",due:400,paid:0,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"New Member 3",cls:"New Member",due:400,paid:0,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"New Member 4",cls:"New Member",due:400,paid:0,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"New Member 5",cls:"New Member",due:400,paid:0,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"New Member 6",cls:"New Member",due:400,paid:0,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"New Member 7",cls:"New Member",due:400,paid:0,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"New Member 8",cls:"New Member",due:400,paid:0,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"New Member 9",cls:"New Member",due:400,paid:0,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"New Member 10",cls:"New Member",due:400,paid:0,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"New Member 11",cls:"New Member",due:400,paid:0,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"New Member 12",cls:"New Member",due:400,paid:0,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"New Member 13",cls:"New Member",due:400,paid:0,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"New Member 14",cls:"New Member",due:400,paid:0,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"New Member 15",cls:"New Member",due:400,paid:0,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"New Member 16",cls:"New Member",due:400,paid:0,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"New Member 17",cls:"New Member",due:400,paid:0,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"New Member 18",cls:"New Member",due:400,paid:0,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"New Member 19",cls:"New Member",due:400,paid:0,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""},
+  {name:"New Member 20",cls:"New Member",due:400,paid:0,payStatus:"Paid in Full",payMethod:"Bank Account",installments:1,installmentsPaid:0,earlyDiscount:false,rentStatus:"N/A",rentPaid:0,rentInstallments:1,rentInstallmentsPaid:0,rentEarlyDiscount:false,extraFees:[],notes:"",financialProbation:0,brotherhood:""}
 ];
 
 const SPRING_EXP = [
-  {section:"Committees",item:"Cups & Awards",budgeted:20,spent:0},
-  {section:"Committees",item:"Graduate Relations",budgeted:0,spent:0},
-  {section:"Committees",item:"Community Service",budgeted:0,spent:0},
-  {section:"Committees",item:"Judicial Board",budgeted:25,spent:13.76},
-  {section:"Committees",item:"Scholarship",budgeted:200,spent:0},
-  {section:"Committees",item:"Big Brother",budgeted:0,spent:0},
-  {section:"Committees",item:"Social",budgeted:2000,spent:1606.13},
-  {section:"Committees",item:"Homecoming",budgeted:0,spent:0},
-  {section:"Committees",item:"Greek Week",budgeted:2172,spent:2125.48},
-  {section:"Committees",item:"Recruitment",budgeted:2000,spent:1702.06},
-  {section:"Committees",item:"Foundations of Courage",budgeted:0,spent:0},
-  {section:"Committees",item:"Publications",budgeted:150,spent:128.47},
-  {section:"Committees",item:"Philanthropy",budgeted:875,spent:836.89},
-  {section:"Committees",item:"T-Shirt",budgeted:2500,spent:2505.88},
-  {section:"Committees",item:"Parent Relations",budgeted:0,spent:0},
-  {section:"Committees",item:"Mental Health",budgeted:200,spent:50.82},
-  {section:"Committees",item:"Brotherhood",budgeted:500,spent:212.03},
-  {section:"Committees",item:"Pig Dinner",budgeted:3706.5,spent:5622.16},
-  {section:"Committees",item:"IFC",budgeted:0,spent:0},
-  {section:"Committees",item:"Intramurals",budgeted:200,spent:0},
-  {section:"Committees",item:"Housing",budgeted:1500,spent:538.74},
-  {section:"Committees",item:"Build to Lead",budgeted:0,spent:0},
   {section:"Committees",item:"Chaplain",budgeted:70,spent:49.3},
+  {section:"Committees",item:"Housing",budgeted:1500,spent:471.64},
+  {section:"Committees",item:"Intramurals",budgeted:200,spent:0},
+  {section:"Committees",item:"IFC",budgeted:0,spent:0},
+  {section:"Committees",item:"Pig Dinner",budgeted:3706.5,spent:5621.23},
+  {section:"Committees",item:"Brotherhood",budgeted:500,spent:85.47},
+  {section:"Committees",item:"Mental Health",budgeted:200,spent:50.82},
+  {section:"Committees",item:"Parent Relations",budgeted:0,spent:0},
+  {section:"Committees",item:"T-Shirt",budgeted:2500,spent:2505.88},
+  {section:"Committees",item:"Philanthropy",budgeted:875,spent:836.89},
+  {section:"Committees",item:"Publications",budgeted:150,spent:128.47},
+  {section:"Committees",item:"Foundations of Courage",budgeted:0,spent:0},
+  {section:"Committees",item:"Recruitment",budgeted:2000,spent:1702.06},
+  {section:"Committees",item:"Greek Week",budgeted:2172,spent:1928.32},
+  {section:"Committees",item:"Homecoming",budgeted:0,spent:0},
+  {section:"Committees",item:"Social",budgeted:2000,spent:1296.71},
+  {section:"Committees",item:"Big Brother",budgeted:0,spent:0},
+  {section:"Committees",item:"Scholarship",budgeted:200,spent:0},
+  {section:"Committees",item:"Judicial Board",budgeted:25,spent:13.76},
+  {section:"Committees",item:"Community Service",budgeted:0,spent:0},
+  {section:"Committees",item:"Graduate Relations",budgeted:0,spent:0},
+  {section:"Committees",item:"Cups & Awards",budgeted:20,spent:0},
+  {section:"Committees",item:"Build to Lead",budgeted:0,spent:0},
   {section:"Housing Corp",item:"Parlor Fees",budgeted:2050,spent:2075},
   {section:"Housing Corp",item:"House Rent",budgeted:36000,spent:26400},
-  {section:"IHQ",item:"LegFi Fee",budgeted:3528,spent:3780},
-  {section:"IHQ",item:"IFC Fees",budgeted:1276,spent:1278.6},
   {section:"IHQ",item:"Member Fees",budgeted:3125,spent:3000},
+  {section:"IHQ",item:"LegFi Fee",budgeted:3528,spent:3780},
+  {section:"IHQ",item:"IFC Fees",budgeted:1276,spent:1428.6},
   {section:"IHQ",item:"Graduate Gifts",budgeted:200,spent:1001.7},
   {section:"IHQ",item:"Insurance Fees",budgeted:12250,spent:12000},
-  {section:"Officers",item:"Executive Discretionary",budgeted:150,spent:54.69},
-  {section:"Officers",item:"Recording Secretary",budgeted:20,spent:0},
-  {section:"Officers",item:"President",budgeted:20,spent:0},
   {section:"Officers",item:"Historian",budgeted:20,spent:20},
   {section:"Officers",item:"Treasurer",budgeted:20,spent:0},
+  {section:"Officers",item:"Recording Secretary",budgeted:20,spent:0},
+  {section:"Officers",item:"Executive Discretionary",budgeted:150,spent:54.69},
+  {section:"Officers",item:"President",budgeted:20,spent:0},
   {section:"Officers",item:"Corresponding Secretary",budgeted:20,spent:0},
-  {section:"Other",item:"Composite",budgeted:2000,spent:1873.15},
-  {section:"Other",item:"Services",budgeted:120,spent:120},
   {section:"Other",item:"Savings",budgeted:1000,spent:0},
+  {section:"Other",item:"Services",budgeted:120,spent:120},
+  {section:"Other",item:"Composite",budgeted:2000,spent:1873.15},
   {section:"Other",item:"Shenanigans",budgeted:0,spent:0},
-  {section:"Other",item:"Spring Sing",budgeted:1200,spent:1025.22},
-  {section:"Other",item:"Formal",budgeted:800,spent:1130.2},
-  {section:"Other",item:"Cabinet Retreat",budgeted:50,spent:0},
-  {section:"Other",item:"Misc.",budgeted:800,spent:752.49},
-  {section:"Other",item:"Ritual Room",budgeted:100,spent:0},
-  {section:"Other",item:"Strategic Planning Retreat",budgeted:50,spent:45.72},
-  {section:"Other",item:"Brotherhood Retreat",budgeted:7000,spent:6275.55},
-  {section:"Other",item:"Tent",budgeted:0,spent:0},
+  {section:"Other",item:"Owed to Housing Corp",budgeted:0,spent:0},
+  {section:"Other",item:"FIJI Academy",budgeted:172.46,spent:172.46},
+  {section:"Other",item:"Spring Sing",budgeted:1200,spent:691.02},
   {section:"Other",item:"Lawncare",budgeted:2000,spent:0},
   {section:"Other",item:"Other Org Philanthropy",budgeted:700,spent:692.36},
-  {section:"Other",item:"Owed to Housing Corp",budgeted:0,spent:0},
-  {section:"Other",item:"FIJI Academy",budgeted:172.46,spent:172.46}
+  {section:"Other",item:"Brotherhood Retreat",budgeted:7000,spent:6275.55},
+  {section:"Other",item:"Tent",budgeted:0,spent:0},
+  {section:"Other",item:"Strategic Planning Retreat",budgeted:50,spent:45.72},
+  {section:"Other",item:"Ritual Room",budgeted:100,spent:0},
+  {section:"Other",item:"Misc.",budgeted:800,spent:752.49},
+  {section:"Other",item:"Cabinet Retreat",budgeted:50,spent:0},
+  {section:"Other",item:"Formal",budgeted:800,spent:1130.2}
 ];
 const FALL_EXP = [
   {section:"Officers",item:"President",budgeted:0,spent:0},
@@ -2027,15 +2049,15 @@ const FALL_EXP = [
   {section:"Housing Corp",item:"Parlor Fees",budgeted:0,spent:0},
 ];
 const TX_OUT_SEED = [
-  {id:"o1774668181348",term:"Spring 2026",date:"2026-04-25",amount:250,budget:"Social",account:"Operating",card:"Check",paid:true,notes:"Colby DJ Islander",dir:"OUT"},
+  {id:"o1774668181348",term:"Spring 2026",date:"2026-04-25",amount:200,budget:"Social",account:"Operating",card:"Check",paid:false,notes:"Colby DJ Islander",dir:"OUT"},
   {id:"o1776385338621",term:"Spring 2026",date:"2026-04-17",amount:21.18,budget:"Other Org Philanthropy",account:"Operating",card:"Check",paid:false,notes:"Banner check for Adyson",dir:"OUT"},
-  {id:"o1776385288055",term:"Spring 2026",date:"2026-04-17",amount:54.76,budget:"Social",account:"Operating",card:"Check",paid:true,notes:"Circular saw from Crosley",dir:"OUT"},
-  {id:"o1776385271405",term:"Spring 2026",date:"2026-04-17",amount:31.78,budget:"Social",account:"Operating",card:"Check",paid:true,notes:"Indy Nails",dir:"OUT"},
+  {id:"o1776385288055",term:"Spring 2026",date:"2026-04-17",amount:54.76,budget:"Social",account:"Operating",card:"Check",paid:false,notes:"Circular saw from Crosley",dir:"OUT"},
+  {id:"o1776385271405",term:"Spring 2026",date:"2026-04-17",amount:31.78,budget:"Social",account:"Operating",card:"Check",paid:false,notes:"Indy Nails",dir:"OUT"},
   {id:"o1776364167405",term:"Spring 2026",date:"2026-04-16",amount:42.39,budget:"Social",account:"Operating",card:"Jakob Card",paid:true,notes:"Islander Decorations",dir:"OUT"},
-  {id:"o1776376741923",term:"Spring 2026",date:"2026-04-16",amount:37.06,budget:"Social",account:"Operating",card:"Check",paid:true,notes:"Harv islander supplies",dir:"OUT"},
-  {id:"o1776376780223",term:"Spring 2026",date:"2026-04-16",amount:247.71,budget:"Social",account:"Operating",card:"Check",paid:true,notes:"More supplies for islander, check for Harv",dir:"OUT"},
+  {id:"o1776376741923",term:"Spring 2026",date:"2026-04-16",amount:37.06,budget:"Social",account:"Operating",card:"Check",paid:false,notes:"Harv islander supplies",dir:"OUT"},
+  {id:"o1776376780223",term:"Spring 2026",date:"2026-04-16",amount:247.71,budget:"Social",account:"Operating",card:"Check",paid:false,notes:"More supplies for islander, check for Harv",dir:"OUT"},
   {id:"o1775937594754",term:"Spring 2026",date:"2026-04-11",amount:9000,budget:"House Rent",account:"Housing",card:"Jakob Card",paid:true,notes:"April Transfer",dir:"OUT"},
-  {id:"o1774592526652",term:"Spring 2026",date:"2026-04-11",amount:1791.93,budget:"Pig Dinner",account:"Operating",card:"Check",paid:false,notes:"MAC Reservation for Pig Dinner - Needs to go to Jake Edmunds",dir:"OUT"},
+  {id:"o1774592526652",term:"Spring 2026",date:"2026-04-11",amount:1791,budget:"Pig Dinner",account:"Operating",card:"Check",paid:false,notes:"MAC Reservation for Pig Dinner - Needs to go to Jake Edmunds",dir:"OUT"},
   {id:"o1774668142599",term:"Spring 2026",date:"2026-04-11",amount:175,budget:"Formal",account:"Operating",card:"Check",paid:true,notes:"Cayden Bailey - DJ Formal",dir:"OUT"},
   {id:"o1775937320756",term:"Spring 2026",date:"2026-04-11",amount:7,budget:"Social",account:"Operating",card:"Check",paid:true,notes:"Jayce Repairs",dir:"OUT"},
   {id:"o1775937390355",term:"Spring 2026",date:"2026-04-11",amount:640.2,budget:"Formal",account:"Operating",card:"Jakob Card",paid:true,notes:"Tab for Formal",dir:"OUT"},
@@ -2048,16 +2070,16 @@ const TX_OUT_SEED = [
   {id:"o1775626203004",term:"Spring 2026",date:"2026-04-08",amount:127.68,budget:"Greek Week",account:"Operating",card:"Jagger Card",paid:true,notes:"Canstruct",dir:"OUT"},
   {id:"o1775626220536",term:"Spring 2026",date:"2026-04-08",amount:91.2,budget:"Greek Week",account:"Operating",card:"Jagger Card",paid:true,notes:"Canstruct",dir:"OUT"},
   {id:"o1775532456722",term:"Spring 2026",date:"2026-04-07",amount:51.26,budget:"Social",account:"Operating",card:"Check",paid:true,notes:"Super8 Repairs",dir:"OUT"},
-  {id:"o1775532401789",term:"Spring 2026",date:"2026-04-07",amount:46.43,budget:"Housing",account:"Operating",card:"Check",paid:true,notes:"Housing re-supply",dir:"OUT"},
+  {id:"o1775532401789",term:"Spring 2026",date:"2026-04-07",amount:46.43,budget:"Housing",account:"Operating",card:"Check",paid:false,notes:"Housing re-supply",dir:"OUT"},
   {id:"o1774656380298",term:"Spring 2026",date:"2026-04-03",amount:1001.7,budget:"Graduate Gifts",account:"Operating",card:"Jakob Card",paid:true,notes:"Stoles ",dir:"OUT"},
   {id:"o1775152823003",term:"Spring 2026",date:"2026-04-02",amount:80.56,budget:"Pig Dinner",account:"Operating",card:"Jakob Card",paid:true,notes:"Pig for Pig Dinner",dir:"OUT"},
   {id:"o1774895715370",term:"Spring 2026",date:"2026-03-30",amount:326.47,budget:"Spring Sing",account:"Operating",card:"Jakob Card",paid:true,notes:"Spring Sing Costumes - Shein ",dir:"OUT"},
   {id:"o1774895223556",term:"Spring 2026",date:"2026-03-30",amount:273.76,budget:"Spring Sing",account:"Operating",card:"Jakob Card",paid:true,notes:"Spring Sing Costumes - Hobby Lobby",dir:"OUT"},
   {id:"o1774895243756",term:"Spring 2026",date:"2026-03-30",amount:6.35,budget:"Spring Sing",account:"Operating",card:"Jakob Card",paid:true,notes:"Spring Sing Costumes - Good Will",dir:"OUT"},
-  {id:"o1774656396882",term:"Spring 2026",date:"2026-03-28",amount:150,budget:"IFC Fees",account:"Operating",card:"Check",paid:true,notes:"Golf Scramble (half will come into chapter later)",dir:"OUT"},
+  {id:"o1774656396882",term:"Spring 2026",date:"2026-03-28",amount:300,budget:"IFC Fees",account:"Operating",card:"Check",paid:false,notes:"Golf Scramble (half will come into chapter later)",dir:"OUT"},
   {id:"o1774592469236",term:"Spring 2026",date:"2026-03-27",amount:200,budget:"Other Org Philanthropy",account:"Operating",card:"Check",paid:true,notes:"Check for DAA Graduation",dir:"OUT"},
   {id:"o1774591563110",term:"Spring 2026",date:"2026-03-27",amount:63.35,budget:"Spring Sing",account:"Operating",card:"Jakob Card",paid:true,notes:"Backdrops",dir:"OUT"},
-  {id:"o1774592501151",term:"Spring 2026",date:"2026-03-27",amount:3628.06,budget:"Pig Dinner",account:"Operating",card:"Jakob Card",paid:true,notes:"Aramark for Pig Dinner",dir:"OUT"},
+  {id:"o1774592501151",term:"Spring 2026",date:"2026-03-27",amount:3628.06,budget:"Pig Dinner",account:"Operating",card:"Check",paid:false,notes:"Aramark for Pig Dinner",dir:"OUT"},
   {id:"o1774592450186",term:"Spring 2026",date:"2026-03-27",amount:21.18,budget:"Other Org Philanthropy",account:"Operating",card:"Check",paid:false,notes:"Check for Addison's MOTH Poster",dir:"OUT"},
   {id:"o1774564444355",term:"Spring 2026",date:"2026-03-26",amount:21.09,budget:"Spring Sing",account:"Operating",card:"Jakob Card",paid:true,notes:"Backdrops",dir:"OUT"},
   {id:"o1774564488939",term:"Spring 2026",date:"2026-03-26",amount:63.58,budget:"Brotherhood",account:"Operating",card:"Jakob Card",paid:true,notes:"Bean bags",dir:"OUT"},
@@ -2124,32 +2146,10 @@ const TX_OUT_SEED = [
   {id:"o4",term:"Spring 2026",date:"2026-01-17",amount:1150.72,budget:"Brotherhood Retreat",account:"Operating",card:"Jakob Card",paid:true,notes:"Broho T shirts",dir:"OUT"},
   {id:"o3",term:"Spring 2026",date:"2026-01-12",amount:4172.87,budget:"Brotherhood Retreat",account:"Operating",card:"Jakob Card",paid:true,notes:"Cabin payment pt. 2",dir:"OUT"},
   {id:"o2",term:"Spring 2026",date:"2026-01-08",amount:172.46,budget:"FIJI Academy",account:"Operating",card:"Jakob Card",paid:true,notes:"Davis reimbursement",dir:"OUT"},
-  {id:"o1",term:"Spring 2026",date:"2026-01-05",amount:2505.88,budget:"T-Shirt",account:"Operating",card:"Jakob Card",paid:true,notes:"Rush Shirts",dir:"OUT"},
-  {id:"o1776824231978",term:"Spring 2026",date:"2026-04-22",amount:9.53,budget:"Spring Sing",account:"Operating",card:"Check",paid:false,notes:"Hobby Lobby Spring Sing - Check for Kaden",dir:"OUT"},
-  {id:"o1776824289010",term:"Spring 2026",date:"2026-04-22",amount:9.51,budget:"Spring Sing",account:"Operating",card:"Check",paid:false,notes:"Walmart Spring Sing - Check for Kaden",dir:"OUT"},
-  {id:"o1776824351193",term:"Spring 2026",date:"2026-04-22",amount:68.27,budget:"Brotherhood",account:"Operating",card:"Check",paid:false,notes:"Brotherhood Food - Check for Thomas",dir:"OUT"},
-  {id:"o1776824374993",term:"Spring 2026",date:"2026-04-22",amount:58.29,budget:"Brotherhood",account:"Operating",card:"Check",paid:false,notes:"T-Mart Brotherhood - Check for Thomas",dir:"OUT"},
-  {id:"o1776824588624",term:"Spring 2026",date:"2026-04-22",amount:648,budget:"Spring Sing",account:"Operating",card:"Check",paid:true,notes:"Spring Sing Family & Friends Tickets",dir:"OUT"},
-  {id:"o1776824727507",term:"Spring 2026",date:"2026-04-22",amount:24.26,budget:"Spring Sing",account:"Operating",card:"Jagger Card",paid:true,notes:"Hobby Lobby Spring Sing Supplies",dir:"OUT"},
-  {id:"o1776824931239",term:"Spring 2026",date:"2026-04-22",amount:21.12,budget:"Spring Sing",account:"Operating",card:"Jagger Card",paid:true,notes:"Home Depot Spring Sing Supplies",dir:"OUT"},
-  {id:"o1776825087671",term:"Spring 2026",date:"2026-04-22",amount:122.6,budget:"Social",account:"Operating",card:"Jakob Card",paid:true,notes:"Islander Supplies - Home Depot",dir:"OUT"},
-  {id:"o1776825131351",term:"Spring 2026",date:"2026-04-22",amount:42.3,budget:"Social",account:"Operating",card:"Jakob Card",paid:true,notes:"Islander Supplies - Walmart",dir:"OUT"},
-  {id:"o1776825151217",term:"Spring 2026",date:"2026-04-22",amount:44.52,budget:"Social",account:"Operating",card:"Jakob Card",paid:true,notes:"Islander Supplies - Dollar Tree",dir:"OUT"},
-  {id:"o1776825451963",term:"Spring 2026",date:"2026-04-22",amount:138.71,budget:"Greek Week",account:"Operating",card:"Check",paid:true,notes:"Tug Jerseys - Check for Crosley",dir:"OUT"},
-  {id:"o1776825521313",term:"Spring 2026",date:"2026-04-22",amount:50,budget:"Social",account:"Operating",card:"Check",paid:true,notes:"Stools for Islander",dir:"OUT"},
-  {id:"o1777038272012",term:"Spring 2026",date:"2026-04-24",amount:25.4,budget:"Spring Sing",account:"Operating",card:"Jakob Card",paid:true,notes:"Final Decorations",dir:"OUT"},
-  {id:"o1777038283445",term:"Spring 2026",date:"2026-04-24",amount:88.92,budget:"Spring Sing",account:"Operating",card:"Jakob Card",paid:true,notes:"Snacks",dir:"OUT"},
-  {id:"o1777038303894",term:"Spring 2026",date:"2026-04-24",amount:4.94,budget:"Spring Sing",account:"Operating",card:"Jakob Card",paid:true,notes:"Snacks pt. 2",dir:"OUT"},
-  {id:"o1777039012072",term:"Spring 2026",date:"2026-04-24",amount:19.91,budget:"Spring Sing",account:"Operating",card:"Jakob Card",paid:true,notes:"Spring Sing Supplies",dir:"OUT"},
-  {id:"o1777039059505",term:"Spring 2026",date:"2026-04-24",amount:58.45,budget:"Greek Week",account:"Operating",card:"Jakob Card",paid:false,notes:"Tug Snacks",dir:"OUT"},
-  {id:"o1777067248362",term:"Spring 2026",date:"2026-04-24",amount:44.39,budget:"Spring Sing",account:"Operating",card:"Jakob Card",paid:true,notes:"Little Caesars Pizza",dir:"OUT"},
-  {id:"o1777646762983",term:"Spring 2026",date:"2026-05-01",amount:67.1,budget:"Housing",account:"Operating",card:"Check",paid:true,notes:"Check for Devin",dir:"OUT"},
-  {id:"o1777647005647",term:"Spring 2026",date:"2026-03-28",amount:150,budget:"IFC Fees",account:"Operating",card:"Check",paid:true,notes:"Half of paid back Golf scramble fees",dir:"OUT"},
-  {id:"o1777761829187",term:"Spring 2026",date:"2026-05-02",amount:58.22,budget:"Spring Sing",account:"Operating",card:"Check",paid:false,notes:"Reimbursements for Hayden - Check",dir:"OUT"},
-  {id:"o1777762094020",term:"Spring 2026",date:"2026-05-02",amount:28,budget:"Spring Sing",account:"Operating",card:"Check",paid:false,notes:"Hayden award - Check for Clayton",dir:"OUT"}
+  {id:"o1",term:"Spring 2026",date:"2026-01-05",amount:2505.88,budget:"T-Shirt",account:"Operating",card:"Jakob Card",paid:true,notes:"Rush Shirts",dir:"OUT"}
 ];
 const TX_IN_SEED = [
-  {id:"i1776265944368",term:"Spring 2026",date:"2026-04-15",amount:127.84,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
+  {id:"i1776265944368",term:"Spring 2026",date:"2026-04-15",amount:127.48,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i1775937441538",term:"Spring 2026",date:"2026-04-11",amount:314.76,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i1775937456404",term:"Spring 2026",date:"2026-04-11",amount:129.14,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i1775626057221",term:"Spring 2026",date:"2026-04-08",amount:225.98,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
@@ -2222,17 +2222,7 @@ const TX_IN_SEED = [
   {id:"i5",term:"Spring 2026",date:"2026-01-08",amount:38,category:"Other",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i3",term:"Spring 2026",date:"2026-01-08",amount:1598.01,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
   {id:"i4",term:"Spring 2026",date:"2026-01-08",amount:1100,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
-  {id:"i2",term:"Spring 2026",date:"2026-01-06",amount:750.59,category:"Other",account:"Operating",notes:"",dir:"IN",paid:true},
-  {id:"i1776824473493",term:"Spring 2026",date:"2026-04-22",amount:40,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
-  {id:"i1776824481476",term:"Spring 2026",date:"2026-04-22",amount:32,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
-  {id:"i1776824488126",term:"Spring 2026",date:"2026-04-22",amount:23.24,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
-  {id:"i1776881249276",term:"Spring 2026",date:"2026-04-22",amount:24,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
-  {id:"i1776881257560",term:"Spring 2026",date:"2026-04-22",amount:736.72,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
-  {id:"i1776956569085",term:"Spring 2026",date:"2026-04-23",amount:216,category:"Other",account:"Operating",notes:"Collections",dir:"IN",paid:true},
-  {id:"i1777038581675",term:"Spring 2026",date:"2026-04-24",amount:96.85,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
-  {id:"i1777558145534",term:"Spring 2026",date:"2026-04-30",amount:242.12,category:"Dues",account:"Operating",notes:"",dir:"IN",paid:true},
-  {id:"i1777558175217",term:"Spring 2026",date:"2026-04-30",amount:544.78,category:"Rent",account:"Housing",notes:"",dir:"IN",paid:true},
-  {id:"i1777558180583",term:"Spring 2026",date:"2026-04-30",amount:544.78,category:"Rent",account:"Housing",notes:"",dir:"IN",paid:true}
+  {id:"i2",term:"Spring 2026",date:"2026-01-06",amount:750.59,category:"Other",account:"Operating",notes:"",dir:"IN",paid:true}
 ];
 
 // ═══════════════════════════════════════════════════════════════
@@ -2348,7 +2338,7 @@ let config    = JSON.parse(localStorage.getItem("fiji_config")      || "null") |
 // Two separate rosters — spring and fall
 // Seed version — run THIS FIRST before reading localStorage
 // so variables get the freshly-seeded data, not stale cached data
-const SEED_VERSION = "2026-05-04d";
+const SEED_VERSION = "2026-05-04e";
 var _storedSeedVer = localStorage.getItem("fiji_seed_version");
 if (_storedSeedVer !== SEED_VERSION) {
   // Wipe and replace all data from seed
@@ -3169,38 +3159,66 @@ function renderDashboard() {
 // ═══════════════════════════════════════════════════════════════
 function renderRevenues() {
   duesData = getDuesData(); // always use the correct term's roster
+
   document.getElementById("rev-term-label").textContent = currentTerm;
-  var totalDue  = duesData.reduce(function(s,d){return s+d.due;},0);
-  var totalPaid = duesData.reduce(function(s,d){return s+d.paid;},0);
-  var totalRev  = duesData.reduce(function(s,d){return s+brotherTotalRevenue(d);},0);
-  var paidFull  = duesData.filter(function(d){return d.payStatus==="Paid in Full";}).length;
-  var onPlan    = duesData.filter(function(d){return d.payStatus==="Payment Plan";}).length;
-  var problems  = duesData.filter(function(d){return d.payStatus==="Problem!";}).length;
+
+  // ── What's owed (from roster) ──────────────────────────────────────────
+  var totalExpected = duesData.reduce(function(s,d){ return s + effectiveDue(d); }, 0);
+  var totalDuesExpected = duesData.reduce(function(s,d){
+    var disc  = d.earlyDiscount ? (config.earlyPayDiscount||50) : 0;
+    var extra = (d.extraFees||[]).reduce(function(a,f){ return a+f.amount; }, 0);
+    var gross = d.due + extra - disc;
+    var cc    = d.payMethod==="Credit Card" ? gross*((isSpring()?config.ccRateSpring:config.ccRateFall||3.15)/100) : 0;
+    return s + gross - cc;
+  }, 0);
+
+  // ── What's actually been received (from transactions) ─────────────────
+  // This is the source of truth — roster .paid fields can be stale
+  var termTxns = txList.filter(function(t){
+    return t.dir === "IN" && t.term === currentTerm;
+  });
+  var duesCollected = termTxns
+    .filter(function(t){ return t.category === "Dues"; })
+    .reduce(function(s,t){ return s + t.amount; }, 0);
+  var rentCollected = termTxns
+    .filter(function(t){ return t.category === "Rent"; })
+    .reduce(function(s,t){ return s + t.amount; }, 0);
+  var otherIn = termTxns
+    .filter(function(t){ return t.category !== "Dues" && t.category !== "Rent"; })
+    .reduce(function(s,t){ return s + t.amount; }, 0);
+  var totalCollected = duesCollected + rentCollected + otherIn;
+
+  // ── Roster status counts ──────────────────────────────────────────────
+  var paidFull = duesData.filter(function(d){ return d.payStatus === "Paid in Full"; }).length;
+  var onPlan   = duesData.filter(function(d){ return d.payStatus === "Payment Plan"; }).length;
+  var problems = duesData.filter(function(d){ return d.payStatus === "Problem!"; }).length;
+  var pctCollected = totalExpected > 0 ? pct(totalCollected / totalExpected) : "—";
 
   document.getElementById("rev-kpis").innerHTML = [
-    {label:"Total Revenue",   value:fmt(totalRev),  sub:"After CC fees & extras",   color:"var(--gold)"},
-    {label:"Dues Collected",  value:fmt(totalPaid), sub:pct(totalPaid/totalDue)+" of expected", color:"var(--green)"},
-    {label:"Payment Plans",   value:onPlan+"",       sub:paidFull+" paid in full",    color:"var(--blue)"},
-    {label:"Problems",        value:problems+"",     sub:"flagged brothers",           color:problems>0?"var(--red)":"var(--muted)"}
+    {label:"Expected Revenue",  value:fmt(totalExpected),   sub:"After CC fees & extras",               color:"var(--gold)"},
+    {label:"Dues Collected",    value:fmt(duesCollected),   sub:pct(duesCollected/totalDuesExpected)+" of dues expected",  color:"var(--green)"},
+    {label:"Rent Collected",    value:fmt(rentCollected),   sub:(termTxns.filter(function(t){return t.category==="Rent";}).length)+" payments received", color:"var(--blue)"},
+    {label:"Problems",          value:problems+"",           sub:onPlan+" on payment plan",               color:problems>0?"var(--red)":"var(--muted)"}
   ].map(function(k) {
     return '<div class="card kpi"><div class="kpi-label">'+k.label+'</div>'
       +'<div class="kpi-value" style="color:'+k.color+'">'+k.value+'</div>'
       +'<div class="kpi-sub">'+k.sub+'</div></div>';
   }).join("");
 
-  // Roster banner — dynamic for any term
+  // Roster banner
   var rosterNote = document.getElementById("rev-roster-note");
   if (rosterNote) {
     rosterNote.style.display = "block";
     rosterNote.innerHTML = '<div style="padding:8px 14px;background:rgba(74,127,193,0.06);border:1px solid rgba(74,127,193,0.15);border-radius:8px;font-size:12px;color:var(--muted);display:flex;align-items:center;justify-content:space-between;gap:12px">'+
       '<span>'+getDuesData().length+' brothers on the <b>'+currentTerm+'</b> roster</span>'+
-      '<button class="btn btn-ghost btn-sm" onclick="addBrotherToRoster()" style="font-size:11px;white-space:nowrap">+ Add Brother</button>'+
+      '<button class="btn btn-ghost btn-sm" onclick="addBrotherToRoster()">+ Add Brother</button>'+
       '</div>';
   }
 
-  if (document.getElementById("dues-total-due"))     document.getElementById("dues-total-due").textContent     = fmt(totalDue);
-  if (document.getElementById("dues-total-paid"))    document.getElementById("dues-total-paid").textContent    = fmt(totalPaid);
-  if (document.getElementById("dues-total-revenue")) document.getElementById("dues-total-revenue").textContent = fmt(totalRev);
+  // Footer totals — use transaction-based figures
+  if (document.getElementById("dues-total-due"))     document.getElementById("dues-total-due").textContent     = fmt(totalExpected);
+  if (document.getElementById("dues-total-paid"))    document.getElementById("dues-total-paid").textContent    = fmt(duesCollected + rentCollected);
+  if (document.getElementById("dues-total-revenue")) document.getElementById("dues-total-revenue").textContent = fmt(totalCollected);
 
   filterDues();
 
@@ -5498,6 +5516,12 @@ function markEditDirty() {
   if (bar) bar.style.display = "flex";
 }
 function renderEditBudget() {
+  var terms = getTerms();
+  // Update card headers with correct year
+  var sh = document.getElementById("edit-spring-hdr");
+  var fh = document.getElementById("edit-fall-hdr");
+  if (sh) sh.querySelector("span").textContent = terms.spring + " Budget Lines";
+  if (fh) fh.querySelector("span").textContent = terms.fall   + " Budget Lines";
   renderEditBudgetTable("edit-spring-tbody", springExp, "spring");
   renderEditBudgetTable("edit-fall-tbody",   fallExp,   "fall");
 }
