@@ -289,6 +289,8 @@
   }
   .edit-tab:hover { color: var(--text); background: var(--surface); }
   .edit-tab.active { background: rgba(200,168,75,0.13); color: var(--gold); }
+  .edit-pane { display: block; }
+  .edit-pane.hidden { display: none; }
   .edit-pane input[type="number"], .edit-pane input[type="text"] {
     width: 100%; padding: 7px 10px; background: rgba(255,255,255,0.06);
     border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;
@@ -614,13 +616,11 @@
   </header>
   <nav>
     <button class="nav-btn active" onclick="showView('dashboard',this)">Dashboard</button>
-    <button class="nav-btn" onclick="showView('revenues',this)">Revenues & Dues</button>
-    <button class="nav-btn" onclick="showView('expenditures',this)">Expenditures</button>
-    <button class="nav-btn" onclick="showView('budgeting',this)">Budgeting</button>
-    <button class="nav-btn" onclick="showView('transactions',this)">Transactions</button>
-    <button class="nav-btn" onclick="showView('calculations',this)">Calculations & Rates</button>
-    <button class="nav-btn" onclick="showView('reports',this)">Reports</button>
-    <button class="nav-btn" onclick="showView('edit',this)">✎ Edit</button>
+    <button class="nav-btn" onclick="showView('revenues',this)">Dues</button>
+    <button class="nav-btn" onclick="showView('expenditures',this)">Spending</button>
+    <button class="nav-btn" onclick="showView('transactions',this)">Ledger</button>
+    <button class="nav-btn" onclick="showView('calculations',this)">Finances</button>
+    <button class="nav-btn" onclick="showView('edit',this)">✎ Configure</button>
     <button class="nav-btn" onclick="showView('settings',this)">⚙ Settings</button>
   </nav>
 
@@ -638,7 +638,7 @@
       <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
       Ledger
     </button>
-    <button class="mob-tab" id="mob-tab-budgeting" onclick="showView('budgeting',this);closeMobileMore()">
+    <button class="mob-tab" id="mob-tab-calculations" onclick="showView('budgeting',this);closeMobileMore()">
       <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
       Budget
     </button>
@@ -650,10 +650,8 @@
 
   <!-- More menu overlay -->
   <div id="mobile-more-menu">
-    <button class="mob-more-item" onclick="showView('edit',null);closeMobileMore()">✎ Edit</button>
-    <button class="mob-more-item" onclick="showView('expenditures',null);closeMobileMore()">Expenditures</button>
-    <button class="mob-more-item" onclick="showView('calculations',null);closeMobileMore()">Calculations & Rates</button>
-    <button class="mob-more-item" onclick="showView('reports',null);closeMobileMore()">Reports</button>
+    <button class="mob-more-item" onclick="showView('calculations',null);closeMobileMore()">Finances</button>
+    <button class="mob-more-item" onclick="showView('edit',null);closeMobileMore()">✎ Configure</button>
     <button class="mob-more-item" onclick="showView('settings',null);closeMobileMore()">⚙ Settings</button>
   </div>
   <div id="content">
@@ -710,8 +708,8 @@
     <!-- ═══════════════════════════════════════ REVENUES ═══════════════════════════════════════ -->
     <div id="view-revenues" class="view">
       <div class="page-header">
-        <div class="eyebrow">Revenues & Dues</div>
-        <div class="section-title">Brother Dues Tracker</div>
+        <div class="eyebrow">Dues & Revenue</div>
+        <div class="section-title">Dues Tracker</div>
       </div>
       <div class="kpi-grid" id="rev-kpis"></div>
       <div id="rev-roster-note" style="display:none;margin-bottom:12px"></div>
@@ -759,7 +757,7 @@
     <!-- ═══════════════════════════════════════ EXPENDITURES ═══════════════════════════════════════ -->
     <div id="view-expenditures" class="view">
       <div class="page-header">
-        <div class="eyebrow">Expenditures</div>
+        <div class="eyebrow">Spending</div>
         <div class="section-title" id="exp-title">Spring 2026 · Budget</div>
       </div>
       <div class="kpi-grid" id="exp-kpis"></div>
@@ -787,7 +785,7 @@
     <!-- ═══════════════════════════════════════ TRANSACTIONS ═══════════════════════════════════════ -->
     <div id="view-transactions" class="view">
       <div class="page-header">
-        <div class="eyebrow">Transactions</div>
+        <div class="eyebrow">Transaction Ledger</div>
         <div style="display:flex;align-items:center;justify-content:space-between">
           <div class="section-title">Transaction Ledger</div>
           <div style="display:flex;gap:8px">
@@ -845,71 +843,161 @@
     <!-- ═══════════════════════════════════════ CALCULATIONS ═══════════════════════════════════════ -->
     <div id="view-calculations" class="view">
       <div class="page-header">
-        <div class="eyebrow">Calculations & Rates</div>
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <div class="section-title">Financial Model</div>
-          <div style="display:flex;gap:8px;align-items:center">
-            <div id="calc-edit-bar" style="display:none;gap:8px;align-items:center">
-              <span style="font-size:12px;color:var(--amber)">Editing — changes apply to full sheet</span>
-              <button class="btn btn-ghost btn-sm" onclick="discardCalcEdit()">Discard</button>
-              <button class="btn btn-primary btn-sm" onclick="saveCalcEdit()">Save Changes</button>
-            </div>
+        <div class="eyebrow">Finances</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+          <div class="section-title">Financial Overview</div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <button class="btn btn-ghost btn-sm" id="fin-tab-model-btn" onclick="setFinTab('model',this)" style="border-color:var(--gold);color:var(--gold)">Model</button>
+            <button class="btn btn-ghost btn-sm" id="fin-tab-reports-btn" onclick="setFinTab('reports',this)">Reports</button>
             <button class="btn btn-ghost btn-sm" id="calc-edit-btn" onclick="toggleCalcEdit()">✎ Edit</button>
           </div>
         </div>
-      </div>
-      <div class="three-col">
-        <div class="card">
-          <div class="card-header">Brothers by Class</div>
-          <div style="padding:16px" id="calc-brothers"></div>
-        </div>
-        <div class="card">
-          <div class="card-header">Dues Rates</div>
-          <div style="padding:16px" id="calc-rates"></div>
-        </div>
-        <div class="card">
-          <div class="card-header">IHQ Fees (Per Brother)</div>
-          <div style="padding:16px" id="calc-fees"></div>
-        </div>
-      </div>
-      <!-- Housing rates card — only shown in edit mode -->
-      <div id="calc-housing-section" style="margin-bottom:18px">
-        <div class="card">
-          <div class="card-header">Rent Rates</div>
-          <div style="padding:16px" id="calc-housing"></div>
-        </div>
-      </div>
-      <!-- Account Starting Balances -->
-      <div id="calc-balances-section" style="margin-bottom:18px">
-        <div class="card">
-          <div class="card-header">Account Starting Balances
-            <span style="font-size:11px;color:var(--muted);font-weight:400;margin-left:8px">— set once at start of term; transactions update from here</span>
+        <!-- Edit mode bar -->
+        <div id="calc-edit-bar" style="display:none;margin-top:10px;background:rgba(212,133,74,0.1);border:1px solid rgba(212,133,74,0.3);border-radius:8px;padding:10px 16px;display:none;align-items:center;justify-content:space-between">
+          <span style="font-size:12px;color:var(--amber)">Editing — changes apply to full financial model</span>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-ghost btn-sm" onclick="discardCalcEdit()">Discard</button>
+            <button class="btn btn-primary btn-sm" onclick="saveCalcEdit()">Save Changes</button>
           </div>
-          <div style="padding:16px" id="calc-balances"></div>
         </div>
       </div>
 
-      <div class="two-col">
-        <div class="card">
-          <div class="card-header">Revenue Breakdown by Term</div>
-          <div style="padding:16px" id="calc-revenue"></div>
+      <!-- MODEL PANE -->
+      <div id="fin-pane-model">
+        <div class="three-col">
+          <div class="card">
+            <div class="card-header">Brothers by Class</div>
+            <div style="padding:16px" id="calc-brothers"></div>
+          </div>
+          <div class="card">
+            <div class="card-header">Dues Rates</div>
+            <div style="padding:16px" id="calc-rates"></div>
+          </div>
+          <div class="card">
+            <div class="card-header">IHQ Fees (Per Brother)</div>
+            <div style="padding:16px" id="calc-fees"></div>
+          </div>
         </div>
-        <div class="card">
-          <div class="card-header">Ending Balances &amp; Surplus</div>
-          <div style="padding:16px" id="calc-surplus"></div>
+        <div id="calc-housing-section" style="margin-bottom:18px">
+          <div class="card">
+            <div class="card-header">Rent Rates</div>
+            <div style="padding:16px" id="calc-housing"></div>
+          </div>
+        </div>
+        <div id="calc-balances-section" style="margin-bottom:18px">
+          <div class="card">
+            <div class="card-header">Account Starting Balances
+              <span style="font-size:11px;color:var(--muted);font-weight:400;margin-left:8px">— set once at start of term</span>
+            </div>
+            <div style="padding:16px" id="calc-balances"></div>
+          </div>
+        </div>
+        <div class="two-col">
+          <div class="card">
+            <div class="card-header">Revenue Breakdown by Term</div>
+            <div style="padding:16px" id="calc-revenue"></div>
+          </div>
+          <div class="card">
+            <div class="card-header">Ending Balances &amp; Surplus</div>
+            <div style="padding:16px" id="calc-surplus"></div>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:18px">
+          <div class="card-header">Budget Breakdown by Section</div>
+          <div style="padding:16px" id="calc-breakdown"></div>
         </div>
       </div>
+
+      <!-- REPORTS PANE -->
+      <div id="fin-pane-reports" style="display:none">
+        <div class="page-header">
+        <div class="eyebrow">Reports</div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div class="section-title">Financial Reports</div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-ghost btn-sm" onclick="window.print()">⎙ Print</button>
+            <button class="btn btn-primary btn-sm" onclick="downloadReport()">↓ Download Report</button>
+          </div>
+        </div>
+      </div>
+      <!-- Timeframe selector -->
+      <div class="card" style="margin-bottom:20px;padding:14px 20px">
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+          <span style="font-family:var(--font-mono);font-size:10px;letter-spacing:1px;color:var(--muted);text-transform:uppercase">Timeframe</span>
+          <div style="display:flex;gap:2px;background:rgba(255,255,255,0.04);border-radius:8px;padding:3px" id="rpt-timeframe-btns">
+            <button class="rpt-tf-btn active" data-tf="semester" onclick="setReportTimeframe('semester',this)">Semester</button>
+            <button class="rpt-tf-btn" data-tf="month" onclick="setReportTimeframe('month',this)">This Month</button>
+            <button class="rpt-tf-btn" data-tf="quarter" onclick="setReportTimeframe('quarter',this)">Quarter</button>
+            <button class="rpt-tf-btn" data-tf="custom" onclick="setReportTimeframe('custom',this)">Custom</button>
+          </div>
+          <div style="display:flex;gap:6px" id="rpt-term-toggle">
+            <button class="rpt-term-btn active" data-t="Spring 2026" onclick="setReportTerm('Spring 2026',this)">Spring 2026</button>
+            <button class="rpt-term-btn" data-t="Fall 2026" onclick="setReportTerm('Fall 2026',this)">Fall 2026</button>
+          </div>
+          <div id="rpt-custom-dates" style="display:none;gap:8px;align-items:center">
+            <input type="date" id="rpt-start" value="" onchange="renderReports()" style="width:140px;padding:5px 8px;font-size:11px">
+            <span style="color:var(--dim)">to</span>
+            <input type="date" id="rpt-end" value="" onchange="renderReports()" style="width:140px;padding:5px 8px;font-size:11px">
+          </div>
+          <span style="font-family:var(--font-mono);font-size:10px;color:var(--dim);margin-left:auto" id="rpt-range-label"></span>
+        </div>
+      </div>
+      <!-- KPIs -->
+      <div class="kpi-grid" id="rpt-kpis" style="margin-bottom:20px"></div>
+      <!-- Account balances + Income statement -->
+      <div class="two-col" style="margin-bottom:18px">
+        <div class="card">
+          <div class="card-header">Account Balances</div>
+          <div style="padding:16px" id="rpt-accounts"></div>
+        </div>
+        <div class="card">
+          <div class="card-header" id="rpt-income-header">Income Statement</div>
+          <div style="padding:16px" id="rpt-income"></div>
+        </div>
+      </div>
+      <!-- Committee budget table -->
+      <div class="card" style="margin-bottom:18px">
+        <div class="card-header"><span id="rpt-committee-header">Committee Budget</span></div>
+        <div class="table-scroll-wrap"><table class="data-table">
+          <thead><tr><th>Section / Item</th><th style="text-align:right">Budgeted</th><th style="text-align:right">Spent</th><th style="text-align:right">Remaining</th><th style="text-align:right">% Used</th><th>Health</th></tr></thead>
+          <tbody id="rpt-committee-tbody"></tbody>
+        </table></div>
+      </div>
+      <!-- Expenses in period -->
       <div class="card">
-        <div class="card-header">Budget Breakdown by Section</div>
-        <div id="calc-breakdown" style="padding:16px"></div>
+        <div class="card-header">
+          <span id="rpt-tx-header">Expenses in Period</span>
+          <span style="font-family:var(--font-mono);font-size:10px;color:var(--muted)" id="rpt-tx-total"></span>
+        </div>
+        <div class="table-scroll-wrap"><table class="data-table">
+          <thead><tr><th>Date</th><th>Description</th><th>Budget Line</th><th>Account</th><th style="text-align:right">Amount</th></tr></thead>
+          <tbody id="rpt-tx-tbody"></tbody>
+        </table></div>
+        <div id="rpt-tx-more" style="padding:12px 20px;font-size:11px;color:var(--dim);text-align:center;display:none"></div>
+        <!-- Accounts Receivable -->
+      <div class="card" style="margin-bottom:18px">
+        <div class="card-header">Accounts Receivable — Outstanding Dues
+          <span id="rpt-ar-total" style="margin-left:auto;font-family:var(--font-mono);font-size:13px;color:var(--amber)"></span>
+        </div>
+        <div style="padding:16px" id="rpt-ar"></div>
       </div>
+
+      <!-- Financial Probation Register -->
+      <div class="card" style="margin-bottom:18px">
+        <div class="card-header">Financial Probation Register</div>
+        <div style="padding:16px" id="rpt-probation"></div>
+      </div>
+
+      <!-- Article VI.7 Compliance Checklist -->
+      <div class="card" style="margin-bottom:18px;border-color:rgba(201,168,76,0.3)">
+        <div class="card-header" style="color:var(--gold)">Article VI.7 — Reporting Compliance</div>
+        <div style="padding:16px" id="rpt-compliance"></div>
+      </div>
+
     </div>
-
-
-    <!-- ═══════════════════════════════════════ BUDGETING ═══════════════════════════════════════ -->
-    <div id="view-budgeting" class="view">
+    <div id="view-budgeting" class="view" style="display:none">
       <div class="page-header">
-        <div class="eyebrow">Visual Analytics</div>
+        <div class="eyebrow">Budget Charts</div>
         <div style="display:flex;align-items:center;justify-content:space-between">
           <div class="section-title" id="budget-title">Spring 2026 · Budgeting</div>
           <div style="display:flex;gap:6px">
@@ -1080,9 +1168,9 @@
     </div>
 
     <!-- ═══════════════════════════════════════ REPORTS ═══════════════════════════════════════ -->
-    <div id="view-reports" class="view">
+    <div id="view-reports" class="view" style="display:none">
       <div class="page-header">
-        <div class="eyebrow">Analytics</div>
+        <div class="eyebrow">Reports</div>
         <div style="display:flex;align-items:center;justify-content:space-between">
           <div class="section-title">Financial Reports</div>
           <div style="display:flex;gap:8px">
@@ -1172,20 +1260,18 @@
     <!-- ═══════════════════════════════════════ EDIT ══════════════════════════════ -->
     <div id="view-edit" class="view">
       <div class="page-header">
-        <div class="eyebrow">Configuration</div>
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <div class="section-title">Edit &amp; Configure</div>
+        <div class="eyebrow">Configure</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+          <div class="section-title">Configure</div>
           <div style="display:flex;gap:6px" id="edit-tabs">
-            <button class="edit-tab active" data-tab="budget"   onclick="setEditTab('budget',this)">Budget Lines</button>
-            <button class="edit-tab"        data-tab="rates"    onclick="setEditTab('rates',this)">Dues &amp; Rates</button>
-            <button class="edit-tab"        data-tab="housing"  onclick="setEditTab('housing',this)">Housing</button>
-            <button class="edit-tab"        data-tab="brothers" onclick="setEditTab('brothers',this)">Brothers</button>
+            <button class="edit-tab active" data-tab="budget"  onclick="setEditTab('budget',this)">Budget Lines</button>
+            <button class="edit-tab"        data-tab="rates"   onclick="setEditTab('rates',this)">Rates &amp; Roster</button>
           </div>
         </div>
       </div>
 
       <!-- Unsaved changes bar -->
-      <div id="edit-save-bar" style="display:none;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);border-radius:9px;padding:12px 20px;margin-bottom:16px;display:none;align-items:center;justify-content:space-between">
+      <div id="edit-save-bar" style="display:none;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);border-radius:9px;padding:12px 20px;margin-bottom:16px;align-items:center;justify-content:space-between">
         <span style="font-size:13px;color:var(--gold)">⚠ You have unsaved changes</span>
         <div style="display:flex;gap:8px">
           <button class="btn btn-ghost btn-sm" onclick="discardEditChanges()">Discard</button>
@@ -1193,117 +1279,139 @@
         </div>
       </div>
 
-      <!-- BUDGET LINES sub-tab -->
+      <!-- ── BUDGET LINES TAB ── -->
       <div id="edit-budget" class="edit-pane">
-        <div class="two-col" style="margin-bottom:16px">
-          <div class="card">
-            <div class="card-header" id="edit-spring-hdr"><span>Spring Budget Lines</span></div>
-            <div class="table-scroll-wrap"><table class="data-table" id="edit-spring-budget-table">
-              <thead><tr><th>Section</th><th>Line Item</th><th style="text-align:right">Budgeted ($)</th></tr></thead>
-              <tbody id="edit-spring-tbody"></tbody>
-            </table></div>
-          </div>
-          <div class="card">
-            <div class="card-header" id="edit-fall-hdr"><span>Fall Budget Lines</span></div>
-            <div class="table-scroll-wrap"><table class="data-table">
-              <thead><tr><th>Section</th><th>Line Item</th><th style="text-align:right">Budgeted ($)</th></tr></thead>
-              <tbody id="edit-fall-tbody"></tbody>
-            </table></div>
+
+        <!-- Live impact bar -->
+        <div id="edit-budget-impact" style="margin-bottom:14px;padding:12px 18px;background:var(--surface);border:1px solid var(--border);border-radius:10px;display:flex;gap:24px;flex-wrap:wrap;align-items:center">
+          <div><div style="font-family:var(--font-display);font-size:8.5px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Spring Budgeted</div><div class="mono" style="font-size:16px;font-weight:700;color:var(--gold)" id="imp-sp-total">—</div></div>
+          <div><div style="font-family:var(--font-display);font-size:8.5px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Fall Budgeted</div><div class="mono" style="font-size:16px;font-weight:700;color:var(--blue)" id="imp-fa-total">—</div></div>
+          <div><div style="font-family:var(--font-display);font-size:8.5px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Spring Surplus/Deficit</div><div class="mono" style="font-size:16px;font-weight:700" id="imp-sp-surplus">—</div></div>
+          <div><div style="font-family:var(--font-display);font-size:8.5px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Fall Surplus/Deficit</div><div class="mono" style="font-size:16px;font-weight:700" id="imp-fa-surplus">—</div></div>
+          <div style="margin-left:auto"><button class="btn btn-ghost btn-sm" onclick="addBudgetLine()" style="white-space:nowrap">+ Add Line</button></div>
+        </div>
+
+        <!-- Legend -->
+        <div style="display:flex;gap:16px;margin-bottom:10px;font-size:11px;color:var(--muted);flex-wrap:wrap">
+          <span><span style="color:var(--red)">🔒</span> Contractual — set by external obligations (IHQ, Housing Corp)</span>
+          <span><span style="color:var(--amber)">⚡</span> Formula-based — calculated from rates, not manually set</span>
+          <span style="color:var(--dim)">All other lines are fully editable</span>
+        </div>
+
+        <!-- Aligned spring+fall table -->
+        <div class="card">
+          <div class="card-header">Budget Lines</div>
+          <div class="table-scroll-wrap">
+            <table class="data-table" style="min-width:580px">
+              <thead>
+                <tr>
+                  <th style="width:110px">Section</th>
+                  <th>Line Item</th>
+                  <th id="edit-spring-hdr" style="text-align:right;width:130px">Spring ($)</th>
+                  <th id="edit-fall-hdr"   style="text-align:right;width:130px">Fall ($)</th>
+                  <th style="text-align:right;width:110px">Spent</th>
+                  <th style="width:32px"></th>
+                </tr>
+              </thead>
+              <tbody id="edit-aligned-tbody"><tr><td colspan="6" style="color:var(--muted);font-size:12px;padding:16px;text-align:center">Loading budget lines...</td></tr></tbody>
+            </table>
           </div>
         </div>
       </div>
 
-      <!-- DUES & RATES sub-tab -->
+      <!-- ── RATES & ROSTER TAB (consolidated) ── -->
       <div id="edit-rates" class="edit-pane" style="display:none">
-        <div class="two-col" style="margin-bottom:16px">
-          <div class="card" style="padding:22px">
-            <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin-bottom:14px">Dues Rates</div>
-            <div class="form-row cols2">
-              <div><label>Spring New Member ($)</label><input type="number" id="edit-sp-nm" step="0.01"></div>
-              <div><label>Fall New Member ($)</label><input type="number" id="edit-fa-nm" step="0.01"></div>
-            </div>
-            <div class="form-row cols2">
-              <div><label>Spring Member ($)</label><input type="number" id="edit-sp-m" step="0.01"></div>
-              <div><label>Fall Member ($)</label><input type="number" id="edit-fa-m" step="0.01"></div>
-            </div>
-            <div class="form-row cols2">
-              <div><label>Spring House Member ($)</label><input type="number" id="edit-sp-hm" step="0.01"></div>
-              <div><label>Fall House Member ($)</label><input type="number" id="edit-fa-hm" step="0.01"></div>
-            </div>
-          </div>
-          <div class="card" style="padding:22px">
-            <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:1px;color:var(--amber);text-transform:uppercase;margin-bottom:14px">Credit Card Processing Rate</div>
-            <div class="form-row cols2">
-              <div><label>Spring CC Rate (%)</label><input type="number" id="edit-cc-spring" step="0.01" placeholder="3.15"></div>
-              <div><label>Fall CC Rate (%)</label><input type="number" id="edit-cc-fall" step="0.01" placeholder="3.15"></div>
-            </div>
-            <p style="font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.6">
-              When a brother pays by credit card, the chapter nets this % less. Applied automatically when payment method is set to Credit Card.
-            </p>
-          </div>
-        </div>
-      </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
 
-      <!-- HOUSING sub-tab -->
-      <div id="edit-housing" class="edit-pane" style="display:none">
-        <div class="two-col" style="margin-bottom:16px">
-          <div class="card" style="padding:22px">
-            <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin-bottom:14px">Spring 2026 Housing</div>
-            <div class="form-row">
-              <div><label>Total Rent to Housing Corp ($)</label><input type="number" id="edit-sp-rent" step="0.01"></div>
+          <!-- Dues Rates -->
+          <div class="card" style="padding:20px">
+            <div style="font-family:var(--font-display);font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;margin-bottom:12px">Dues Rates</div>
+            <table class="data-table" style="margin-bottom:0">
+              <thead><tr><th>Class</th><th style="text-align:right">Spring</th><th style="text-align:right">Fall</th></tr></thead>
+              <tbody>
+                <tr><td>New Member</td>
+                  <td style="text-align:right"><input class="edit-budget-input" type="number" id="edit-sp-nm" step="0.01" oninput="markEditDirty()"></td>
+                  <td style="text-align:right"><input class="edit-budget-input" type="number" id="edit-fa-nm" step="0.01" oninput="markEditDirty()"></td>
+                </tr>
+                <tr><td>Member</td>
+                  <td style="text-align:right"><input class="edit-budget-input" type="number" id="edit-sp-m" step="0.01" oninput="markEditDirty()"></td>
+                  <td style="text-align:right"><input class="edit-budget-input" type="number" id="edit-fa-m" step="0.01" oninput="markEditDirty()"></td>
+                </tr>
+                <tr><td>House Member</td>
+                  <td style="text-align:right"><input class="edit-budget-input" type="number" id="edit-sp-hm" step="0.01" oninput="markEditDirty()"></td>
+                  <td style="text-align:right"><input class="edit-budget-input" type="number" id="edit-fa-hm" step="0.01" oninput="markEditDirty()"></td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+              <div style="font-family:var(--font-display);font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--amber);text-transform:uppercase;margin-bottom:8px">CC Processing Rate (%)</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                <div><label>Spring</label><input class="edit-budget-input" type="number" id="edit-cc-spring" step="0.01" placeholder="3.15" oninput="markEditDirty()" style="width:100%"></div>
+                <div><label>Fall</label><input class="edit-budget-input" type="number" id="edit-cc-fall" step="0.01" placeholder="3.15" oninput="markEditDirty()" style="width:100%"></div>
+              </div>
             </div>
-            <div class="form-row">
-              <div><label>Parlor / Common Area Fee ($)</label><input type="number" id="edit-sp-parlor" step="0.01"></div>
-            </div>
-            <div class="form-row">
-              <div><label>Rent Per House Member ($)</label><input type="number" id="edit-sp-rent-per-bro" step="0.01"></div>
+            <!-- Chapter-wide fees -->
+            <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+                <div>
+                  <div style="font-family:var(--font-display);font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--green);text-transform:uppercase">Chapter-Wide Fees</div>
+                  <div style="font-size:11px;color:var(--muted);margin-top:3px">Applied to all brothers automatically — e.g. parlor fee, activity fee</div>
+                </div>
+                <button class="btn btn-ghost btn-sm" onclick="addChapterFee()">+ Add Fee</button>
+              </div>
+              <div id="chapter-fees-container"></div>
             </div>
           </div>
-          <div class="card" style="padding:22px">
-            <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:1px;color:var(--blue);text-transform:uppercase;margin-bottom:14px">Fall 2026 Housing</div>
-            <div class="form-row">
-              <div><label>Total Rent to Housing Corp ($)</label><input type="number" id="edit-fa-rent" step="0.01"></div>
-            </div>
-            <div class="form-row">
-              <div><label>Parlor / Common Area Fee ($)</label><input type="number" id="edit-fa-parlor" step="0.01"></div>
-            </div>
-            <div class="form-row">
-              <div><label>Rent Per House Member ($)</label><input type="number" id="edit-fa-rent-per-bro" step="0.01"></div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- BROTHERS sub-tab -->
-      <div id="edit-brothers" class="edit-pane" style="display:none">
-        <div class="two-col" style="margin-bottom:16px">
-          <div class="card" style="padding:22px">
-            <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin-bottom:14px">Spring 2026 Brother Count</div>
-            <div class="form-row cols2">
-              <div><label>New Members</label><input type="number" id="edit-sp-cnt-nm" min="0" step="1"></div>
-              <div><label>Members</label><input type="number" id="edit-sp-cnt-m" min="0" step="1"></div>
+          <!-- Housing + Brother Counts -->
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div class="card" style="padding:20px">
+              <div style="font-family:var(--font-display);font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--red);text-transform:uppercase;margin-bottom:4px">🔒 Housing Corp Rates</div>
+              <div style="font-size:11px;color:var(--muted);margin-bottom:12px">Set by housing corporation contract — cannot be negotiated mid-semester</div>
+              <table class="data-table" style="margin-bottom:0">
+                <thead><tr><th>Rate</th><th style="text-align:right">Spring</th><th style="text-align:right">Fall</th></tr></thead>
+                <tbody>
+                  <tr><td style="font-size:11.5px">Total Rent</td>
+                    <td style="text-align:right"><input class="edit-budget-input" type="number" id="edit-sp-rent" step="0.01" oninput="markEditDirty()"></td>
+                    <td style="text-align:right"><input class="edit-budget-input" type="number" id="edit-fa-rent" step="0.01" oninput="markEditDirty()"></td>
+                  </tr>
+                  <tr><td style="font-size:11.5px">Parlor Fee</td>
+                    <td style="text-align:right"><input class="edit-budget-input" type="number" id="edit-sp-parlor" step="0.01" oninput="markEditDirty()"></td>
+                    <td style="text-align:right"><input class="edit-budget-input" type="number" id="edit-fa-parlor" step="0.01" oninput="markEditDirty()"></td>
+                  </tr>
+                  <tr><td style="font-size:11.5px">Per House Member</td>
+                    <td style="text-align:right"><input class="edit-budget-input" type="number" id="edit-sp-rent-per-bro" step="0.01" oninput="markEditDirty()"></td>
+                    <td style="text-align:right"><input class="edit-budget-input" type="number" id="edit-fa-rent-per-bro" step="0.01" oninput="markEditDirty()"></td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-            <div class="form-row cols2">
-              <div><label>House Members</label><input type="number" id="edit-sp-cnt-hm" min="0" step="1"></div>
-              <div><label>Total <span id="edit-sp-total" style="color:var(--gold)"></span></label><input type="number" id="edit-sp-cnt-tot" disabled style="opacity:.5"></div>
-            </div>
-          </div>
-          <div class="card" style="padding:22px">
-            <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:1px;color:var(--blue);text-transform:uppercase;margin-bottom:14px">Fall 2026 Brother Count</div>
-            <div class="form-row cols2">
-              <div><label>New Members</label><input type="number" id="edit-fa-cnt-nm" min="0" step="1"></div>
-              <div><label>Members</label><input type="number" id="edit-fa-cnt-m" min="0" step="1"></div>
-            </div>
-            <div class="form-row cols2">
-              <div><label>House Members</label><input type="number" id="edit-fa-cnt-hm" min="0" step="1"></div>
-              <div><label>Total <span id="edit-fa-total" style="color:var(--blue)"></span></label><input type="number" id="edit-fa-cnt-tot" disabled style="opacity:.5"></div>
+            <div class="card" style="padding:20px">
+              <div style="font-family:var(--font-display);font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--blue);text-transform:uppercase;margin-bottom:12px">Brother Counts (Override)</div>
+              <table class="data-table" style="margin-bottom:0">
+                <thead><tr><th>Class</th><th style="text-align:right">Spring</th><th style="text-align:right">Fall</th></tr></thead>
+                <tbody>
+                  <tr><td>New Members</td>
+                    <td style="text-align:right"><input class="edit-budget-input" type="number" id="edit-sp-cnt-nm" min="0" step="1" oninput="markEditDirty()"></td>
+                    <td style="text-align:right"><input class="edit-budget-input" type="number" id="edit-fa-cnt-nm" min="0" step="1" oninput="markEditDirty()"></td>
+                  </tr>
+                  <tr><td>Members</td>
+                    <td style="text-align:right"><input class="edit-budget-input" type="number" id="edit-sp-cnt-m" min="0" step="1" oninput="markEditDirty()"></td>
+                    <td style="text-align:right"><input class="edit-budget-input" type="number" id="edit-fa-cnt-m" min="0" step="1" oninput="markEditDirty()"></td>
+                  </tr>
+                  <tr><td>House Members</td>
+                    <td style="text-align:right"><input class="edit-budget-input" type="number" id="edit-sp-cnt-hm" min="0" step="1" oninput="markEditDirty()"></td>
+                    <td style="text-align:right"><input class="edit-budget-input" type="number" id="edit-fa-cnt-hm" min="0" step="1" oninput="markEditDirty()"></td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- ═══════════════════════════════ SETTINGS ══════════════════════════════ -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
     <div id="view-settings" class="view">
       <div style="max-width:860px;margin:0 auto">
 
@@ -1316,7 +1424,7 @@
           <span style="font-size:11px;color:var(--muted);font-weight:400;margin-left:8px">Updates the header and welcome screen</span>
         </div>
         <div style="padding:16px">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px" id="settings-officer-fields"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px" id="settings-officer-fields"><div style="color:var(--muted);font-size:12px;padding:8px">Loading officer info...</div></div>
           <div style="margin-top:14px;display:flex;gap:10px">
             <button class="btn btn-primary btn-sm" onclick="saveOfficerSettings()">Save Officer Info</button>
             <span id="settings-save-status" style="font-size:11px;color:var(--green);display:none;align-self:center">✓ Saved</span>
@@ -1330,7 +1438,7 @@
           <span style="font-size:11px;color:var(--muted);font-weight:400;margin-left:8px">Used for spend pace calculations and reports</span>
         </div>
         <div style="padding:16px">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px" id="settings-sem-dates"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px" id="settings-sem-dates"><div style="color:var(--muted);font-size:12px;padding:8px">Loading semester dates...</div></div>
           <div style="margin-top:14px;display:flex;gap:10px">
             <button class="btn btn-primary btn-sm" onclick="saveSemDates()">Save Dates</button>
             <span id="settings-sem-status" style="font-size:11px;color:var(--green);display:none;align-self:center">✓ Saved</span>
@@ -1394,7 +1502,7 @@
         <div class="card-header">📋 Treasurer SOP — Standard Operating Procedures
           <button class="btn btn-ghost btn-sm" style="font-size:10px" onclick="downloadSOP()">⬇ Download PDF</button>
         </div>
-        <div style="padding:16px" id="settings-sop"></div>
+        <div style="padding:16px" id="settings-sop"><div style="color:var(--muted);font-size:12px;padding:8px">Loading SOP...</div></div>
       </div>
 
       <!-- Data Management Card -->
@@ -2284,7 +2392,17 @@ const DEFAULT_CONFIG = {
     { name: "Insurance Fees", perBrother: 125.00 },
     { name: "IFC",            perBrother: 12.00  },
     { name: "LegFi Fee",      perBrother: 36.00  }
-  ]
+  ],
+  // Chapter-wide fees applied to all brothers (or specific classes)
+  // appliesTo: "all" | "Member" | "New Member" | "House Member" | "non-house"
+  chapterFees: {
+    spring: [
+      { name: "Parlor Fee", amount: 25, appliesTo: "non-house" }
+    ],
+    fall: [
+      { name: "Parlor Fee", amount: 25, appliesTo: "non-house" }
+    ]
+  }
 };
 
 const DEFAULT_PASSWORD = "fijixheta2026";
@@ -2309,14 +2427,17 @@ let config    = JSON.parse(localStorage.getItem("fiji_config")      || "null") |
   if (!config.ihqFees) config.ihqFees = JSON.parse(JSON.stringify(d.ihqFees));
   if (config.ccRateSpring === undefined)   config.ccRateSpring   = d.ccRateSpring;
   if (config.ccRateFall   === undefined)   config.ccRateFall     = d.ccRateFall;
-  // Use DEFAULT_CONFIG starting balances unless user has saved custom ones via Edit
-  // Always override with DEFAULT_CONFIG if values differ (file update takes precedence)
-  var defSB = DEFAULT_CONFIG.startingBalances;
-  if (!config.startingBalances
-      || config.startingBalances['Operating'] !== defSB['Operating']
-      || config.startingBalances['Savings']   !== defSB['Savings']
-      || config.startingBalances['Housing']   !== defSB['Housing']) {
-    config.startingBalances = Object.assign({}, defSB);
+  // FIN-003: NEVER overwrite user-edited starting balances
+  // Only initialize if they have never been set at all
+  if (!config.startingBalances) {
+    config.startingBalances = Object.assign({}, DEFAULT_CONFIG.startingBalances);
+  } else {
+    // Add any new account keys without touching existing values
+    Object.keys(DEFAULT_CONFIG.startingBalances).forEach(function(k) {
+      if (config.startingBalances[k] === undefined || config.startingBalances[k] === null) {
+        config.startingBalances[k] = DEFAULT_CONFIG.startingBalances[k];
+      }
+    });
   }
   if (config.earlyPayDiscount  === undefined) config.earlyPayDiscount  = d.earlyPayDiscount;
   if (config.endGoal           === undefined) config.endGoal           = DEFAULT_CONFIG.endGoal;
@@ -2341,14 +2462,15 @@ let config    = JSON.parse(localStorage.getItem("fiji_config")      || "null") |
 const SEED_VERSION = "2026-05-04e";
 var _storedSeedVer = localStorage.getItem("fiji_seed_version");
 if (_storedSeedVer !== SEED_VERSION) {
-  // Wipe and replace all data from seed
+  // New seed version — reload roster, transactions, budgets from seed
+  // Config (including user-edited starting balances, rates, and password) is NOT touched
   localStorage.setItem("fiji_tx",           JSON.stringify([...TX_OUT_SEED, ...TX_IN_SEED]));
   localStorage.setItem("fiji_dues_spring",   JSON.stringify(DUES_DATA_SPRING.map(function(d){ return Object.assign({}, d); })));
   localStorage.setItem("fiji_dues_fall",     JSON.stringify(DUES_DATA_FALL.map(function(d){ return Object.assign({}, d); })));
   localStorage.setItem("fiji_spring_exp",    JSON.stringify(SPRING_EXP.map(function(e){ return Object.assign({}, e); })));
   localStorage.setItem("fiji_fall_exp",      JSON.stringify(FALL_EXP.map(function(e){ return Object.assign({}, e); })));
   localStorage.setItem("fiji_seed_version",  SEED_VERSION);
-  // Keep config/password intact
+  // fiji_config is intentionally NOT reset — preserves balances, rates, password
 }
 
 // Initialize spring from localStorage (preserves user edits)
@@ -2404,18 +2526,30 @@ duesData = duesData.map(d => ({
   ...d
 }));
 
+function getChapterFeesForBrother(d) {
+  // Returns total chapter-wide fees applicable to this brother
+  var term = isSpring() ? "spring" : "fall";
+  var fees = ((config.chapterFees || DEFAULT_CONFIG.chapterFees)[term]) || [];
+  return fees.reduce(function(s, fee) {
+    var applies = fee.appliesTo === "all"
+      || fee.appliesTo === d.cls
+      || (fee.appliesTo === "non-house" && d.cls !== "House Member");
+    return s + (applies ? (fee.amount || 0) : 0);
+  }, 0);
+}
+
 function effectiveDue(d) {
   var term     = isSpring() ? "spring" : "fall";
   var ccRate   = isSpring() ? config.ccRateSpring : config.ccRateFall;
   var extra    = (d.extraFees || []).reduce(function(s,f){ return s+f.amount; }, 0);
+  var chFees   = getChapterFeesForBrother(d);
   var discount = d.earlyDiscount ? (config.earlyPayDiscount || 50) : 0;
   var hr       = config.housingRates[term] || {};
   var rentBase = hr.rentPerBrother || DEFAULT_CONFIG.housingRates[term].rentPerBrother || 2250;
   var rentDisc = (d.rentEarlyDiscount && d.rentStatus === "Paid in Full")
     ? (config.rentEarlyDiscount || 50) : 0;
   var hasRent  = (d.cls === "House Member" && d.rentStatus && d.rentStatus !== "N/A");
-  // Discount reduces what brother pays; CC then applied to the discounted amount
-  var netDues  = d.due + extra - discount;
+  var netDues  = d.due + extra + chFees - discount;
   var netRent  = hasRent ? Math.max(0, rentBase - rentDisc) : 0;
   var netTotal = netDues + netRent;
   var ccDed    = d.payMethod === "Credit Card" ? netTotal * (ccRate / 100) : 0;
@@ -2442,14 +2576,15 @@ function termRevenue(term) {
   var bc     = config.brotherCounts[t];
   var hr     = config.housingRates[t];
   var ccRate = config.ccRateFall;
+  // FIN-001: houseMember dues rate already includes rent — do NOT add rentRev separately
+  // Rent is collected separately via transactions and tracked in the Housing account
   var duesRev = bc.newMember   * r.newMember
               + bc.member      * r.member
               + bc.houseMember * r.houseMember;
-  var rentRev = bc.houseMember * (hr.rentPerBrother || DEFAULT_CONFIG.housingRates.fall.rentPerBrother || 2250);
   var ihq = config.ihqFees || DEFAULT_CONFIG.ihqFees;
   var totalBros = bc.newMember + bc.member + bc.houseMember;
   var ihqCost = ihq.reduce(function(s,f){ return s + f.perBrother * totalBros; }, 0);
-  return duesRev + rentRev - ihqCost;
+  return duesRev - ihqCost;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -2602,7 +2737,9 @@ async function pushAll() {
       _fallRoster:   fallDuesData,
       _txList:       txList,
       _springExp:    springExp,
-      _fallExp:      fallExp
+      _fallExp:      fallExp,
+      _lastModified: new Date().toISOString(),
+      _lastModifiedBy: (config.officer && config.officer.name) || "Unknown"
     });
     await sbUpsert("config", { id: 1, data: payload });
     sbOnline = true; setSyncStatus("ok"); saveLocal();
@@ -2759,7 +2896,6 @@ function syncRosterCounts() {
 
 function refreshAll() {
   recomputeExpSpent();
-  save();
   var activeId = (document.querySelector(".view.active") || {}).id;
   if (!activeId) return;
   activeId = activeId.replace("view-","");
@@ -2771,27 +2907,31 @@ function refreshAll() {
   else if (activeId === "calculations") renderCalculations();
   else if (activeId === "reports")      renderReports();
   else if (activeId === "edit")         renderEdit();
+  else if (activeId === "settings")     renderSettingsView();
 }
 
 function showView(id, btn) {
-  document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active");});
+  document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active"); v.style.display="";});
   document.querySelectorAll(".nav-btn").forEach(function(b){b.classList.remove("active");});
   var el = document.getElementById("view-"+id);
   if (el) el.classList.add("active");
   if (btn) btn.classList.add("active");
+  // Scroll content to top on every view change
+  var content = document.getElementById("content");
+  if (content) content.scrollTop = 0;
   // Sync mobile tab bar
   document.querySelectorAll(".mob-tab").forEach(function(b){b.classList.remove("active");});
   var mobTab = document.getElementById("mob-tab-"+id);
   if (mobTab) mobTab.classList.add("active");
   if      (id === "dashboard")    renderDashboard();
   else if (id === "revenues")     renderRevenues();
-  else if (id === "expenditures") renderExpenditures();
+  else if (id === "expenditures") { renderExpenditures(); filterExp(); }
   else if (id === "transactions") { renderTransactions(); renderReceiptVault(); }
-  else if (id === "calculations") renderCalculations();
-  else if (id === "budgeting")    renderBudgeting();
-  else if (id === "reports")      renderReports();
-  else if (id === "edit")         renderEdit();
-  else if (id === "settings")     renderSettingsView();
+  else if (id === "calculations") { renderCalculations(); setFinTab("model", document.getElementById("fin-tab-model-btn")); }
+  else if (id === "budgeting")    { showView("expenditures", btn); return; }
+  else if (id === "reports")      { showView("calculations", null); setTimeout(function(){ setFinTab("reports", document.getElementById("fin-tab-reports-btn")); }, 50); return; }
+  else if (id === "edit")         { renderEdit(); setTimeout(function(){ renderEdit(); }, 50); }
+  else if (id === "settings")     { renderSettingsView(); setTimeout(function(){ renderSettingsView(); }, 50); }
 }
 
 function getTerms() {
@@ -3031,14 +3171,14 @@ function renderDashboard() {
     var outstandingDues = duesData.reduce(function(s,d) {
       var disc    = d.earlyDiscount ? (config.earlyPayDiscount || 50) : 0;
       var extra   = (d.extraFees||[]).reduce(function(a,f){return a+f.amount;},0);
-      var gross   = d.due + extra - disc;
+      var chFees  = getChapterFeesForBrother(d); // chapter-wide fees (parlor, activity, etc.)
+      var gross   = d.due + extra + chFees - disc;
       var cc      = d.payMethod === "Credit Card" ? gross*(ccRate2/100) : 0;
       var netDues = gross - cc;
       if (d.payStatus === "Payment Plan") {
         var paidSoFar = d.installments > 0 ? (netDues / d.installments) * d.installmentsPaid : 0;
         return s + Math.max(0, netDues - paidSoFar);
       } else if (d.payStatus === "Problem!") {
-        // Count as uncertain — still owed but flag separately
         return s + netDues;
       }
       return s;
@@ -3096,6 +3236,7 @@ function renderDashboard() {
       healthLabel = "✓ On Track";
       healthDesc  = "Overall projected surplus of " + fmt(totalEnd) + " exceeds your " + fmt(endGoal) + " goal by " + fmt(totalEnd - endGoal) + ".";
     }
+
 
     healthEl.innerHTML =
       '<div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;padding:14px 16px;background:rgba(0,0,0,0.15);border-radius:8px;border-left:4px solid '+healthColor+'">'
@@ -3211,6 +3352,7 @@ function renderRevenues() {
     rosterNote.style.display = "block";
     rosterNote.innerHTML = '<div style="padding:8px 14px;background:rgba(74,127,193,0.06);border:1px solid rgba(74,127,193,0.15);border-radius:8px;font-size:12px;color:var(--muted);display:flex;align-items:center;justify-content:space-between;gap:12px">'+
       '<span>'+getDuesData().length+' brothers on the <b>'+currentTerm+'</b> roster</span>'+
+      '<button class="btn btn-ghost btn-sm" onclick="openChapterFeesModal()">⚡ Chapter Fees</button>'+
       '<button class="btn btn-ghost btn-sm" onclick="addBrotherToRoster()">+ Add Brother</button>'+
       '</div>';
   }
@@ -4285,12 +4427,18 @@ function saveDues() {
   // Auto-set paid amount based on status
   var paid;
   if (status === "Paid in Full") {
-    paid = due + dmFees.reduce(function(s,f){return s+f.amount;},0);
-    // Also set installments to reflect fully paid
+    // FIN-002: paid field reflects the expected dues amount for this brother.
+    // Actual money received is tracked via IN transactions tagged "Dues".
+    // Do not allow paid > due+fees (impossible state)
+    var maxPaid = due + dmFees.reduce(function(s,f){return s+f.amount;},0);
+    paid = maxPaid;
     duesData[idx].installments     = 1;
     duesData[idx].installmentsPaid = 1;
   } else {
     paid = parseFloat(document.getElementById("dm-paid").value)||0;
+    // Clamp paid to never exceed what's owed
+    var maxOwed = due + dmFees.reduce(function(s,f){return s+f.amount;},0);
+    if (paid > maxOwed) paid = maxOwed;
     duesData[idx].installments     = parseInt((document.getElementById("dm-installments")||{}).value)||1;
     duesData[idx].installmentsPaid = parseInt((document.getElementById("dm-inst-paid")||{}).value)||0;
   }
@@ -5500,30 +5648,133 @@ function setEditTab(tab, btn) {
   document.querySelectorAll(".edit-pane").forEach(function(p){p.style.display="none";});
   var el = document.getElementById("edit-"+tab);
   if (el) el.style.display = "block";
-  renderEdit();
+  if (tab === "budget") renderEditBudget();
+  if (tab === "rates")  renderEditRates();
 }
 function renderEdit() {
-  document.querySelectorAll(".edit-pane").forEach(function(p){p.style.display="none";});
-  var pane = document.getElementById("edit-"+editSubTab);
-  if (pane) pane.style.display = "block";
-  if (editSubTab === "budget")   renderEditBudget();
-  if (editSubTab === "rates")    renderEditRates();
-  if (editSubTab === "housing")  renderEditHousing();
-  if (editSubTab === "brothers") renderEditBrothers();
+  try {
+    document.querySelectorAll(".edit-pane").forEach(function(p){ p.style.display="none"; });
+    var pane = document.getElementById("edit-"+editSubTab);
+    if (pane) { pane.style.display = "block"; }
+    else {
+      var budgetPane = document.getElementById("edit-budget");
+      if (budgetPane) budgetPane.style.display = "block";
+      editSubTab = "budget";
+    }
+    if (editSubTab === "budget")   renderEditBudget();
+    if (editSubTab === "rates")    renderEditRates();
+    if (editSubTab === "housing")  renderEditHousing();
+    if (editSubTab === "brothers") renderEditBrothers();
+  } catch(err) {
+    console.error("renderEdit error:", err);
+    var pane = document.getElementById("edit-budget");
+    if (pane) {
+      pane.style.display = "block";
+      pane.innerHTML = "<div style='padding:20px;color:var(--red)'>Error loading Configure page: " + err.message + "</div>";
+    }
+  }
 }
 function markEditDirty() {
   var bar = document.getElementById("edit-save-bar");
   if (bar) bar.style.display = "flex";
 }
+// Fixed-cost sections/items — locked or formula-driven
+var LOCKED_SECTIONS = {"IHQ":true,"Housing Corp":true};
+var LOCKED_ITEMS = {"Insurance Fees":true,"Member Fees":true,"IFC Fees":true,"LegFi Fee":true,"House Rent":true,"Parlor Fees":true};
+
 function renderEditBudget() {
   var terms = getTerms();
-  // Update card headers with correct year
   var sh = document.getElementById("edit-spring-hdr");
   var fh = document.getElementById("edit-fall-hdr");
-  if (sh) sh.querySelector("span").textContent = terms.spring + " Budget Lines";
-  if (fh) fh.querySelector("span").textContent = terms.fall   + " Budget Lines";
-  renderEditBudgetTable("edit-spring-tbody", springExp, "spring");
-  renderEditBudgetTable("edit-fall-tbody",   fallExp,   "fall");
+  if (sh) sh.textContent = terms.spring + " ($)";
+  if (fh) fh.textContent = terms.fall   + " ($)";
+  var tbody = document.getElementById("edit-aligned-tbody");
+  if (!tbody) return;
+  var spMap = {}; springExp.forEach(function(e,i){ spMap[e.item]={e:e,i:i}; });
+  var faMap = {}; fallExp.forEach(function(e,i){ faMap[e.item]={e:e,i:i}; });
+  var allItems = []; var seen = {};
+  springExp.forEach(function(e){ if(!seen[e.item]){seen[e.item]=1;allItems.push(e.item);} });
+  fallExp.forEach(function(e){ if(!seen[e.item]){seen[e.item]=1;allItems.push(e.item);} });
+  var sections = {};
+  allItems.forEach(function(item){
+    var sec = (spMap[item]||faMap[item]).e.section;
+    if (!sections[sec]) sections[sec]=[];
+    sections[sec].push(item);
+  });
+  var rows = [];
+  var sectionOrder = ["Housing Corp","IHQ","Officers","Committees","Other"];
+  sectionOrder.concat(Object.keys(sections).filter(function(s){return sectionOrder.indexOf(s)<0;})).forEach(function(sec){
+    if (!sections[sec]) return;
+    var lockedSec = !!LOCKED_SECTIONS[sec];
+    rows.push('<tr style="background:rgba(255,252,240,0.02)"><td colspan="6" style="font-family:var(--font-display);font-size:8.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:'+(lockedSec?'var(--red)':'var(--gold)')+';padding:10px 13px 6px;border-top:1px solid var(--border)">'+(lockedSec?'🔒 ':'')+sec+'</td></tr>');
+    sections[sec].forEach(function(item){
+      var sp=spMap[item]; var fa=faMap[item];
+      var spVal=sp?sp.e.budgeted:0; var faVal=fa?fa.e.budgeted:0; var spSpent=sp?sp.e.spent:0;
+      var isLocked = lockedSec||!!LOCKED_ITEMS[item];
+      var inputAttrs = ' class="edit-budget-input" type="number" step="0.01" onchange="onBudgetLineChange(this)" oninput="onBudgetInputChange(this)"';
+      var spInput = isLocked
+        ? '<span class="mono" style="font-size:12px;color:var(--muted);display:block;text-align:right;padding-right:8px">'+fmt(spVal)+'</span>'
+        : '<input'+inputAttrs+' value="'+spVal+'" data-src="spring" data-idx="'+(sp?sp.i:'')+'">';
+      var faInput = isLocked
+        ? '<span class="mono" style="font-size:12px;color:var(--muted);display:block;text-align:right;padding-right:8px">'+fmt(faVal)+'</span>'
+        : '<input'+inputAttrs+' value="'+faVal+'" data-src="fall" data-idx="'+(fa?fa.i:'')+'">';
+      var spentColor = spSpent>spVal?'var(--red)':spSpent>spVal*0.8?'var(--amber)':'var(--muted)';
+      rows.push('<tr>'
+        +'<td></td>'
+        +'<td style="font-size:12.5px;padding-left:20px">'+(isLocked?'<span style="color:var(--dim);font-size:10px;margin-right:4px">'+(lockedSec?'🔒':'⚡')+'</span>':'')+item+'</td>'
+        +'<td style="text-align:right;padding:4px 8px">'+spInput+'</td>'
+        +'<td style="text-align:right;padding:4px 8px">'+faInput+'</td>'
+        +'<td class="mono" style="text-align:right;padding-right:14px;font-size:11.5px;color:'+spentColor+'">'+(spSpent>0?fmt(spSpent):'—')+'</td>'
+        +'<td style="padding:0 6px">'+(isLocked?'':'<button data-item="'+item+'" onclick="removeBudgetLine(this.dataset.item)" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:12px" title="Remove">✕</button>')+'</td>'
+        +'</tr>');
+    });
+  });
+  tbody.innerHTML = rows.join("");
+  updateBudgetImpact();
+}
+
+function renderEditBudgetTable(tbodyId, exp, src) {
+  // Legacy stub — main rendering now in renderEditBudget aligned view
+}
+
+function updateBudgetImpact() {
+  var spTotal = 0; var faTotal = 0;
+  document.querySelectorAll(".edit-budget-input").forEach(function(inp){
+    var src=inp.dataset.src; var idx=parseInt(inp.dataset.idx); var val=parseFloat(inp.value)||0;
+    if (src==="spring") spTotal+=val;
+    if (src==="fall")   faTotal+=val;
+  });
+  // Also add locked items (not in inputs)
+  springExp.forEach(function(e){ if(LOCKED_SECTIONS[e.section]||LOCKED_ITEMS[e.item]) spTotal+=e.budgeted; });
+  fallExp.forEach(function(e){   if(LOCKED_SECTIONS[e.section]||LOCKED_ITEMS[e.item]) faTotal+=e.budgeted; });
+  var spRev = termRevenue(getTerms().spring);
+  var faRev = termRevenue(getTerms().fall);
+  var spSurplus = spRev - spTotal;
+  var faSurplus = faRev - faTotal;
+  function setEl(id,val,gold){ var el=document.getElementById(id); if(!el)return; el.textContent=(val>=0&&gold?'+':'')+fmt(val); el.style.color=gold?(val>=0?'var(--green)':'var(--red)'):val>=0?'var(--gold)':'var(--red)'; }
+  setEl("imp-sp-total",   spTotal,   false);
+  setEl("imp-fa-total",   faTotal,   false);
+  setEl("imp-sp-surplus", spSurplus, true);
+  setEl("imp-fa-surplus", faSurplus, true);
+}
+
+function addBudgetLine() {
+  var section = prompt("Section:", "Committees");
+  if (!section||!section.trim()) return;
+  var item = prompt("Line item name:");
+  if (!item||!item.trim()) return;
+  var spBud = parseFloat(prompt("Spring budget ($):","0"))||0;
+  var faBud = parseFloat(prompt("Fall budget ($):","0"))||0;
+  springExp.push({section:section.trim(),item:item.trim(),budgeted:spBud,spent:0});
+  fallExp.push({section:section.trim(),item:item.trim(),budgeted:faBud,spent:0});
+  markEditDirty(); renderEditBudget();
+}
+
+function removeBudgetLine(item) {
+  if (!confirm('Remove "'+item+'" from both spring and fall budgets?')) return;
+  springExp = springExp.filter(function(e){return e.item!==item;});
+  fallExp   = fallExp.filter(function(e){return e.item!==item;});
+  markEditDirty(); renderEditBudget();
 }
 function renderEditBudgetTable(tbodyId, exp, src) {
   var tbody = document.getElementById(tbodyId);
@@ -5536,6 +5787,11 @@ function renderEditBudgetTable(tbodyId, exp, src) {
       +'data-src="'+src+'" data-idx="'+idx+'" onchange="onBudgetLineChange(this)" oninput="this.classList.add(\'changed\')">'
       +'</td></tr>';
   }).join("");
+}
+function onBudgetInputChange(el) {
+  el.classList.add("changed");
+  updateBudgetImpact();
+  markEditDirty();
 }
 function onBudgetLineChange(input) {
   var src = input.dataset.src;
@@ -5561,6 +5817,100 @@ function renderEditRates() {
     var el = document.getElementById(p[0]);
     if (el) { el.value = p[1]; el.oninput = markEditDirty; }
   });
+  renderChapterFees();
+}
+
+function renderChapterFees() {
+  var container = document.getElementById("chapter-fees-container");
+  if (!container) return;
+  var cf = config.chapterFees || DEFAULT_CONFIG.chapterFees;
+  var terms = ["spring","fall"];
+  var rows = [];
+  // Get all fee names across both terms
+  var allNames = [];
+  terms.forEach(function(t){
+    (cf[t]||[]).forEach(function(f){ if (allNames.indexOf(f.name)<0) allNames.push(f.name); });
+  });
+  if (!allNames.length) {
+    container.innerHTML = '<div style="color:var(--dim);font-size:12px;padding:8px 0">No chapter-wide fees set. Click + Add Fee to add one.</div>';
+    return;
+  }
+  var html = '<table class="data-table" style="margin-bottom:10px"><thead><tr>'
+    +'<th>Fee Name</th><th>Applies To</th>'
+    +'<th style="text-align:right">Spring ($)</th>'
+    +'<th style="text-align:right">Fall ($)</th>'
+    +'<th></th></tr></thead><tbody>';
+  allNames.forEach(function(name){
+    var spFee = (cf.spring||[]).find(function(f){ return f.name===name; }) || {amount:0,appliesTo:"all"};
+    var faFee = (cf.fall||[]).find(function(f){ return f.name===name; }) || {amount:0,appliesTo:"all"};
+    var enc   = encodeURIComponent(name);
+    var applyOpts = ["all","Member","New Member","House Member","non-house"].map(function(o){
+      return "<option value=\""+o+"\""+( spFee.appliesTo===o?" selected":"")+">"+
+        (o==="all"?"All Brothers":o==="non-house"?"Non-House Members":o)+"</option>";
+    }).join("");
+    html += "<tr>"
+      +"<td style='font-size:12.5px;font-weight:500'>"+name+"</td>"
+      +"<td><select class='edit-budget-input' style='width:150px' data-feename='"+enc+"' "
+        +"onchange='updateChapterFeeAppliesTo(decodeURIComponent(this.dataset.feename),this.value);markEditDirty()'>"+applyOpts+"</select></td>"
+      +"<td style='text-align:right'><input class='edit-budget-input' type='number' step='0.01' value='"+spFee.amount+"' "
+        +"data-feename='"+enc+"' data-feeterm='spring' "
+        +"onchange='updateChapterFeeAmount(decodeURIComponent(this.dataset.feename),this.dataset.feeterm,this.value);markEditDirty()'></td>"
+      +"<td style='text-align:right'><input class='edit-budget-input' type='number' step='0.01' value='"+faFee.amount+"' "
+        +"data-feename='"+enc+"' data-feeterm='fall' "
+        +"onchange='updateChapterFeeAmount(decodeURIComponent(this.dataset.feename),this.dataset.feeterm,this.value);markEditDirty()'></td>"
+      +"<td><button data-feename='"+enc+"' onclick='removeChapterFee(decodeURIComponent(this.dataset.feename))' "
+        +"style='background:none;border:none;color:var(--dim);cursor:pointer;font-size:12px' title='Remove'>✕</button></td>"
+      +"</tr>";
+  });
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+function addChapterFee() {
+  var name = prompt("Fee name (e.g. Parlor Fee, Activity Fee):");
+  if (!name || !name.trim()) return;
+  name = name.trim();
+  var cf = config.chapterFees || DEFAULT_CONFIG.chapterFees;
+  if (!cf.spring) cf.spring = [];
+  if (!cf.fall)   cf.fall   = [];
+  // Don't add duplicate
+  if (cf.spring.find(function(f){ return f.name===name; })) {
+    alert("A fee named '"+name+"' already exists.");
+    return;
+  }
+  var amount = parseFloat(prompt("Amount per brother ($):", "25")) || 0;
+  var appliesTo = "all";
+  cf.spring.push({name:name, amount:amount, appliesTo:appliesTo});
+  cf.fall.push(  {name:name, amount:amount, appliesTo:appliesTo});
+  config.chapterFees = cf;
+  markEditDirty();
+  renderChapterFees();
+}
+
+function removeChapterFee(name) {
+  if (!confirm("Remove '"+name+"' from chapter fees?")) return;
+  var cf = config.chapterFees || DEFAULT_CONFIG.chapterFees;
+  cf.spring = (cf.spring||[]).filter(function(f){ return f.name!==name; });
+  cf.fall   = (cf.fall||[]).filter(function(f){ return f.name!==name; });
+  config.chapterFees = cf;
+  markEditDirty();
+  renderChapterFees();
+}
+
+function updateChapterFeeAmount(name, term, val) {
+  var cf = config.chapterFees || DEFAULT_CONFIG.chapterFees;
+  var fee = (cf[term]||[]).find(function(f){ return f.name===name; });
+  if (fee) fee.amount = parseFloat(val)||0;
+  config.chapterFees = cf;
+}
+
+function updateChapterFeeAppliesTo(name, val) {
+  var cf = config.chapterFees || DEFAULT_CONFIG.chapterFees;
+  ["spring","fall"].forEach(function(t){
+    var fee = (cf[t]||[]).find(function(f){ return f.name===name; });
+    if (fee) fee.appliesTo = val;
+  });
+  config.chapterFees = cf;
 }
 function renderEditHousing() {
   var hr = config.housingRates;
@@ -5684,12 +6034,14 @@ function openWelcome() {
   var term2        = "spring";
   var hr2          = config.housingRates[term2] || {};
   var rentRate2    = hr2.rentPerBrother || 2250;
+  // ── Fix 1: Include chapter-wide fees in outstanding dues calculation ──
   var outstandingDuesW = duesData.reduce(function(s,d) {
-    var disc = d.earlyDiscount ? (config.earlyPayDiscount||50) : 0;
-    var extra = (d.extraFees||[]).reduce(function(a,f){return a+f.amount;},0);
-    var gross = d.due + extra - disc;
-    var cc = d.payMethod==="Credit Card" ? gross*(ccRate2/100) : 0;
-    var net = gross - cc;
+    var disc    = d.earlyDiscount ? (config.earlyPayDiscount||50) : 0;
+    var extra   = (d.extraFees||[]).reduce(function(a,f){return a+f.amount;},0);
+    var chFees  = getChapterFeesForBrother(d); // parlor fee, activity fee, etc.
+    var gross   = d.due + extra + chFees - disc;
+    var cc      = d.payMethod==="Credit Card" ? gross*(ccRate2/100) : 0;
+    var net     = gross - cc;
     if (d.payStatus==="Payment Plan") {
       var paid = d.installments>0 ? (net/d.installments)*d.installmentsPaid : 0;
       return s + Math.max(0, net - paid);
@@ -5707,8 +6059,11 @@ function openWelcome() {
     var r = Math.max(0, item.budgeted - item.spent);
     if (item.section==="Housing Corp") housingRem += r; else operatingRem += r;
   });
-  var projSurplus = (operatingBal + outstandingDuesW - operatingRem) + (housingBal + outstandingRentW - housingRem);
+
+  var projSurplus = (operatingBal + outstandingDuesW - operatingRem)
+                  + (housingBal  + outstandingRentW  - housingRem);
   var endGoalW    = config.endGoal || 5000;
+  var hour = new Date().getHours();
   var greeting = hour<12?"Good morning":hour<17?"Good afternoon":"Good evening";
 
   var sumEl = document.getElementById("welcome-summary");
@@ -5785,13 +6140,16 @@ async function tryLogin() {
   var inputHash = await hashStr(input);
 
   if (inputHash === storedHash) {
-    // Correct — unlock and show app (no full reinit needed, data still in memory)
+    // Correct — unlock and initialize the app
     config.passwordHash = storedHash;
     saveLocal();
     localStorage.setItem("fiji_authed","1");
     document.getElementById("login-screen").style.display = "none";
-    document.getElementById("app").style.display = "flex";
-    refreshAll();
+    var appEl = document.getElementById("app");
+    appEl.style.display = "flex";
+    // Force layout reflow so all hidden elements are parsed by browser
+    void appEl.offsetHeight;
+    await init();
   } else {
     errorEl.style.display = "block";
     errorEl.textContent = "\u2715 Incorrect password. Try again.";
@@ -6239,36 +6597,129 @@ document.addEventListener('click', function(e) {
   }
 });
 
-async function init() {
-  // Always pull from Supabase first — this is the source of truth
-  // so all devices stay in sync
+
+function setFinTab(tab, btn) {
+  document.querySelectorAll("#fin-pane-model, #fin-pane-reports").forEach(function(p){ p.style.display = "none"; });
+  var pane = document.getElementById("fin-pane-"+tab);
+  if (pane) pane.style.display = "block";
+  ["fin-tab-model-btn","fin-tab-reports-btn"].forEach(function(id){
+    var b = document.getElementById(id);
+    if (b) { b.style.borderColor = ""; b.style.color = ""; }
+  });
+  if (btn) { btn.style.borderColor = "var(--gold)"; btn.style.color = "var(--gold)"; }
+  if (tab === "reports") renderReports();
+}
+
+
+function openChapterFeesModal() {
+  renderChapterFeesModal();
+  document.getElementById("chapter-fees-modal").classList.add("open");
+}
+function closeChapterFeesModal() {
+  document.getElementById("chapter-fees-modal").classList.remove("open");
+  saveLocal(); pushAll().catch(function(){}); refreshAll();
+}
+function renderChapterFeesModal() {
+  var container = document.getElementById("cf-modal-list");
+  if (!container) return;
+  var term = isSpring() ? "spring" : "fall";
+  var cf   = config.chapterFees || DEFAULT_CONFIG.chapterFees;
+  var fees = (cf[term]) || [];
+  var data = getDuesData();
+  var applyLabel = {"all":"All Brothers","non-house":"Non-House Members","Member":"Members Only","New Member":"New Members Only","House Member":"House Members Only"};
+  if (!fees.length) {
+    container.innerHTML = '<div style="color:var(--dim);font-size:12px;padding:12px;text-align:center">No fees set for '+currentTerm+'. Add one below.</div>';
+    return;
+  }
+  container.innerHTML = fees.map(function(fee,idx) {
+    var eligible = data.filter(function(d){
+      return fee.appliesTo==="all" || fee.appliesTo===d.cls || (fee.appliesTo==="non-house" && d.cls!=="House Member");
+    });
+    var already = eligible.filter(function(d){
+      return (d.extraFees||[]).some(function(f){ return f.label===fee.name; });
+    }).length;
+    var total = eligible.length * (fee.amount||0);
+    return '<div style="display:grid;grid-template-columns:1fr 160px 80px 80px 28px;gap:12px;align-items:center;padding:11px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:8px">'
+      +'<div><div style="font-size:13px;font-weight:600;color:var(--text)">'+fee.name+'</div>'
+        +'<div style="font-size:11px;color:var(--muted);margin-top:2px">'+(applyLabel[fee.appliesTo]||fee.appliesTo)+'</div></div>'
+      +'<div style="font-size:11px;color:var(--muted)">'+eligible.length+' eligible<div style="color:'+(already===eligible.length?'var(--green)':'var(--amber)')+'">'+already+'/'+eligible.length+' applied</div></div>'
+      +'<div class="mono" style="font-size:13px;font-weight:700;color:var(--gold)">$'+(fee.amount||0).toFixed(2)+'</div>'
+      +'<div class="mono" style="font-size:11px;color:var(--muted)">$'+total.toFixed(2)+'</div>'
+      +'<button data-fi="'+idx+'" onclick="removeChapterFeeByIdx(parseInt(this.dataset.fi))" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:14px">x</button>'
+      +'</div>';
+  }).join("");
+}
+function addChapterFeeFromModal() {
+  var name    = (document.getElementById("cf-new-name").value||"").trim();
+  var applies = document.getElementById("cf-new-applies").value;
+  var amount  = parseFloat(document.getElementById("cf-new-amount").value)||0;
+  if (!name) { alert("Please enter a fee name."); return; }
+  var cf = config.chapterFees || JSON.parse(JSON.stringify(DEFAULT_CONFIG.chapterFees));
+  if (!cf.spring) cf.spring=[]; if (!cf.fall) cf.fall=[];
+  var term = isSpring()?"spring":"fall";
+  if ((cf[term]||[]).find(function(f){return f.name===name;})) { alert("Fee '"+name+"' already exists."); return; }
+  cf.spring.push({name:name,amount:amount,appliesTo:applies});
+  cf.fall.push(  {name:name,amount:amount,appliesTo:applies});
+  config.chapterFees = cf;
+  document.getElementById("cf-new-name").value="";
+  document.getElementById("cf-new-amount").value="";
+  renderChapterFeesModal();
+  if (document.getElementById("chapter-fees-container")) renderChapterFees();
+}
+function removeChapterFeeByIdx(idx) {
+  var term = isSpring()?"spring":"fall";
+  var cf   = config.chapterFees || DEFAULT_CONFIG.chapterFees;
+  var fee  = (cf[term]||[])[idx];
+  if (!fee || !confirm('Remove "'+fee.name+'" from chapter fees?')) return;
+  cf.spring = (cf.spring||[]).filter(function(f){return f.name!==fee.name;});
+  cf.fall   = (cf.fall||[]).filter(function(f){return f.name!==fee.name;});
+  config.chapterFees = cf;
+  renderChapterFeesModal();
+  if (document.getElementById("chapter-fees-container")) renderChapterFees();
+}
+function bulkApplyChapterFees() {
+  var term  = isSpring()?"spring":"fall";
+  var cf    = config.chapterFees || DEFAULT_CONFIG.chapterFees;
+  var fees  = (cf[term])||[];
+  var data  = getDuesData();
+  if (!fees.length) { alert("No fees set for "+currentTerm+"."); return; }
+  var applied=0, skipped=0;
+  data.forEach(function(d){
+    if (!d.extraFees) d.extraFees=[];
+    fees.forEach(function(fee){
+      var ok = fee.appliesTo==="all" || fee.appliesTo===d.cls || (fee.appliesTo==="non-house" && d.cls!=="House Member");
+      if (!ok) return;
+      if (d.extraFees.some(function(f){return f.label===fee.name;})) { skipped++; return; }
+      d.extraFees.push({label:fee.name,amount:fee.amount||0});
+      applied++;
+    });
+  });
+  setDuesData(data); recomputeExpSpent();
+  var r=document.getElementById("cf-bulk-result");
+  if (r) { r.style.display="block"; r.innerHTML='<span style="color:var(--green)">Applied '+applied+' fee entr'+(applied===1?'y':'ies')+'.</span>'+(skipped?' <span style="color:var(--muted)">'+skipped+' already applied.</span>':''); }
+  renderChapterFeesModal();
+}
+
+async function init(headless) {
+  // Load data and sync — headless=true means data only, no rendering
+  recomputeExpSpent();
+  syncRosterCounts();
   setSyncStatus("syncing");
   updateHeaderSubtitle();
-  renderDashboard(); // show something immediately
-  if (!localStorage.getItem("fiji_skip_welcome")) openWelcome();
 
   try {
     var pulled = await pullAll();
-    if (pulled) {
-      recomputeExpSpent();
-      syncRosterCounts();
-      updateHeaderSubtitle();
-      refreshAll();
-      setSyncStatus("ok");
-    } else {
-      // Offline — use localStorage
-      recomputeExpSpent();
-      syncRosterCounts();
-      updateHeaderSubtitle();
-      refreshAll();
-      setSyncStatus("offline");
-    }
-  } catch(e) {
     recomputeExpSpent();
     syncRosterCounts();
-    updateHeaderSubtitle();
-    refreshAll();
+    setSyncStatus(pulled ? "ok" : "offline");
+  } catch(e) {
     setSyncStatus("offline");
+  }
+
+  if (!headless) {
+    updateHeaderSubtitle();
+    showView("dashboard", document.querySelector(".nav-btn"));
+    if (!localStorage.getItem("fiji_skip_welcome")) openWelcome();
   }
 }
 
@@ -6655,6 +7106,13 @@ function renderSettings() {
   // Render SOP
   var sopEl = document.getElementById('settings-sop');
   if (sopEl) sopEl.innerHTML = buildSOP();
+
+  // Render sem dates
+  var sdEl = document.getElementById('settings-sem-dates');
+  if (sdEl && !sdEl.innerHTML.trim()) {
+    // fallback if render failed above
+    sdEl.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:8px">Semester dates not configured</div>';
+  }
 }
 
 function saveSemDates() {
@@ -7215,8 +7673,14 @@ function buildSOPHTML(o, sections) {
 
 
 function renderSettingsView() {
-  updateHeaderSubtitle();
-  renderSettings();
+  try {
+    updateHeaderSubtitle();
+    renderSettings();
+  } catch(err) {
+    console.error("renderSettingsView error:", err);
+    var el = document.getElementById("settings-officer-fields");
+    if (el) el.innerHTML = "<div style='color:red;padding:12px'>Settings error: " + err.message + "</div>";
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -7263,11 +7727,13 @@ document.addEventListener("visibilitychange", function() {
 });
 
 (async function authCheck() {
-  // Always open the app directly — login only required after manually locking
-  document.getElementById("login-screen").style.display = "none";
-  document.getElementById("app").style.display = "flex";
-  localStorage.setItem("fiji_authed", "1");
-  init();
+  // Require password on every page load
+  localStorage.removeItem("fiji_authed");
+  document.getElementById("login-screen").style.display = "flex";
+  document.getElementById("app").style.display = "none";
+  // Pre-load data in the background while user enters password
+  // so the app is ready the moment they log in
+  init(true); // true = headless mode (don't render, just load data)
 })();
 
 </script>
@@ -7277,6 +7743,49 @@ document.addEventListener("visibilitychange", function() {
   0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)}
 }
 </style>
+
+  <!-- CHAPTER FEES MODAL -->
+  <div id="chapter-fees-modal" class="modal-bg">
+    <div class="modal" style="width:620px">
+      <div class="modal-title">Chapter-Wide Fees</div>
+      <div style="font-size:12px;color:var(--muted);margin:-14px 0 18px;line-height:1.5">
+        Fees applied automatically to all eligible brothers based on classification.
+        Use <b>Apply to All</b> to write fees to each brother so they appear in their individual dues record.
+      </div>
+      <div id="cf-modal-list"></div>
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+        <div style="font-family:var(--font-display);font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;margin-bottom:10px">Add New Fee</div>
+        <div style="display:grid;grid-template-columns:1fr 160px 80px auto;gap:10px;align-items:end">
+          <div><label>Fee Name</label><input id="cf-new-name" placeholder="e.g. Parlor Fee" style="width:100%"></div>
+          <div><label>Applies To</label>
+            <select id="cf-new-applies" style="width:100%">
+              <option value="all">All Brothers</option>
+              <option value="non-house" selected>Non-House Members</option>
+              <option value="Member">Members Only</option>
+              <option value="New Member">New Members Only</option>
+              <option value="House Member">House Members Only</option>
+            </select>
+          </div>
+          <div><label>Amount ($)</label><input id="cf-new-amount" type="number" step="0.01" placeholder="25" style="width:100%"></div>
+          <button class="btn btn-primary" onclick="addChapterFeeFromModal()">Add</button>
+        </div>
+      </div>
+      <div style="margin-top:16px;padding:12px 16px;background:var(--surface2);border-radius:8px;border:1px solid var(--border)">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+          <div>
+            <div style="font-family:var(--font-display);font-size:10px;font-weight:700;letter-spacing:1.2px;color:var(--text);text-transform:uppercase">Apply to Roster</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px">Writes all fees to each eligible brother. Safe to run multiple times — no duplicates.</div>
+          </div>
+          <button class="btn btn-primary" onclick="bulkApplyChapterFees()">Apply to All Eligible Brothers</button>
+        </div>
+        <div id="cf-bulk-result" style="margin-top:8px;font-size:11.5px;display:none"></div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:18px">
+        <button class="btn btn-ghost" onclick="closeChapterFeesModal()">Done</button>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html
 >
